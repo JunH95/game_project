@@ -49,6 +49,7 @@
 
 ## 설계 문서
 - 구현 기준(수치·리소스 스키마·현재 스코프)의 source of truth = `docs/design.md`
+- 시스템 아키텍처·이벤트 흐름·씬 컴포지션 다이어그램(Mermaid) = `docs/architecture.md`
 - 서사·설정·무드보드·비전은 Notion "저승·바리데기" 페이지
 - 충돌 시: 수치·동작은 `design.md` 우선, 스토리·테마는 Notion 우선
 - 수치나 동작을 바꾸면 코드와 같은 커밋에서 `design.md`를 갱신한다
