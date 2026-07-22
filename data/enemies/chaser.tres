@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/enemy_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"chaser"
+display_name = "추격 원귀"
+max_hp = 10.0
+move_speed = 60.0
+contact_damage = 8.0
+xp_reward = 1
+wonhon_chance = 0.05
+is_boss = false
+radius = 8.0

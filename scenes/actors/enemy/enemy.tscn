@@ -1,22 +1,27 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=9 format=3]
 
-[ext_resource type="Script" path="res://scenes/actors/player/player.gd" id="1_player"]
+[ext_resource type="Script" path="res://scenes/actors/enemy/enemy.gd" id="1_enemy"]
 [ext_resource type="Script" path="res://scripts/components/movement_component.gd" id="2_move"]
 [ext_resource type="Script" path="res://scripts/components/health_component.gd" id="3_health"]
 [ext_resource type="Script" path="res://scripts/components/hurtbox_component.gd" id="4_hurt"]
+[ext_resource type="Script" path="res://scripts/components/hitbox_component.gd" id="5_hit"]
 
 [sub_resource type="CircleShape2D" id="Shape_body"]
-radius = 12.0
+radius = 8.0
 
 [sub_resource type="CircleShape2D" id="Shape_hurt"]
-radius = 12.0
+radius = 8.0
 
-[node name="Player" type="CharacterBody2D" groups=["player"]]
-collision_layer = 2
+[sub_resource type="CircleShape2D" id="Shape_hit"]
+radius = 8.0
+
+[node name="Enemy" type="CharacterBody2D" groups=["enemy"]]
+collision_layer = 4
 collision_mask = 1
-script = ExtResource("1_player")
+script = ExtResource("1_enemy")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+unique_name_in_owner = true
 shape = SubResource("Shape_body")
 
 [node name="MovementComponent" type="Node" parent="."]
@@ -29,12 +34,19 @@ script = ExtResource("3_health")
 
 [node name="HurtboxComponent" type="Area2D" parent="."]
 unique_name_in_owner = true
-collision_layer = 8
-collision_mask = 64
+collision_layer = 16
+collision_mask = 32
 script = ExtResource("4_hurt")
-invuln_time = 0.5
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="HurtboxComponent"]
 shape = SubResource("Shape_hurt")
 
-[node name="Camera2D" type="Camera2D" parent="."]
+[node name="HitboxComponent" type="Area2D" parent="."]
+unique_name_in_owner = true
+collision_layer = 64
+collision_mask = 0
+monitoring = false
+script = ExtResource("5_hit")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxComponent"]
+shape = SubResource("Shape_hit")

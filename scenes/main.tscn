@@ -1,7 +1,10 @@
-[gd_scene load_steps=3 format=3 uid="uid://dexox5mrtlgpm"]
+[gd_scene load_steps=6 format=3 uid="uid://dexox5mrtlgpm"]
 
 [ext_resource type="Script" path="res://scenes/background.gd" id="1_bg"]
 [ext_resource type="PackedScene" path="res://scenes/actors/player/player.tscn" id="2_player"]
+[ext_resource type="Script" path="res://scripts/systems/spawn_director.gd" id="3_spawn"]
+[ext_resource type="PackedScene" path="res://scenes/actors/enemy/enemy.tscn" id="4_enemy"]
+[ext_resource type="Resource" path="res://data/enemies/chaser.tres" id="5_chaser"]
 
 [node name="Main" type="Node2D"]
 
@@ -9,3 +12,8 @@
 script = ExtResource("1_bg")
 
 [node name="Player" parent="." instance=ExtResource("2_player")]
+
+[node name="SpawnDirector" type="Node2D" parent="."]
+script = ExtResource("3_spawn")
+enemy_scene = ExtResource("4_enemy")
+enemy_data = ExtResource("5_chaser")
