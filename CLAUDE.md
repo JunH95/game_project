@@ -18,7 +18,7 @@
   - `components/` : 재사용 노드(health/hurtbox/hitbox/movement/xp) — M1에서 채움
   - `systems/` : 스폰/무기/레벨 등 시스템 — M1에서 채움
 - `assets/` : 원본 아트·오디오. `placeholder/`는 임시 도형 리소스.
-- `docs/` : `design.md`(구현 기준 문서)
+- `docs/` : `vision.md`(비전·서사·톤) · `design.md`(수치·스키마·스코프) · `lore.md`(고증) · `architecture.md`(구조) · `기획서.html`(사람용 종합 뷰)
 - `tests/` : 테스트
 - 씬 전용 스크립트는 해당 `.tscn` 옆에, 공용 로직은 `scripts/` 아래에 둔다.
 - `addons/godot_ai/`와 autoload `_mcp_game_helper`는 MCP 플러그인이다. 건드리지 않는다.
@@ -47,12 +47,18 @@
 - 파일시스템에 직접 쓴 `class_name` 스크립트는 `filesystem_manage(op="scan")`로 전역 클래스 테이블 갱신
 - 다중 에디터면 `session_activate`로 세션 고정
 
-## 설계 문서
-- 구현 기준(수치·리소스 스키마·현재 스코프)의 source of truth = `docs/design.md`
-- 시스템 아키텍처·이벤트 흐름·씬 컴포지션 다이어그램(Mermaid) = `docs/architecture.md`
-- 서사·설정·무드보드·비전은 Notion "저승·바리데기" 페이지
-- 충돌 시: 수치·동작은 `design.md` 우선, 스토리·테마는 Notion 우선
-- 수치나 동작을 바꾸면 코드와 같은 커밋에서 `design.md`를 갱신한다
+## 문서 아키텍처 (정본 = repo)
+**정본은 전부 repo 마크다운이다. Notion은 은퇴했다(더 이상 읽지도 쓰지도 않는다).** 문서 지도:
+- `docs/vision.md` — 비전·서사·톤·무드·재미 방향·떡밥·아트 방향 (WHY / 무엇을 느끼게)
+- `docs/design.md` — 수치·리소스 스키마·스코프·마일스톤 (구현 정본, 코드가 따름)
+- `docs/lore.md` — 무속·저승 고증(고증/각색/미확인 구분)
+- `docs/architecture.md` — 시스템·이벤트 흐름·씬 컴포지션 다이어그램(Mermaid)
+- `docs/기획서.html` — 위 문서들을 합친 **사람용 종합 뷰**(파생물, 정본 아님)
+
+규칙:
+- 충돌 시: 수치·동작은 `design.md`, 서사·톤은 `vision.md`가 우선.
+- **변경은 repo 마크다운에 먼저**, 코드와 같은 커밋에서 해당 문서를 갱신한다. 그 변경이 사람용 뷰에 영향 주면 같은 작업에서 `기획서.html`도 갱신한다(단방향 흐름 = 드리프트 차단). `기획서.html`을 손으로 먼저 고치지 않는다.
+- **톤 유지**: 새 서사·카피·UI 문구를 쓸 땐 `vision.md`의 톤(§4)을 따른다 — 어둡고 신령하되 무겁지만은 않게, 현대 각색 우선.
 
 ## Git
 - 기능 단위 브랜치, 커밋은 작게
