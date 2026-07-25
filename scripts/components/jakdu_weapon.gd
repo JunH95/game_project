@@ -138,19 +138,24 @@ func _get_knockback() -> float:
 	return base * _god_mult(&"knockback_pct")
 
 
-## 플레이스홀더 연출 = 흰 호(design.md §9). 휘두른 직후 잠깐 나타났다 사라진다.
+## 플레이스홀더 연출 = 흰 부채꼴(design.md 9절). 휘두른 직후 잠깐 나타났다 사라진다.
+## 테두리 선만 그리면 판정 범위(부채꼴 전체)와 보이는 것이 어긋나므로 면을 채운다.
 func _draw() -> void:
 	if _swing_visual_left <= 0.0:
 		return
 	var alpha := _swing_visual_left / SWING_VISUAL_TIME
+	var reach := _get_range()
 	var half_arc := deg_to_rad(_get_arc_degrees() * 0.5)
 	var base_angle := _swing_direction.angle()
-	draw_arc(
-		Vector2.ZERO,
-		_get_range(),
-		base_angle - half_arc,
-		base_angle + half_arc,
-		24,
-		Color(1.0, 1.0, 1.0, alpha),
-		3.0
-	)
+
+	const SEGMENTS := 24
+	var points := PackedVector2Array()
+	points.append(Vector2.ZERO)
+	for i in SEGMENTS + 1:
+		var t := float(i) / float(SEGMENTS)
+		points.append(Vector2.from_angle(base_angle - half_arc + half_arc * 2.0 * t) * reach)
+
+	draw_colored_polygon(points, Color(1.0, 1.0, 1.0, alpha * 0.30))
+	# 바깥 테두리는 좀 더 진하게 — 사거리 끝이 어디인지 읽히게.
+	draw_arc(Vector2.ZERO, reach, base_angle - half_arc, base_angle + half_arc, SEGMENTS,
+		Color(1.0, 1.0, 1.0, alpha * 0.85), 2.0)
