@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://scenes/ui/hud/hud.gd" id="1_hud"]
 
 [node name="Hud" type="CanvasLayer"]
+process_mode = 3
 script = ExtResource("1_hud")
 
 [node name="StatusLabel" type="Label" parent="."]

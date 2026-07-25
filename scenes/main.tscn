@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://dexox5mrtlgpm"]
+[gd_scene load_steps=11 format=3 uid="uid://dexox5mrtlgpm"]
 
 [ext_resource type="Script" path="res://scenes/background.gd" id="1_bg"]
 [ext_resource type="PackedScene" path="res://scenes/actors/player/player.tscn" id="2_player"]
@@ -9,13 +9,20 @@
 [ext_resource type="PackedScene" path="res://scenes/actors/pickups/xp_gem.tscn" id="7_gem"]
 [ext_resource type="Script" path="res://scripts/systems/level_system.gd" id="8_level"]
 [ext_resource type="PackedScene" path="res://scenes/ui/hud/hud.tscn" id="9_hud"]
+[ext_resource type="Script" path="res://scripts/systems/god_system.gd" id="10_god"]
+[ext_resource type="PackedScene" path="res://scenes/ui/level_up/god_select.tscn" id="11_select"]
 
 [node name="Main" type="Node2D"]
 
 [node name="Background" type="Node2D" parent="."]
 script = ExtResource("1_bg")
 
+[node name="GodSystem" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("10_god")
+
 [node name="Player" parent="." instance=ExtResource("2_player")]
+god_system_path = NodePath("../GodSystem")
 
 [node name="SpawnDirector" type="Node2D" parent="."]
 script = ExtResource("3_spawn")
@@ -32,3 +39,6 @@ script = ExtResource("8_level")
 
 [node name="Hud" parent="." instance=ExtResource("9_hud")]
 level_system_path = NodePath("../LevelSystem")
+
+[node name="GodSelect" parent="." instance=ExtResource("11_select")]
+god_system_path = NodePath("../GodSystem")

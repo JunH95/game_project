@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="GodData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/god_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"jakdodaesin"
+display_name = "작도대신"
+tier = 1
+max_level = 5
+element = &"metal"
+stat_mods = {
+"jakdu_arc_deg": 8.0,
+"jakdu_damage_pct": 15.0
+}
+description = "작두의 신. 베는 힘과 휘두르는 폭이 늘어난다."

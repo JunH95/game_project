@@ -12,10 +12,3 @@ cooldown = 0.8
 knockback = 120.0
 attack_range = 90.0
 arc_degrees = 100.0
-level_scale = {
-"arc_every": 3,
-"arc_step": 20.0,
-"cooldown_every": 3,
-"cooldown_step": -0.1,
-"damage_per_level": 3.0
-}

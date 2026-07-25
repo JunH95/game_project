@@ -1,0 +1,84 @@
+extends Node
+
+## 모시는 신과 스탯 수정자 집계(신내림).
+## 각 신은 레벨당 stat_mods 를 주고, 같은 신을 다시 고르면 레벨이 쌓인다(VS식 스택).
+## 무기·플레이어는 이 노드에 수정자를 물어보고 자기 수치를 계산한다.
+##
+## 몸주(런 시작 시 고정되는 주신)는 캐릭터 선택이 생기는 M4에서 갈라낸다.
+## 지금은 전부 "모시는 신"으로만 다룬다(design.md 3-1).
+
+## 고를 수 있는 신 목록. 비워 두면 아래 기본 명단을 로드한다(인스펙터에서 덮어쓸 수 있다).
+@export var available_gods: Array[GodData] = []
+
+## 레벨업마다 제시하는 선택지 수.
+@export var choice_count: int = 3
+
+## MVP 신 명단(design.md 3-4). 신을 추가하면 여기에 경로를 넣는다.
+const DEFAULT_GOD_PATHS: PackedStringArray = [
+	"res://data/gods/jakdodaesin.tres",
+	"res://data/gods/choeyeong.tres",
+	"res://data/gods/sansin.tres",
+	"res://data/gods/wolgwang.tres",
+	"res://data/gods/chilseong.tres",
+]
+
+## { god_id: level }
+var _served: Dictionary = {}
+
+
+func _ready() -> void:
+	_served.clear()
+	if available_gods.is_empty():
+		_load_default_gods()
+
+
+func _load_default_gods() -> void:
+	for path in DEFAULT_GOD_PATHS:
+		var god := load(path) as GodData
+		if god == null:
+			push_error("신 데이터를 불러오지 못했다: %s" % path)
+			continue
+		available_gods.append(god)
+
+
+## 해당 수정자 키의 총합. 신마다 (레벨당 값 × 레벨)을 더한다.
+func get_mod(key: StringName) -> float:
+	var total := 0.0
+	for god in available_gods:
+		if god == null or not _served.has(god.id):
+			continue
+		if not god.stat_mods.has(key):
+			continue
+		total += float(god.stat_mods[key]) * float(_served[god.id])
+	return total
+
+
+## 퍼센트 수정자를 배율로. 예: -7 -> 0.93
+func get_multiplier(key: StringName) -> float:
+	return maxf(0.0, 1.0 + get_mod(key) * 0.01)
+
+
+func get_level(god_id: StringName) -> int:
+	return int(_served.get(god_id, 0))
+
+
+func get_served() -> Dictionary:
+	return _served.duplicate()
+
+
+## 이번 레벨업에 제시할 선택지. 만렙인 신은 제외한다.
+func roll_choices() -> Array[GodData]:
+	var pool: Array[GodData] = []
+	for god in available_gods:
+		if god != null and get_level(god.id) < god.max_level:
+			pool.append(god)
+	pool.shuffle()
+	return pool.slice(0, mini(choice_count, pool.size()))
+
+
+## 선택한 신을 모신다(이미 모시는 신이면 레벨 +1).
+func serve(god: GodData) -> void:
+	if god == null:
+		return
+	_served[god.id] = get_level(god.id) + 1
+	RunManager.served_gods = _served.keys()

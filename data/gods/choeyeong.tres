@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="GodData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/god_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"choeyeong"
+display_name = "최영장군"
+tier = 1
+max_level = 5
+element = &"metal"
+stat_mods = {
+"cooldown_pct": -7.0,
+"move_speed_pct": 5.0
+}
+description = "장군신. 손이 빨라지고 발이 가벼워진다."

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="GodData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/god_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"sansin"
+display_name = "산신"
+tier = 1
+max_level = 5
+element = &"earth"
+stat_mods = {
+"knockback_pct": 20.0,
+"max_hp_pct": 12.0
+}
+description = "산의 신. 몸이 단단해지고 후려치는 힘이 실린다."

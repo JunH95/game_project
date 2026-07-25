@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="GodData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/god_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"wolgwang"
+display_name = "월광보살"
+tier = 1
+max_level = 5
+element = &"water"
+stat_mods = {
+"move_speed_pct": 8.0,
+"pickup_radius_pct": 10.0
+}
+description = "달의 신. 걸음이 빨라지고 넋을 멀리서 거둔다."
