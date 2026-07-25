@@ -8,12 +8,20 @@ const RADIUS: float = 12.0
 @onready var _movement: MovementComponent = %MovementComponent
 @onready var _health: HealthComponent = %HealthComponent
 @onready var _hurtbox: HurtboxComponent = %HurtboxComponent
+@onready var _magnet: Area2D = %PickupMagnet
 
 
 func _ready() -> void:
 	_hurtbox.health = _health
 	_health.health_changed.connect(_on_health_changed)
 	_health.died.connect(_on_died)
+	_magnet.area_entered.connect(_on_magnet_area_entered)
+
+
+## 자석 반경에 들어온 픽업은 플레이어를 향해 끌려온다. 수집 판정은 픽업 쪽이 한다.
+func _on_magnet_area_entered(area: Area2D) -> void:
+	if area.has_method(&"attract_to"):
+		area.call(&"attract_to", self)
 
 
 func _physics_process(_delta: float) -> void:

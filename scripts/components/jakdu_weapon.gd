@@ -23,9 +23,24 @@ const FALLBACK_KNOCKBACK: float = 120.0
 ## 베기 잔상이 남는 시간. 연출 전용이라 판정과는 무관하다.
 const SWING_VISUAL_TIME: float = 0.15
 
+## 성장해도 넘지 않는 한계. 쿨이 0 이 되면 매 프레임 판정이 돌고, 각이 360 을 넘으면 의미가 없다.
+const MIN_COOLDOWN: float = 0.15
+const MAX_ARC: float = 360.0
+
+## 플레이어 레벨을 그대로 무기 레벨로 쓴다. 무기별 개별 레벨은 M3(신내림 정식)에서 분리한다.
+var _level: int = 1
+
 var _cooldown_left: float = 0.0
 var _swing_visual_left: float = 0.0
 var _swing_direction: Vector2 = Vector2.RIGHT
+
+
+func _ready() -> void:
+	EventBus.player_leveled_up.connect(_on_leveled_up)
+
+
+func _on_leveled_up(new_level: int) -> void:
+	_level = new_level
 
 
 func _process(delta: float) -> void:
@@ -98,12 +113,30 @@ func _hit(enemy: Node2D, damage: float, knockback: float, offset: Vector2) -> vo
 		enemy.call(&"apply_knockback", push * knockback)
 
 
+## level_scale 딕셔너리에서 튜닝값을 꺼낸다. 비어 있으면 성장이 없는 것으로 본다.
+func _scale_value(key: StringName, fallback: float) -> float:
+	if data == null or not data.level_scale.has(key):
+		return fallback
+	return float(data.level_scale[key])
+
+
+## N레벨마다 한 단씩 오르는 계단 수. 레벨 1은 0단(기본값).
+func _steps(every_key: StringName) -> float:
+	var every := _scale_value(every_key, 3.0)
+	if every <= 0.0:
+		return 0.0
+	return floorf(float(_level - 1) / every)
+
+
 func _get_damage() -> float:
-	return data.base_damage if data != null else FALLBACK_DAMAGE
+	var base := data.base_damage if data != null else FALLBACK_DAMAGE
+	return base + _scale_value(&"damage_per_level", 0.0) * float(_level - 1)
 
 
 func _get_cooldown() -> float:
-	return data.cooldown if data != null else FALLBACK_COOLDOWN
+	var base := data.cooldown if data != null else FALLBACK_COOLDOWN
+	var scaled := base + _scale_value(&"cooldown_step", 0.0) * _steps(&"cooldown_every")
+	return maxf(MIN_COOLDOWN, scaled)
 
 
 func _get_range() -> float:
@@ -111,7 +144,9 @@ func _get_range() -> float:
 
 
 func _get_arc_degrees() -> float:
-	return data.arc_degrees if data != null else FALLBACK_ARC
+	var base := data.arc_degrees if data != null else FALLBACK_ARC
+	var scaled := base + _scale_value(&"arc_step", 0.0) * _steps(&"arc_every")
+	return minf(MAX_ARC, scaled)
 
 
 func _get_knockback() -> float:
