@@ -9,6 +9,13 @@ extends CharacterBody2D
 ## 넉백 감쇠 계수. 클수록 빨리 멎는다(초당 감쇠율).
 const KNOCKBACK_DECAY: float = 8.0
 
+## 이웃을 밀어내는 반경. SeparationArea 의 CircleShape2D 반지름과 맞춘다.
+const SEPARATION_RADIUS: float = 20.0
+## 추격 방향 대비 분리 조향의 비중. 너무 크면 흩어져 플레이어에게 도달하지 못한다.
+const SEPARATION_WEIGHT: float = 0.7
+## 이웃이 많아도 분리력이 무한정 커지지 않게 막는 상한.
+const SEPARATION_MAX: float = 1.5
+
 var _target: Node2D
 var _knockback: Vector2 = Vector2.ZERO
 
@@ -17,6 +24,7 @@ var _knockback: Vector2 = Vector2.ZERO
 @onready var _hurtbox: HurtboxComponent = %HurtboxComponent
 @onready var _hitbox: HitboxComponent = %HitboxComponent
 @onready var _body_shape: CollisionShape2D = %CollisionShape2D
+@onready var _separation: Area2D = %SeparationArea
 
 
 func _ready() -> void:
@@ -43,8 +51,25 @@ func _physics_process(delta: float) -> void:
 	if _target == null or not is_instance_valid(_target):
 		_movement.move(Vector2.ZERO)
 		return
-	var direction := (_target.global_position - global_position).normalized()
+	# 추격 방향에 이웃을 밀어내는 힘을 섞는다. 하드 충돌로 막으면 한 점으로 몰린 무리가
+	# 벽이 되어 플레이어에게 닿지 못하므로, 겹침은 허용하되 서로 퍼지게만 한다.
+	var chase := (_target.global_position - global_position).normalized()
+	var direction := (chase + _separation_push() * SEPARATION_WEIGHT).normalized()
 	_movement.move(direction)
+
+
+## 반경 안의 다른 적에게서 멀어지는 방향. 가까울수록 강하다.
+func _separation_push() -> Vector2:
+	var push := Vector2.ZERO
+	for body in _separation.get_overlapping_bodies():
+		if body == self:
+			continue
+		var offset := global_position - body.global_position
+		var dist := offset.length()
+		if dist <= 0.001:
+			continue
+		push += (offset / dist) * (1.0 - dist / SEPARATION_RADIUS)
+	return push.limit_length(SEPARATION_MAX)
 
 
 ## 무기가 호출한다. impulse 는 방향 × 세기(px/s).
