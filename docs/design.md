@@ -276,7 +276,7 @@ M1~M5에서 시스템을 세우는 기준 관문.
   `special: StringName`(시그니처 훅, 없으면 빈 값), `icon: Texture2D`, `description: String`,
   `element: StringName`(오행 木火土金水), `is_momju: bool`(몸주 가능 여부), `momju_weapon: StringName`(몸주 시 시작 무기), `momju_passive: StringName`(몸주 시 패시브 훅).
 - **WeaponData** (`weapon_data.gd`): `id: StringName`, `display_name: String`,
-  `base_damage: float`, `cooldown: float`, `range: float`, `arc_degrees: float`(근접),
+  `base_damage: float`, `cooldown: float`, `attack_range: float`(내장 `range()`와 이름 충돌을 피해 `range` 아님), `arc_degrees: float`(근접),
   `projectile_speed: float`, `homing_turn_rate: float`, `pierce: int`, `count: int`,
   `lifetime: float`(원거리), `knockback: float`, `is_melee: bool`, `level_scale: Dictionary`.
 - **EnemyData** (`enemy_data.gd`): `id: StringName`, `display_name: String`, `max_hp: float`,

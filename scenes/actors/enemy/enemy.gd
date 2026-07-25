@@ -6,7 +6,11 @@ extends CharacterBody2D
 
 @export var data: EnemyData
 
+## 넉백 감쇠 계수. 클수록 빨리 멎는다(초당 감쇠율).
+const KNOCKBACK_DECAY: float = 8.0
+
 var _target: Node2D
+var _knockback: Vector2 = Vector2.ZERO
 
 @onready var _movement: MovementComponent = %MovementComponent
 @onready var _health: HealthComponent = %HealthComponent
@@ -28,12 +32,24 @@ func _ready() -> void:
 	_target = get_tree().get_first_node_in_group("player")
 
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
+	# 넉백은 추격 속도와 별개로 감쇠하며 밀어낸다. 남아 있는 동안은 추격보다 우선.
+	if not _knockback.is_zero_approx():
+		_knockback = _knockback.lerp(Vector2.ZERO, minf(KNOCKBACK_DECAY * delta, 1.0))
+		velocity = _knockback
+		move_and_slide()
+		return
+
 	if _target == null or not is_instance_valid(_target):
 		_movement.move(Vector2.ZERO)
 		return
 	var direction := (_target.global_position - global_position).normalized()
 	_movement.move(direction)
+
+
+## 무기가 호출한다. impulse 는 방향 × 세기(px/s).
+func apply_knockback(impulse: Vector2) -> void:
+	_knockback = impulse
 
 
 func _on_died() -> void:

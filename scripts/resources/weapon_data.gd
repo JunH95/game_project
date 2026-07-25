@@ -14,7 +14,8 @@ extends Resource
 @export var knockback: float = 120.0
 
 @export_group("Melee (작두)")
-@export var range: float = 90.0
+## 사거리(px). GDScript 내장 range() 와 이름이 겹치면 값이 아니라 함수로 해석되므로 attack_range 로 둔다.
+@export var attack_range: float = 90.0
 @export var arc_degrees: float = 100.0
 
 @export_group("Ranged (부적)")
