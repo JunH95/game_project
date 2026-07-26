@@ -14,10 +14,13 @@
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Title
+    [*] --> Prologue: 첫 플레이(세이브 없음)
+    [*] --> Title: 이후
+    Prologue --> Title: 내림굿 — 작도대신이 실린다
     Title --> Shrine: 시작
-    Shrine --> GateRun: 관문 진입
+    Shrine --> MomjuSelect: 관문 진입
     Shrine --> [*]: 종료
+    MomjuSelect --> GateRun: 몸주 확정(시작 무기 결정)
     GateRun --> LevelUp: XP 참, 일시정지
     LevelUp --> GateRun: 신 3택1 선택
     GateRun --> Payout: 사망
@@ -27,6 +30,10 @@ stateDiagram-v2
     Payout --> Shrine: 원혼 정산
     Ending --> Shrine
 ```
+
+- **Prologue** = 첫 플레이 전용. 무병 → 허주풀이 → 내림굿으로 첫 몸주(작도대신)를 받는다.
+  몸주는 고르는 것이 아니라 내려온다는 고증을 도입부에 쓰고, 이후부터 선택제로 넘어간다(design.md 3-1-2).
+- **MomjuSelect** = 해금된 몸주 중 선택. 몸주가 시작 무기를 정하므로 런의 성격이 여기서 갈린다.
 
 ---
 

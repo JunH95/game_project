@@ -18,6 +18,14 @@ extends Resource
 ## 이 신이 부여하는 무기 id. 없으면 빈 값 (순수 스탯 신)
 @export var grants_weapon: StringName
 
+@export_group("몸주 (런 시작 시 고르는 주신)")
+## 몸주로 고를 수 있는 신인지. false 면 레벨업으로만 모신다.
+@export var is_momju: bool = false
+## 몸주로 골랐을 때 쥐고 시작하는 무기 id. 몸주 3종이 서로 다른 무기를 준다(design.md 3-1-1).
+@export var momju_weapon: StringName
+## 몸주로 골랐을 때만 붙는 패시브 훅 키.
+@export var momju_passive: StringName
+
 ## 시그니처 메커닉 훅 키. 없으면 빈 값 (손님신/바리공주 같은 특수 신만 사용)
 @export var special: StringName
 
