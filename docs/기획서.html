@@ -247,7 +247,7 @@
           <span class="chip">규모 <b>1인 개발</b></span>
         </div>
         <div class="cover-meta">
-          보고: 개발 &rarr; 팀장 &nbsp;·&nbsp; 문서 상태: <strong>M1 코어 루프 완료</strong>(이동·적·작두·XP/레벨업·신 3택1·5분 관문) &nbsp;·&nbsp; 2026-07-22<br>
+          보고: 개발 &rarr; 팀장 &nbsp;·&nbsp; 문서 상태: <strong>M1 완료 · M2 진행 중</strong>(풀링·부적·적 3종·HUD·일시정지 / 남은 것: 언월도·데미지 공식) &nbsp;·&nbsp; 2026-07-22<br>
           정본 지도 &mdash; 비전·서사: <code>vision.md</code> &nbsp;/&nbsp; 수치·스키마: <code>design.md</code> &nbsp;/&nbsp; 고증: <code>lore.md</code> &nbsp;/&nbsp; 구조: <code>architecture.md</code> &nbsp;·&nbsp; 이 문서는 그 종합 뷰(파생물)
         </div>
       </div>
@@ -558,8 +558,19 @@
         <div class="stat"><div class="k">XP 드롭</div><div class="v">1</div></div>
         <div class="stat"><div class="k">동시 적 상한</div><div class="v">150–200</div></div>
       </div>
+      <div class="tbl-wrap reveal">
+        <table>
+          <caption>구현된 적 3종 &mdash; 등장 시각을 벌려 밀도만이 아니라 <strong>성격</strong>이 바뀌게 한다</caption>
+          <thead><tr><th>적</th><th class="num">HP</th><th class="num">속도</th><th class="num">접촉</th><th>등장</th><th>플레이스홀더</th></tr></thead>
+          <tbody>
+            <tr><td>추격 원귀</td><td class="num val">10</td><td class="num val">60</td><td class="num val">8</td><td>상시</td><td>빨강 원</td></tr>
+            <tr><td>급살 원귀</td><td class="num val">6</td><td class="num val">115</td><td class="num val">6</td><td>60초~ (35%)</td><td>주황 원</td></tr>
+            <tr><td>업(業)덩이</td><td class="num val">60</td><td class="num val">34</td><td class="num val">16</td><td>120초~ (12%)</td><td>짙은 적갈 원</td></tr>
+          </tbody>
+        </table>
+      </div>
       <ul class="clean col reveal">
-        <li><strong>MVP</strong>: 추격 적 1종. <strong>공용 아키타입 4종</strong> &mdash; chaser(스웜) / fast-weak(러시) / tank(고HP) / ranged(원거리 영).</li>
+        <li><strong>탱크는 늦게·드물게</strong> &mdash; 초반에 나오면 화력이 없어 진행이 막힌다. <strong>버스트는 한 종류로만</strong> &mdash; 섞으면 무엇이 몰려오는지 읽히지 않는다.</li>
         <li><strong>관문마다 다른 적</strong>: 공용 아키타입을 밑바탕으로 <strong>관문별 시그니처 적 1~2종 + 리스킨</strong>을 얹는다 &mdash; 칼산=베임/칼 원귀, 화탕=불/용암 정령, 얼음=냉기/둔화 망령. 밑바탕은 재활용, 얼굴은 관문마다(스코프 방어).</li>
         <li><strong>스폰 디렉터</strong>: 화면 밖 링에서 스폰, 시간에 따라 <code>WaveTable</code>로 스폰율 증가. 동시 상한은 노트북 성능 기준 하드캡 &rarr; <strong>오브젝트 풀링 필수</strong>.</li>
         <li><strong>원혼 드롭</strong>: 처치의 5%가 원혼 1, 미니보스 10, 관문 보스 25.</li>
@@ -890,7 +901,7 @@
       <div class="axis reveal" style="margin-top:1.6rem">
         <div class="node done"><div class="lab">M0 · 초석 <span class="tag t-go" style="margin-left:.3rem">완료</span></div><div class="muted">폴더·규칙·<code>design.md</code>·인풋맵·충돌 레이어·git·부트스트랩 씬 + autoload 스텁. 게임플레이 없음.</div></div>
         <div class="node done"><div class="lab">M1 · 코어 루프 슬라이스 <span class="tag t-go" style="margin-left:.3rem">완료</span></div><div class="muted">8방향 이동 + 작두 자동공격 + 추격 적 스폰/처치 + XP 젬/레벨업 + 신 3택1 + 5분 관문·결과 화면. 도형 플레이스홀더.</div></div>
-        <div class="node now"><div class="lab">M2 · 2번째 무기 + 풀링 <span class="now-badge">다음</span></div><div class="muted">부적 유도, <code>ObjectPool</code>, 적 2~3종, HUD, 일시정지.</div></div>
+        <div class="node now"><div class="lab">M2 · 무기 확장 + 풀링 <span class="now-badge">현재</span></div><div class="muted">완료: <code>ObjectPool</code> · 부적(유도, 칠성신이 부여) · 적 3종 · 정식 HUD · 일시정지. 남은 것: 언월도(궤도) · 데미지 공식·치명.</div></div>
         <div class="node"><div class="lab">M3 · 신내림 정식</div><div class="muted"><code>GodData</code> 리소스, 신 4, 스택, 실제 3택1 UI, 작두타기 2단, 기본 &lsquo;합&rsquo;(<code>SynergyData</code>).</div></div>
         <div class="node"><div class="lab">M4 · 신당 메타 루프</div><div class="muted">원혼 재화, 세이브 저장/로드, 타이틀&rarr;신당&rarr;런&rarr;정산 사이클.</div></div>
         <div class="node"><div class="lab">M5 · 풀 관문 1개 (화탕)</div><div class="muted">WaveTable 램프, 관문별 적 세트, 관문 기믹, 오행 상성, 저승사자 미니보스 + 관문 보스, 클리어 흐름.</div></div>
