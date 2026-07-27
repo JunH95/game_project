@@ -11,7 +11,7 @@ extends Node2D
 const FALLBACK_DAMAGE: float = 8.0
 const FALLBACK_RADIUS: float = 70.0
 const FALLBACK_SPEED: float = 2.0
-const FALLBACK_RETRIGGER: float = 0.5
+const FALLBACK_REHIT: float = 0.5
 
 ## 날 하나의 판정 반지름. 도형 플레이스홀더 크기와 같다.
 const BLADE_RADIUS: float = 10.0
@@ -75,7 +75,7 @@ func _on_blade_area_entered(area: Area2D) -> void:
 	var now := _now()
 	if float(_cooldowns.get(key, -1.0)) > now:
 		return
-	_cooldowns[key] = now + _get_retrigger()
+	_cooldowns[key] = now + _get_rehit_cooldown()
 
 	if hurtbox.health != null:
 		hurtbox.health.take_damage(_get_damage())
@@ -118,8 +118,8 @@ func _get_orbit_speed() -> float:
 	return data.orbit_speed if data != null else FALLBACK_SPEED
 
 
-func _get_retrigger() -> float:
-	return data.retrigger_cooldown if data != null else FALLBACK_RETRIGGER
+func _get_rehit_cooldown() -> float:
+	return data.rehit_cooldown if data != null else FALLBACK_REHIT
 
 
 ## 날 수는 정수라 레벨당 소수로 쌓은 뒤 내림한다(design.md 3-4).

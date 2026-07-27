@@ -24,7 +24,7 @@ extends Resource
 ## 공전 각속도(rad/s).
 @export var orbit_speed: float = 2.0
 ## 같은 적을 다시 때리기까지의 간격(초). 없으면 접촉한 적이 즉사해 궤도의 의미가 사라진다.
-@export var retrigger_cooldown: float = 0.5
+@export var rehit_cooldown: float = 0.5
 
 @export_group("Ranged (부적)")
 @export var projectile_speed: float = 320.0

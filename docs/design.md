@@ -173,6 +173,10 @@ damage를 작두보다 **높게** 둔 이유: 부적은 한 번에 소수만 때
 첫 몸주가 작도대신인 이유: 작두가 이 게임의 얼굴이고, 나머지 몸주 해금이 신당의 첫 목표가 된다.
 씬 흐름은 `타이틀 → 신당 → 몸주 선택 → 관문`(architecture.md 1절).
 
+`[구현 상태 M3]` **몸주 선택 화면은 구현됨** — 런 시작 시 트리를 멈추고 후보를 제시한다.
+프롤로그(첫 플레이 내림굿)와 신당 해금은 세이브가 필요해 **M4**로 미뤘고, 지금은 몸주 3종이
+모두 선택 가능하다. 몸주는 `set_momju()`로 **Lv1에 모신 상태**로 출발하므로 3택1 풀에도 바로 들어간다.
+
 ### 3-2. 신 로스터 — 문헌 확인된 신격만 사용
 `[고증 = 이름·상징 / 각색 = 게임 효과]` 임의 창작 대신 문헌에 실제로 기록된 신격에서 뽑는다.
 
@@ -417,7 +421,9 @@ M1~M5에서 시스템을 세우는 기준 관문.
 - **GodData** (`god_data.gd`): `id: StringName`, `display_name: String`, `tier: int`,
   `max_level: int`, `stat_mods: Dictionary`(레벨별 스탯 수정자), `grants_weapon: StringName`,
   `special: StringName`(시그니처 훅, 없으면 빈 값), `icon: Texture2D`, `description: String`,
-  `element: StringName`(오행 木火土金水), `is_momju: bool`(몸주 가능 여부), `momju_weapon: StringName`(몸주 시 시작 무기), `momju_passive: StringName`(몸주 시 패시브 훅).
+  `element: StringName`(오행 木火土金水), `is_momju: bool`(몸주 가능 여부), `momju_weapon: StringName`(몸주 시 시작 무기),
+  `momju_stat_mods: Dictionary`(몸주 시 **레벨과 무관하게 한 번** 붙는 수치 패시브 — 키 체계는 `stat_mods`와 동일),
+  `momju_passive: StringName`(수치로 표현 못 하는 특수 훅만. 예: 작두타기 게이지).
   `stat_mods` 키 규약: 범용 = `cooldown_pct`·`crit_chance_pct`·`knockback_pct`·`move_speed_pct`·`max_hp_pct`·`pickup_radius_pct`,
   무기 전용 = `<무기id>_damage_pct`·`<무기id>_arc_deg`·`<무기id>_count`(정수는 누적 후 내림).
 - **WeaponData** (`weapon_data.gd`): `id: StringName`, `display_name: String`,
@@ -493,9 +499,9 @@ M1~M5에서 시스템을 세우는 기준 관문.
 - **M0 (완료)**: CLAUDE.md, 폴더, design.md, 인풋맵, 충돌 레이어, git, `main.tscn` 부트스트랩 + autoload 스텁. 게임플레이 없음.
 - **M1 (완료)**: 8방향 이동 + 작두 자동공격 + 추격 적 스폰/처치 + XP 젬/레벨업 + **신 3택1** + 5분 관문·런 결과. 도형 플레이스홀더.
   (선택지는 **신만** 제시한다. 스탯은 신을 통해서만 오른다 — 3-1. 무기 자동 강화는 M1e에서 폐기했다.)
-- **M2 (진행 중)**: `ObjectPool`(완료) · 부적 유도 투사체(완료, 칠성신이 부여) · 적 3종(완료) · HUD(완료) · 일시정지(완료).
-  **남은 것**: 언월도(궤도), 데미지 공식·치명 적용.
-- **M3 (신내림 정식)**: 몸주 선택 화면, 몸주 3 ↔ 무기 3 배선, 신 로스터 확장, 합(`SynergyData`), 작두타기.
+- **M2 (완료)**: `ObjectPool` · 부적 유도 투사체 · 적 3종 · 정식 HUD · 일시정지 · **언월도(궤도)**.
+- **M3 (진행 중)**: 몸주 선택 화면(완료) · 몸주 3 ↔ 무기 3 배선(완료).
+  **남은 것**: 데미지 공식·치명 적용, 신 로스터 확장, 합(`SynergyData`), 작두타기.
 - **M4 (신당 메타 루프)**: 원혼 재화, `SaveManager` JSON 저장/로드, 신 1 해금, 타이틀→신당→런→정산→신당 사이클.
 - **M5 (풀 관문 1개 — 화탕)**: WaveTable 램프, 관문별 적 세트, 관문 기믹(용암 웅덩이), 오행 상성, 저승사자 미니보스 + 관문 보스, 클리어 흐름.
 - **M6 (게임 필 · 아트 패스)**: 히트스톱·스크린셰이크·데미지 숫자·히트 플래시·넉백 튜닝 + 무신도 톤 아트·셰이더·파티클(비주얼 완성도 셀링).

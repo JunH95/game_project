@@ -12,5 +12,5 @@ cooldown = 0.0
 knockback = 60.0
 orbit_radius = 70.0
 orbit_speed = 2.0
-retrigger_cooldown = 0.5
+rehit_cooldown = 0.5
 count = 2
