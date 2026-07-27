@@ -35,6 +35,8 @@ var _flash_total: float = 0.0
 var _flash_color: Color = FLASH_COLOR
 ## 개체마다 다른 위상. 같으면 무리 전체가 한 몸처럼 맥동해 기괴해진다.
 var _bob_phase: float = 0.0
+## 등급별 크기 배율. 숨쉬기 애니메이션이 scale 을 쓰므로 여기에 곱해 둔다.
+var _elite_scale: float = 1.0
 
 @onready var _movement: MovementComponent = %MovementComponent
 @onready var _health: HealthComponent = %HealthComponent
@@ -42,6 +44,7 @@ var _bob_phase: float = 0.0
 @onready var _hitbox: HitboxComponent = %HitboxComponent
 @onready var _body_shape: CollisionShape2D = %CollisionShape2D
 @onready var _separation: Area2D = %SeparationArea
+@onready var _skills: EnemySkills = get_node_or_null(^"%EnemySkills")
 
 
 func _ready() -> void:
@@ -70,6 +73,11 @@ func _apply_data() -> void:
 	var circle := _body_shape.shape as CircleShape2D
 	if circle != null:
 		circle.radius = data.radius
+	# 엘리트는 눈에 띄어야 한다(design.md 6-4-1). 크기와 테두리 둘로 구분한다 —
+	# 같아 보이는데 특수 능력이 있으면 난이도가 아니라 불공정으로 느껴진다.
+	_elite_scale = maxf(0.1, data.elite_scale)
+	if _skills != null:
+		_skills.reset(data)
 	queue_redraw()
 
 
@@ -81,6 +89,7 @@ func _pool_reset() -> void:
 	modulate = Color.WHITE
 	rotation = 0.0
 	scale = Vector2.ONE
+	_elite_scale = 1.0
 	_bob_phase = randf() * TAU
 	_apply_data()
 	_target = get_tree().get_first_node_in_group("player")
@@ -94,6 +103,9 @@ func _pool_reset() -> void:
 ## 풀에 반납될 때. 그룹에 남아 있으면 죽은 적이 무기 판정에 계속 잡힌다.
 func _pool_exit() -> void:
 	remove_from_group(&"enemy")
+	# 묶어 둔 채로 죽으면 플레이어가 영영 느려진다. 반납 전에 반드시 푼다.
+	if _skills != null:
+		_skills.reset(null)
 	collision_layer = 0
 	_hurtbox.set_deferred(&"monitoring", false)
 	_hitbox.set_deferred(&"monitorable", false)
@@ -127,11 +139,12 @@ func _animate_body(delta: float) -> void:
 	if data != null and data.faces_movement:
 		if not velocity.is_zero_approx():
 			rotation = rotate_toward(rotation, velocity.angle(), TURN_RATE * delta)
+		scale = Vector2.ONE * _elite_scale
 		return
 	_bob_phase += BODY_BOB_SPEED * delta
 	var bob := sin(_bob_phase) * BODY_BOB_AMOUNT
 	# 가로가 늘면 세로가 줄게 해서 부피가 유지되는 것처럼 보이게 한다.
-	scale = Vector2(1.0 + bob, 1.0 - bob)
+	scale = Vector2(1.0 + bob, 1.0 - bob) * _elite_scale
 
 
 ## 반경 안의 다른 적에게서 멀어지는 방향. 가까울수록 강하다.
@@ -174,6 +187,9 @@ func _decay_flash(delta: float) -> void:
 
 
 func _on_died() -> void:
+	# 분열처럼 죽는 순간에만 의미가 있는 스킬은 풀에 반납하기 전에 처리한다.
+	if _skills != null:
+		_skills.on_died()
 	EventBus.enemy_died.emit(self, global_position)
 	ObjectPool.release(self)
 
@@ -186,6 +202,10 @@ func _draw() -> void:
 	if data != null and PlaceholderArt.draw_texture_centered(self, data.texture, r * 2.6):
 		return
 	var color := data.placeholder_color if data != null else Color(0.85, 0.16, 0.16)
+	# 엘리트 테두리 — 실루엣 뒤에 깔아 후광처럼 보이게 한다.
+	if data != null and data.outline_color.a > 0.0:
+		draw_circle(Vector2.ZERO, r * 1.6, Color(data.outline_color, data.outline_color.a * 0.35))
+		draw_arc(Vector2.ZERO, r * 1.35, 0.0, TAU, 28, data.outline_color, 2.0)
 	var shape := data.silhouette if data != null else "wraith"
 	match shape:
 		"rusher":

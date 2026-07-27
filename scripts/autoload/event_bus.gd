@@ -19,6 +19,13 @@ signal momju_chosen(god: GodData)
 signal god_served(god: GodData)
 signal synergy_formed(synergy: SynergyData)
 ## 작두타기처럼 잠시 켜졌다 꺼지는 상태. UI·연출이 구독한다.
+## 적이 부하를 부른다(신장 계열). 스포너가 받아서 실제로 만든다 —
+## 적이 직접 스폰하면 풀 관리가 두 곳으로 갈린다.
+signal enemy_summon_requested(world_position: Vector2, count: int)
+
+## 적이 죽으며 갈라진다. 위와 같은 이유로 스포너가 받는다.
+signal enemy_split_requested(world_position: Vector2, count: int, scale_mult: float)
+
 ## 기세가 가득 차 강림을 부를 수 있게 됐다. HUD 가 이걸로 버튼을 밝힌다.
 signal taegi_ready
 

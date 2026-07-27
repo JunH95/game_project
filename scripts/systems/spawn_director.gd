@@ -35,6 +35,13 @@ extends Node2D
 @export var burst_min: int = 4
 @export var burst_max: int = 20
 
+@export_group("엘리트 (design.md 6-4)")
+## 스킬을 가진 개체. 드물게 나와야 위협이 된다 — 흔하면 잡몹이고 화면이 안 읽힌다.
+@export var elite_data: Array[EnemyData] = []
+## 엘리트가 나오기 시작하는 시각과 주기(초).
+@export var elite_after_sec: float = 45.0
+@export var elite_interval: float = 38.0
+
 @export_group("공통")
 @export var spawn_radius: float = 700.0
 @export var max_alive: int = 200
@@ -44,10 +51,17 @@ var _elapsed: float = 0.0
 ## 스폰율이 소수라서 누적해 두고 1.0 을 넘을 때마다 한 마리씩 낸다.
 var _spawn_accum: float = 0.0
 var _burst_accum: float = 0.0
+var _elite_accum: float = 0.0
+## 엘리트를 돌아가며 낸다. 무작위면 같은 종류만 연달아 나오는 판이 생긴다.
+var _elite_index: int = 0
 
 
 func _ready() -> void:
 	_target = get_tree().get_first_node_in_group("player")
+	# 적이 부하를 부르거나 갈라질 때 실제로 만드는 것은 스포너다 —
+	# 적이 직접 스폰하면 풀 관리가 두 곳으로 갈린다.
+	EventBus.enemy_summon_requested.connect(_on_summon_requested)
+	EventBus.enemy_split_requested.connect(_on_split_requested)
 
 
 func _process(delta: float) -> void:
@@ -65,6 +79,12 @@ func _process(delta: float) -> void:
 		while _burst_accum >= burst_interval:
 			_burst_accum -= burst_interval
 			_spawn_burst()
+
+	if not elite_data.is_empty() and _elapsed >= elite_after_sec and elite_interval > 0.0:
+		_elite_accum += delta
+		while _elite_accum >= elite_interval:
+			_elite_accum -= elite_interval
+			_spawn_elite()
 
 
 ## 램프 진행도 0.0~1.0.
@@ -86,6 +106,56 @@ func _spawn_burst() -> void:
 	var data := _pick_data()
 	for i in count:
 		_spawn_at(base_angle + randf_range(-0.6, 0.6), data)
+
+
+## 엘리트는 한 마리씩만 낸다. 둘 이상이 동시에 스킬을 쓰면 무엇이 위험한지 안 읽힌다.
+func _spawn_elite() -> void:
+	var pool: Array[EnemyData] = []
+	for candidate in elite_data:
+		if candidate != null:
+			pool.append(candidate)
+	if pool.is_empty():
+		return
+	# 돌아가며 낸다. 무작위면 같은 종류만 연달아 나오는 판이 생긴다.
+	var data := pool[_elite_index % pool.size()]
+	_elite_index += 1
+	_spawn_at(randf() * TAU, data)
+
+
+## 신장 계열이 부하를 부른다. 플레이어 쪽이 아니라 **부른 적 주위**에 낸다 —
+## 소환인데 화면 밖에서 걸어오면 소환으로 안 읽힌다.
+func _on_summon_requested(world_position: Vector2, count: int) -> void:
+	for i in count:
+		var angle := TAU * float(i) / float(maxi(1, count)) + randf_range(-0.3, 0.3)
+		_spawn_near(world_position + Vector2.from_angle(angle) * randf_range(28.0, 56.0),
+			enemy_data)
+
+
+## 갈라진 조각. 원래 자리에서 튀어나온다.
+func _on_split_requested(world_position: Vector2, count: int, scale_mult: float) -> void:
+	if rusher_data == null:
+		return
+	for i in count:
+		var angle := TAU * float(i) / float(maxi(1, count))
+		var spawned := _spawn_near(
+			world_position + Vector2.from_angle(angle) * 18.0, rusher_data)
+		# 조각은 작고 약하다. 원본과 같은 크기면 죽인 보람이 없다.
+		if spawned != null:
+			spawned.scale = Vector2.ONE * scale_mult
+
+
+## 링이 아니라 지정한 자리에 낸다. 소환·분열처럼 위치가 의미를 가지는 경우에 쓴다.
+func _spawn_near(world_position: Vector2, data: EnemyData) -> Node2D:
+	if enemy_scene == null or data == null:
+		return null
+	if get_tree().get_nodes_in_group(&"enemy").size() >= max_alive:
+		return null
+	var enemy := ObjectPool.acquire(enemy_scene, get_parent())
+	if enemy == null:
+		return null
+	enemy.global_position = world_position
+	enemy.setup(data)
+	return enemy
 
 
 ## 시간이 지나면 새 종류가 섞인다. 탱크는 늦게·드물게 — 초반에 나오면 진행이 막힌다.

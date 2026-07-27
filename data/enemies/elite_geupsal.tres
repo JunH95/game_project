@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/enemy_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"elite_geupsal"
+display_name = "급살사자"
+max_hp = 30.0
+move_speed = 78.0
+contact_damage = 14.0
+xp_reward = 3
+wonhon_chance = 0.35
+element = &"fire"
+rank = "elite"
+skills = Array[StringName]([&"lunge"])
+skill_cooldown = 3.4
+elite_scale = 1.5
+outline_color = Color(1.0, 0.45, 0.3, 0.8)
+radius = 8.0
+placeholder_color = Color(0.98, 0.35, 0.28, 1)
+silhouette = "rusher"
+faces_movement = true

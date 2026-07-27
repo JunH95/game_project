@@ -17,6 +17,17 @@ extends Resource
 ## 미니보스/보스 여부. 별도 씬 없이 이 플래그 + 소형 행동 스크립트로 처리
 @export var is_boss: bool = false
 
+@export_group("등급과 스킬 (design.md 6-4)")
+## 잡귀에게 스킬을 주면 화면이 안 읽힌다. 스킬은 elite 이상만 가진다.
+@export_enum("minion", "elite", "miniboss", "boss") var rank: String = "minion"
+## EnemySkills 가 해석하는 키 목록. tether / lunge / split / summon
+@export var skills: Array[StringName] = []
+@export var skill_cooldown: float = 4.0
+## 엘리트는 눈에 띄어야 한다 — 같아 보이는데 특수 능력이 있으면 불공정하게 느껴진다.
+## 크기·테두리 중 최소 둘로 구분한다(design.md 0-2 읽히는 설계).
+@export var elite_scale: float = 1.0
+@export var outline_color: Color = Color(0, 0, 0, 0)
+
 @export var texture: Texture2D
 @export var radius: float = 8.0
 

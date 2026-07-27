@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://scenes/actors/enemy/enemy.gd" id="1_enemy"]
 [ext_resource type="Script" path="res://scripts/components/movement_component.gd" id="2_move"]
@@ -17,6 +17,8 @@ radius = 8.0
 
 [sub_resource type="CircleShape2D" id="Shape_sep"]
 radius = 20.0
+
+[ext_resource type="Script" path="res://scripts/components/enemy_skills.gd" id="9_skills"]
 
 [node name="Enemy" type="CharacterBody2D" groups=["enemy"]]
 collision_layer = 4
@@ -62,3 +64,7 @@ monitorable = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="SeparationArea"]
 shape = SubResource("Shape_sep")
+
+[node name="EnemySkills" type="Node2D" parent="."]
+unique_name_in_owner = true
+script = ExtResource("9_skills")
