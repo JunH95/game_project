@@ -6,7 +6,11 @@ extends Area2D
 
 const SIZE: float = 6.0
 
+## 무기의 기본 데미지. 최종값은 명중 시점에 DamageCalc 가 정한다 —
+## 오행 배율은 대상이 정해져야 나오고, 치명도 발마다 굴려야 한다.
 var damage: float = 14.0
+## 발사한 무기의 GodSystem. 명중 시 신 수정자·기운을 물어본다.
+var god_system: Node
 var speed: float = 320.0
 var homing_turn_rate: float = 4.0
 var pierce: int = 1
@@ -89,7 +93,10 @@ func _on_area_entered(area: Area2D) -> void:
 	_hit.append(enemy)
 
 	if hurtbox.health != null:
-		hurtbox.health.take_damage(damage)
+		var result := DamageCalc.resolve(damage, god_system, &"bujeok_damage_pct", enemy)
+		hurtbox.health.take_damage(result["amount"])
+		if enemy.has_method(&"flash_hit"):
+			enemy.call(&"flash_hit", result["is_crit"])
 	if knockback > 0.0 and enemy.has_method(&"apply_knockback"):
 		enemy.call(&"apply_knockback", _direction * knockback)
 

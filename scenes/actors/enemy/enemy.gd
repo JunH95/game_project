@@ -16,8 +16,17 @@ const SEPARATION_WEIGHT: float = 0.7
 ## 이웃이 많아도 분리력이 무한정 커지지 않게 막는 상한.
 const SEPARATION_MAX: float = 1.5
 
+## 피격 틴트가 남는 시간. 치명은 더 길게 보여 준다.
+const FLASH_TIME: float = 0.09
+const FLASH_TIME_CRIT: float = 0.2
+const FLASH_COLOR: Color = Color(1.6, 1.6, 1.6)
+const FLASH_COLOR_CRIT: Color = Color(1.9, 1.5, 0.5)
+
 var _target: Node2D
 var _knockback: Vector2 = Vector2.ZERO
+var _flash_left: float = 0.0
+var _flash_total: float = 0.0
+var _flash_color: Color = FLASH_COLOR
 
 @onready var _movement: MovementComponent = %MovementComponent
 @onready var _health: HealthComponent = %HealthComponent
@@ -60,6 +69,7 @@ func _apply_data() -> void:
 func _pool_reset() -> void:
 	_knockback = Vector2.ZERO
 	velocity = Vector2.ZERO
+	_flash_left = 0.0
 	modulate = Color.WHITE
 	_apply_data()
 	_target = get_tree().get_first_node_in_group("player")
@@ -80,6 +90,8 @@ func _pool_exit() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	_decay_flash(delta)
+
 	# 넉백은 추격 속도와 별개로 감쇠하며 밀어낸다. 남아 있는 동안은 추격보다 우선.
 	if not _knockback.is_zero_approx():
 		_knockback = _knockback.lerp(Vector2.ZERO, minf(KNOCKBACK_DECAY * delta, 1.0))
@@ -114,6 +126,26 @@ func _separation_push() -> Vector2:
 ## 무기가 호출한다. impulse 는 방향 × 세기(px/s).
 func apply_knockback(impulse: Vector2) -> void:
 	_knockback = impulse
+
+
+## 무기가 호출한다. 맞았다는 사실과 치명 여부를 눈에 보이게 한다 —
+## 보이지 않는 치명은 없는 기능이다. 정식 데미지 숫자는 M6.
+func flash_hit(is_crit: bool) -> void:
+	_flash_total = FLASH_TIME_CRIT if is_crit else FLASH_TIME
+	_flash_left = _flash_total
+	_flash_color = FLASH_COLOR_CRIT if is_crit else FLASH_COLOR
+	modulate = _flash_color
+
+
+## Tween 을 쓰지 않는 이유: 풀에 반납되면 노드가 트리 밖으로 나가 트윈이 어중간하게 남는다.
+func _decay_flash(delta: float) -> void:
+	if _flash_left <= 0.0:
+		return
+	_flash_left -= delta
+	if _flash_left <= 0.0:
+		modulate = Color.WHITE
+		return
+	modulate = Color.WHITE.lerp(_flash_color, _flash_left / _flash_total)
 
 
 func _on_died() -> void:

@@ -33,5 +33,3 @@ extends Resource
 @export var count: int = 1
 @export var lifetime: float = 2.5
 
-## 레벨별 스케일 규칙. 예: { "damage_per_level": 3, "cooldown_step": -0.1 }
-@export var level_scale: Dictionary

@@ -78,7 +78,8 @@ func _swing(direction: Vector2) -> void:
 	var reach_sq := reach * reach
 	# 반각과 비교하려고 코사인으로 바꿔둔다(정규화 벡터끼리는 내적이 곧 각도의 코사인).
 	var half_arc_cos := cos(deg_to_rad(_get_arc_degrees() * 0.5))
-	var damage := _get_damage()
+	# 데미지는 대상마다 다르다(오행 배율·치명) — 여기서는 기본값만 넘기고 _hit 에서 확정한다.
+	var damage := _get_base_damage()
 	var knockback := _get_knockback()
 
 	for node in get_tree().get_nodes_in_group(&"enemy"):
@@ -99,7 +100,10 @@ func _hit(enemy: Node2D, damage: float, knockback: float, offset: Vector2) -> vo
 	if health == null:
 		push_error("적에 HealthComponent 가 없어 작두 데미지를 넣지 못했다: %s" % enemy.name)
 		return
-	health.take_damage(damage)
+	var result := DamageCalc.resolve(damage, god_system, &"jakdu_damage_pct", enemy)
+	health.take_damage(result["amount"])
+	if enemy.has_method(&"flash_hit"):
+		enemy.call(&"flash_hit", result["is_crit"])
 	if knockback > 0.0 and enemy.has_method(&"apply_knockback"):
 		var push := offset.normalized() if not offset.is_zero_approx() else _swing_direction
 		enemy.call(&"apply_knockback", push * knockback)
@@ -114,9 +118,9 @@ func _god_add(key: StringName) -> float:
 	return god_system.get_mod(key) if god_system != null else 0.0
 
 
-func _get_damage() -> float:
-	var base := data.base_damage if data != null else FALLBACK_DAMAGE
-	return base * _god_mult(&"jakdu_damage_pct")
+## 신 수정자·오행·치명은 DamageCalc 가 대상별로 처리한다. 여기서는 무기 자체의 기본값만 준다.
+func _get_base_damage() -> float:
+	return data.base_damage if data != null else FALLBACK_DAMAGE
 
 
 func _get_cooldown() -> float:

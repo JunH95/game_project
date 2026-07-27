@@ -78,7 +78,10 @@ func _on_blade_area_entered(area: Area2D) -> void:
 	_cooldowns[key] = now + _get_rehit_cooldown()
 
 	if hurtbox.health != null:
-		hurtbox.health.take_damage(_get_damage())
+		var result := DamageCalc.resolve(_get_base_damage(), god_system, &"eonwoldo_damage_pct", enemy)
+		hurtbox.health.take_damage(result["amount"])
+		if enemy.has_method(&"flash_hit"):
+			enemy.call(&"flash_hit", result["is_crit"])
 	var knockback: float = (data.knockback if data != null else 0.0) * _god_mult(&"knockback_pct")
 	if knockback > 0.0 and enemy.has_method(&"apply_knockback"):
 		var push: Vector2 = (enemy.global_position - global_position).normalized()
@@ -105,9 +108,9 @@ func _god_add(key: StringName) -> float:
 	return god_system.get_mod(key) if god_system != null else 0.0
 
 
-func _get_damage() -> float:
-	var base := data.base_damage if data != null else FALLBACK_DAMAGE
-	return base * _god_mult(&"eonwoldo_damage_pct")
+## 신 수정자·오행·치명은 DamageCalc 가 대상별로 처리한다.
+func _get_base_damage() -> float:
+	return data.base_damage if data != null else FALLBACK_DAMAGE
 
 
 func _get_orbit_radius() -> float:

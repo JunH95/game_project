@@ -66,7 +66,8 @@ func _fire(direction: Vector2) -> void:
 		if projectile == null:
 			return
 		projectile.global_position = global_position
-		projectile.damage = _get_damage()
+		projectile.damage = _get_base_damage()
+		projectile.god_system = god_system
 		projectile.speed = data.projectile_speed if data != null else 320.0
 		projectile.homing_turn_rate = data.homing_turn_rate if data != null else 4.0
 		projectile.pierce = data.pierce if data != null else 1
@@ -83,9 +84,9 @@ func _god_add(key: StringName) -> float:
 	return god_system.get_mod(key) if god_system != null else 0.0
 
 
-func _get_damage() -> float:
-	var base := data.base_damage if data != null else FALLBACK_DAMAGE
-	return base * _god_mult(&"bujeok_damage_pct")
+## 신 수정자·오행·치명은 명중 시점에 DamageCalc 가 처리한다(투사체가 들고 간다).
+func _get_base_damage() -> float:
+	return data.base_damage if data != null else FALLBACK_DAMAGE
 
 
 func _get_cooldown() -> float:
