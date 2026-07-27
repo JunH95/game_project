@@ -438,17 +438,39 @@ M1~M5에서 시스템을 세우는 기준 관문.
 ---
 
 ## 9. 아트/오디오 플레이스홀더 `[지금]`
-프로그래머 우선. 도형 + 엄격한 색 코드. `assets/placeholder/`에 두고 리소스로 참조(코드에 하드코딩 금지) → 이후 아트 패스는 폴더 교체.
+프로그래머 우선. 도형 + 엄격한 색 코드 → 이후 아트 패스는 텍스처 교체.
 
-| 대상 | 플레이스홀더 |
-|---|---|
-| 플레이어 | 흰 원 |
-| 적 | 빨강 원 |
-| 보스 | 큰 짙은 빨강 원 |
-| XP 젬 | 청록 다이아 |
-| 원혼 | 보라 구 |
-| 작두 타격 | 흰 호(arc) |
-| 부적 | 노랑 삼각 |
+### 9-1. 실루엣 라이브러리 `[구현 완료]`
+`scripts/systems/placeholder_art.gd`(`class_name PlaceholderArt`)가 팔레트와 형태를 **한곳에서** 쥔다.
+액터마다 `_draw()`에 색을 흩어 두면 톤이 반드시 어긋나기 때문이다. 기준색은 `vision.md` 4절의
+광물 안료(주사홍 `#B3352A` · 군청 `#25407A` · 금박 `#D9A441` · 먹 `#1B1B24`).
+
+| 대상 | 실루엣 | 움직임 |
+|---|---|---|
+| 플레이어 | 무당 — 흰 무복 + 홍띠 + 군청 깃 + 금빛 방울 | 걸음 흔들림(정지 시 잦아듦), 강림 시 금빛 후광 |
+| 추격 원귀 | `wraith` — 머리 + 아래로 흐르는 자락 + 두 눈 | 제자리 숨쉬기(scale) |
+| 급살 원귀 | `rusher` — 화살촉 + 뒤로 끌리는 잔상 | 이동 방향으로 회전(`faces_movement`) |
+| 업덩이 | `hulk` — 겹친 원 덩어리 + 균열에서 새는 빛 | 제자리 숨쉬기(scale) |
+| XP 젬 | 마름모 + 하이라이트 + 무리 | 폭을 줄였다 늘리는 회전(scale.x) |
+| 부적 | 노란 종이 + 주사 획 + 금빛 꼬리 | `rotation`이 진행 방향 |
+| 작두 타격 | 원호 **띠**(부채꼴 아님) + 밝은 날 끝 선 | 사라지며 바깥으로 번짐 |
+| 궤도 날 | 마름모 날 + 잔상 + 흰 끝점 + 궤도 안내원 | 공전 |
+
+**성능 규약**: 적은 수백 마리가 동시에 뜨므로 `_draw()`는 **정적**으로 두고, 살아 있는 느낌은
+노드 `transform`(회전·스케일)으로만 낸다 — 매 프레임 `queue_redraw`를 부르면 캔버스 아이템을
+마리 수만큼 다시 만든다. 플레이어는 하나뿐이라 예외.
+
+**오목 폴리곤 금지**: `draw_colored_polygon`은 오목 폴리곤을 제대로 채우지 못한다. 모든 형태를
+볼록 조각(삼각형·사다리꼴·원)의 겹침으로 조립하고, 고리 모양이 필요하면 굵은 `draw_arc`를 쓴다.
+
+### 9-2. 텍스처 교체 경로 `[구현 완료]`
+`PlaceholderArt.draw_texture_centered(canvas, texture, fit_size)`를 각 액터 `_draw()` **첫 줄**에서
+부른다. 텍스처가 있으면 그걸 그리고 `true`를 돌려주므로 도형 코드가 자동으로 비켜난다.
+긴 변을 `fit_size`에 맞춰 줄이므로 그림 해상도를 코드가 신경 쓰지 않는다(적 `radius × 2.6`,
+플레이어 `RADIUS × 3.0`). 원점이 항상 중앙이라 피벗 설정도 없다.
+
+→ **아트를 물릴 위치와 생성 프롬프트는 `docs/art_prompts.md`가 정본.** 코드 변경 없이
+`.tres`/`.tscn`의 `texture`(신은 `icon`)만 채우면 된다. 비우면 도형으로 되돌아온다.
 
 - 오디오 `[1차 구현 완료]`: `AudioManager` autoload가 **키만** 알고 파일은 모른다. 지금 울리는 것은
   `tools/gen_audio.py`로 **직접 합성한 플레이스홀더**(효과음 12종 + 8초 앰비언트 루프)다 —
@@ -494,7 +516,9 @@ M1~M5에서 시스템을 세우는 기준 관문.
 - **EnemyData** (`enemy_data.gd`): `id: StringName`, `display_name: String`, `max_hp: float`,
   `move_speed: float`, `contact_damage: float`, `xp_reward: int`, `wonhon_chance: float`,
   `is_boss: bool`, `texture: Texture2D`, `radius: float`, `element: StringName`(오행, 상성 §3-3),
-  `placeholder_color: Color`(도형 플레이스홀더 색 — 종류가 눈에 구분돼야 위협을 가늠한다).
+  `placeholder_color: Color`(도형 플레이스홀더 색 — 종류가 눈에 구분돼야 위협을 가늠한다),
+  `silhouette: String`(`wraith`/`rusher`/`hulk` — 난전에서는 색만으로 종류가 안 읽혀 형태로도 가른다),
+  `faces_movement: bool`(이동 방향으로 몸을 돌릴지. 방향이 있는 실루엣만 켠다).
 - **GateData** (`gate_data.gd`): `id: StringName`, `display_name: String`, `duration_sec: float`,
   `wave_table: WaveTable`, `mid_boss: EnemyData`, `gate_boss: EnemyData`, `background: Texture2D`,
   `clear_color: Color`, `element: StringName`(관문 오행, 적 오행의 기본값).

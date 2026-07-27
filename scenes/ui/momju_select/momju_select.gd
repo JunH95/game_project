@@ -54,6 +54,11 @@ func _show() -> void:
 		]
 		button.custom_minimum_size = Vector2(560, 96)
 		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		# 몸주 일러스트가 들어오면 GodData.icon 만 물리면 여기 뜬다. 없으면 글자만 나온다.
+		if god.icon != null:
+			button.icon = god.icon
+			button.expand_icon = true
+			button.vertical_icon_alignment = VERTICAL_ALIGNMENT_CENTER
 		button.pressed.connect(_on_choice_pressed.bind(god))
 		_buttons.add_child(button)
 

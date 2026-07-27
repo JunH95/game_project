@@ -18,7 +18,7 @@
   - `components/` : 재사용 노드(health/hurtbox/hitbox/movement/xp) — M1에서 채움
   - `systems/` : 스폰/무기/레벨 등 시스템 — M1에서 채움
 - `assets/` : 원본 아트·오디오. `placeholder/`는 임시 도형 리소스.
-- `docs/` : `vision.md`(비전·서사·톤) · `design.md`(수치·스키마·스코프) · `lore.md`(고증) · `architecture.md`(구조) · `기획서.html`(사람용 종합 뷰)
+- `docs/` : `vision.md`(비전·서사·톤) · `design.md`(수치·스키마·스코프) · `lore.md`(고증) · `architecture.md`(구조) · `art_prompts.md`(아트 생성 프롬프트) · `기획서.html`(사람용 종합 뷰)
 - `tests/` : 테스트
 - 씬 전용 스크립트는 해당 `.tscn` 옆에, 공용 로직은 `scripts/` 아래에 둔다.
 - `addons/godot_ai/`와 autoload `_mcp_game_helper`는 MCP 플러그인이다. 건드리지 않는다.
@@ -53,6 +53,7 @@
 - `docs/design.md` — 수치·리소스 스키마·스코프·마일스톤 (구현 정본, 코드가 따름)
 - `docs/lore.md` — 무속·저승 고증(고증/각색/미확인 구분)
 - `docs/architecture.md` — 시스템·이벤트 흐름·씬 컴포지션 다이어그램(Mermaid)
+- `docs/art_prompts.md` — AI 이미지 생성 프롬프트·출력 규격·적용 절차 (아트 정본. 스타일 앵커는 함부로 고치지 않는다)
 - `docs/기획서.html` — 위 문서들을 합친 **사람용 종합 뷰**(파생물, 정본 아님)
 
 규칙:

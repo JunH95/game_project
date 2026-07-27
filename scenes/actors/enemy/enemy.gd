@@ -2,7 +2,7 @@ extends CharacterBody2D
 
 ## 공용 적. EnemyData 리소스로 스탯·외형을 구성한다(data-driven).
 ## M1 슬라이스: 플레이어를 추격하고 접촉 데미지를 준다. 처치 시 enemy_died 를 emit.
-## 플레이스홀더 외형 = 빨강 원(_draw).
+## 외형은 EnemyData.silhouette 이 고르는 PlaceholderArt 실루엣. texture 를 물리면 그쪽이 우선한다.
 
 @export var data: EnemyData
 
@@ -22,11 +22,19 @@ const FLASH_TIME_CRIT: float = 0.2
 const FLASH_COLOR: Color = Color(1.6, 1.6, 1.6)
 const FLASH_COLOR_CRIT: Color = Color(1.9, 1.5, 0.5)
 
+## 몸이 흔들리는 주기(초당 라디안)와 폭. 살짝만 준다 — 크게 흔들면 히트박스와 눈이 어긋난다.
+const BODY_BOB_SPEED: float = 6.5
+const BODY_BOB_AMOUNT: float = 0.09
+## 이동 방향으로 도는 속도. 즉시 돌리면 무리 속에서 방향이 덜덜 떨린다.
+const TURN_RATE: float = 12.0
+
 var _target: Node2D
 var _knockback: Vector2 = Vector2.ZERO
 var _flash_left: float = 0.0
 var _flash_total: float = 0.0
 var _flash_color: Color = FLASH_COLOR
+## 개체마다 다른 위상. 같으면 무리 전체가 한 몸처럼 맥동해 기괴해진다.
+var _bob_phase: float = 0.0
 
 @onready var _movement: MovementComponent = %MovementComponent
 @onready var _health: HealthComponent = %HealthComponent
@@ -71,6 +79,9 @@ func _pool_reset() -> void:
 	velocity = Vector2.ZERO
 	_flash_left = 0.0
 	modulate = Color.WHITE
+	rotation = 0.0
+	scale = Vector2.ONE
+	_bob_phase = randf() * TAU
 	_apply_data()
 	_target = get_tree().get_first_node_in_group("player")
 	add_to_group(&"enemy")
@@ -91,6 +102,7 @@ func _pool_exit() -> void:
 
 func _physics_process(delta: float) -> void:
 	_decay_flash(delta)
+	_animate_body(delta)
 
 	# 넉백은 추격 속도와 별개로 감쇠하며 밀어낸다. 남아 있는 동안은 추격보다 우선.
 	if not _knockback.is_zero_approx():
@@ -107,6 +119,19 @@ func _physics_process(delta: float) -> void:
 	var chase := (_target.global_position - global_position).normalized()
 	var direction := (chase + _separation_push() * SEPARATION_WEIGHT).normalized()
 	_movement.move(direction)
+
+
+## 살아 있다는 느낌은 transform 으로만 낸다 — queue_redraw 를 부르지 않으므로 마리 수에 비례하는
+## 비용이 붙지 않는다. 방향성 있는 실루엣은 진행 방향으로 돌고, 나머지는 제자리에서 숨 쉰다.
+func _animate_body(delta: float) -> void:
+	if data != null and data.faces_movement:
+		if not velocity.is_zero_approx():
+			rotation = rotate_toward(rotation, velocity.angle(), TURN_RATE * delta)
+		return
+	_bob_phase += BODY_BOB_SPEED * delta
+	var bob := sin(_bob_phase) * BODY_BOB_AMOUNT
+	# 가로가 늘면 세로가 줄게 해서 부피가 유지되는 것처럼 보이게 한다.
+	scale = Vector2(1.0 + bob, 1.0 - bob)
 
 
 ## 반경 안의 다른 적에게서 멀어지는 방향. 가까울수록 강하다.
@@ -153,7 +178,19 @@ func _on_died() -> void:
 	ObjectPool.release(self)
 
 
+## 실루엣은 정적으로 그린다 — 수백 마리가 매 프레임 다시 그리면 캔버스 아이템을 그만큼 다시 만든다.
+## 살아 있다는 느낌은 _physics_process 의 transform(회전·숨쉬기)이 낸다.
 func _draw() -> void:
 	var r := data.radius if data != null else 8.0
+	# 실루엣이 판정 원보다 조금 커야 몸이 꽉 차 보인다. 텍스처도 같은 비율로 맞춘다.
+	if data != null and PlaceholderArt.draw_texture_centered(self, data.texture, r * 2.6):
+		return
 	var color := data.placeholder_color if data != null else Color(0.85, 0.16, 0.16)
-	draw_circle(Vector2.ZERO, r, color)
+	var shape := data.silhouette if data != null else "wraith"
+	match shape:
+		"rusher":
+			PlaceholderArt.draw_rusher(self, r, color)
+		"hulk":
+			PlaceholderArt.draw_hulk(self, r, color)
+		_:
+			PlaceholderArt.draw_wraith(self, r, color)

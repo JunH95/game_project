@@ -2,9 +2,12 @@ extends Area2D
 
 ## 부적 투사체. 발사 후 가장 가까운 적을 향해 완만히 방향을 틀며 날아간다(유도).
 ## 관통 횟수를 다 쓰거나 수명이 다하면 풀에 반납된다.
-## 플레이스홀더 외형 = 노랑 삼각(design.md 9절).
+## 외형은 PlaceholderArt 의 부적 종이. texture 를 물리면 그쪽이 우선한다.
 
 const SIZE: float = 6.0
+
+## 정식 아트가 들어오면 여기에 물리고, 도형 실루엣은 자동으로 비켜난다.
+@export var texture: Texture2D
 
 ## 무기의 기본 데미지. 최종값은 명중 시점에 DamageCalc 가 정한다 —
 ## 오행 배율은 대상이 정해져야 나오고, 치명도 발마다 굴려야 한다.
@@ -65,7 +68,6 @@ func _physics_process(delta: float) -> void:
 		rotation = _direction.angle()
 
 	global_position += _direction * speed * delta
-	queue_redraw()
 
 
 func _find_nearest_enemy() -> Node2D:
@@ -106,9 +108,8 @@ func _on_area_entered(area: Area2D) -> void:
 		ObjectPool.release(self)
 
 
-## 노랑 삼각. 진행 방향이 코끝이 되도록 rotation 을 따른다.
+## 진행 방향이 X 축이 되도록 그린다. 방향 전환은 rotation 이 맡으므로 다시 그릴 필요가 없다.
 func _draw() -> void:
-	var points := PackedVector2Array([
-		Vector2(SIZE, 0.0), Vector2(-SIZE * 0.7, SIZE * 0.6), Vector2(-SIZE * 0.7, -SIZE * 0.6)
-	])
-	draw_colored_polygon(points, Color(0.95, 0.82, 0.28))
+	if PlaceholderArt.draw_texture_centered(self, texture, SIZE * 3.0):
+		return
+	PlaceholderArt.draw_talisman(self, SIZE)

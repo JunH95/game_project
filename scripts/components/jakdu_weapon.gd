@@ -211,26 +211,34 @@ func _get_knockback() -> float:
 	return base * _god_mult(&"knockback_pct")
 
 
-## 플레이스홀더 연출 = 흰 부채꼴(design.md 9절). 휘두른 직후 잠깐 나타났다 사라진다.
-## 테두리 선만 그리면 판정 범위(부채꼴 전체)와 보이는 것이 어긋나므로 면을 채운다.
+## 베기 잔상. 원점에서 퍼지는 부채꼴이 아니라 **띠**로 그린다 — 꽉 찬 부채꼴은 장판처럼 보이고,
+## 날이 지나간 자리는 원호를 따라 남기 때문이다. 띠 두께가 곧 판정 범위라 보이는 것과 맞는다.
+## draw_arc 에 굵은 width 를 주면 고리 조각이 나온다(오목 폴리곤을 피하는 방법이기도 하다).
 func _draw() -> void:
 	if _swing_visual_left <= 0.0:
 		return
-	var alpha := _swing_visual_left / SWING_VISUAL_TIME
+	var t := _swing_visual_left / SWING_VISUAL_TIME
 	var reach := _get_range()
 	var half_arc := deg_to_rad(_get_arc_degrees() * 0.5)
 	var base_angle := _swing_direction.angle()
+	var from := base_angle - half_arc
+	var to := base_angle + half_arc
 
-	const SEGMENTS := 24
-	var points := PackedVector2Array()
-	points.append(Vector2.ZERO)
-	for i in SEGMENTS + 1:
-		var t := float(i) / float(SEGMENTS)
-		points.append(Vector2.from_angle(base_angle - half_arc + half_arc * 2.0 * t) * reach)
-
+	const SEGMENTS := 28
 	# 강림 중에는 금색 — 지금이 그 순간이라는 걸 한눈에 알아야 한다.
-	var tint := Color(1.0, 0.82, 0.35) if is_taegi_active() else Color.WHITE
-	draw_colored_polygon(points, Color(tint.r, tint.g, tint.b, alpha * 0.30))
-	# 바깥 테두리는 좀 더 진하게 — 사거리 끝이 어디인지 읽히게.
-	draw_arc(Vector2.ZERO, reach, base_angle - half_arc, base_angle + half_arc, SEGMENTS,
-		Color(tint.r, tint.g, tint.b, alpha * 0.85), 2.0)
+	var tint := PlaceholderArt.GEUMBAK if is_taegi_active() else Color(0.92, 0.95, 1.0)
+
+	# 잔상은 사라지면서 바깥으로 밀려난다. 제자리에서 옅어지기만 하면 베였다는 느낌이 없다.
+	var spread := 1.0 + (1.0 - t) * 0.12
+	var band_radius := reach * 0.7 * spread
+	var band_width := reach * 0.52
+	draw_arc(Vector2.ZERO, band_radius, from, to, SEGMENTS,
+		Color(tint.r, tint.g, tint.b, t * 0.22), band_width)
+	# 날 끝이 지나간 선. 가장 진하게 남겨 베기의 방향이 읽히게 한다.
+	draw_arc(Vector2.ZERO, reach * spread, from, to, SEGMENTS,
+		Color(tint.r, tint.g, tint.b, t * 0.9), 3.0)
+	# 휘두름의 시작·끝을 잇는 짧은 선. 부채꼴의 양 끝이 열려 있으면 띠가 떠 보인다.
+	for edge_angle in [from, to]:
+		var dir := Vector2.from_angle(edge_angle)
+		draw_line(dir * (reach * 0.44), dir * (reach * spread),
+			Color(tint.r, tint.g, tint.b, t * 0.45), 2.0)

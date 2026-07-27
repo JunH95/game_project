@@ -14,3 +14,5 @@ wonhon_chance = 0.05
 is_boss = false
 element = &"fire"
 radius = 8.0
+
+silhouette = "wraith"

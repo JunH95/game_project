@@ -15,3 +15,6 @@ is_boss = false
 element = &"fire"
 radius = 6.0
 placeholder_color = Color(0.98, 0.45, 0.2, 1)
+
+silhouette = "rusher"
+faces_movement = true

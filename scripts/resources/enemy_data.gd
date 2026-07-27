@@ -23,3 +23,10 @@ extends Resource
 ## 도형 플레이스홀더 색(design.md 9절). 종류가 눈에 구분돼야 위협을 가늠할 수 있다.
 ## 아트 패스에서 texture 로 대체된다.
 @export var placeholder_color: Color = Color(0.85, 0.16, 0.16)
+
+## 플레이스홀더 실루엣 종류. 색만으로는 난전 중에 종류가 안 읽혀 형태로도 가른다.
+## PlaceholderArt 가 해석한다. texture 가 있으면 무시된다.
+@export_enum("wraith", "rusher", "hulk") var silhouette: String = "wraith"
+
+## 이동 방향으로 몸을 돌릴지. 화살촉처럼 방향이 있는 실루엣만 켠다.
+@export var faces_movement: bool = false

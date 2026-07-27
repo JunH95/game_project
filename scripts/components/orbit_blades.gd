@@ -153,8 +153,19 @@ func _get_count() -> int:
 
 ## 플레이스홀더 = 날. 회전이 눈에 보이도록 진행 방향으로 살짝 기울인다.
 func _draw() -> void:
+	if _blades.is_empty():
+		return
+	# 날이 지나는 길. 흐릿한 원 하나가 있으면 몇 개가 어디를 도는지 즉시 읽힌다.
+	var radius := _get_orbit_radius()
+	draw_arc(Vector2.ZERO, radius, 0.0, TAU, 48,
+		Color(blade_color.r, blade_color.g, blade_color.b, 0.10), 1.5)
+
 	for blade in _blades:
 		var tangent := blade.position.orthogonal().normalized() * BLADE_RADIUS
+		# 뒤로 끌리는 잔상. 도는 속도가 형태로 읽히게 한다.
+		draw_line(blade.position, blade.position - tangent * 1.8,
+			Color(blade_color.r, blade_color.g, blade_color.b, blade_color.a * 0.3),
+			BLADE_RADIUS * 0.7)
 		var points := PackedVector2Array([
 			blade.position + tangent,
 			blade.position + tangent.orthogonal() * 0.55,
@@ -162,3 +173,6 @@ func _draw() -> void:
 			blade.position - tangent.orthogonal() * 0.55,
 		])
 		draw_colored_polygon(points, blade_color)
+		# 날 끝의 흰 점 — 회전 중에도 날붙이라는 인상이 남는다.
+		draw_circle(blade.position + tangent * 0.6, BLADE_RADIUS * 0.28,
+			Color(1.0, 1.0, 1.0, blade_color.a * 0.8))

@@ -1,9 +1,16 @@
 extends CharacterBody2D
 
 ## 플레이어. M1: 8방향 이동 + 접촉 피격(HP·i-frame) + 사망 시 씬 리셋.
-## 픽업 자석·작두 무기는 이후 조각에서 붙인다. 플레이스홀더 외형 = 흰 원(_draw).
+## 외형은 PlaceholderArt 의 무당 실루엣. texture 를 물리면 그쪽이 우선한다.
 
 const RADIUS: float = 12.0
+
+## 걸음의 위아래 흔들림. 정지하면 잦아든다 — 서 있는데 계속 들썩이면 조작이 안 먹는 것처럼 보인다.
+const BOB_SPEED: float = 11.0
+const BOB_SETTLE: float = 8.0
+
+## 정식 아트가 들어오면 여기에 물리고, 도형 실루엣은 자동으로 비켜난다.
+@export var texture: Texture2D
 
 ## 신내림 수정자를 물어볼 GodSystem. main.tscn 에서 주입한다.
 @export var god_system_path: NodePath
@@ -17,6 +24,9 @@ var _synergy_system: Node
 ## 합이 열어 주는 궤도들(OrbitBlades). 각자 required_synergy 를 들고 있다.
 var _synergy_orbits: Array = []
 var _taegi: bool = false
+var _bob_phase: float = 0.0
+## 0.0~1.0. 걸을수록 오르고 멈추면 내려간다. 흔들림의 크기를 여기에 곱한다.
+var _bob_weight: float = 0.0
 var _base_speed: float = 0.0
 var _base_max_hp: float = 0.0
 var _base_magnet_radius: float = 0.0
@@ -142,9 +152,17 @@ func _on_magnet_area_entered(area: Area2D) -> void:
 		area.call(&"attract_to", self)
 
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	var direction := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	_movement.move(direction)
+
+	# 걸음 흔들림. 플레이어는 하나뿐이라 매 프레임 다시 그려도 부담이 없다.
+	# 몸을 회전·반전시키지 않는 이유: 자식으로 달린 무기(작두 부채꼴·궤도)까지 같이 뒤집힌다.
+	var target_weight := 1.0 if not direction.is_zero_approx() else 0.0
+	_bob_weight = move_toward(_bob_weight, target_weight, BOB_SETTLE * delta)
+	if _bob_weight > 0.0:
+		_bob_phase += BOB_SPEED * delta
+	queue_redraw()
 
 
 func _on_health_changed(current: float, maximum: float) -> void:
@@ -167,7 +185,6 @@ func _on_taegi_state_changed(active: bool) -> void:
 
 
 func _draw() -> void:
-	# 강림 중에는 몸 둘레에 금빛 테가 돈다. 정식 이펙트는 M6 아트 패스.
-	if _taegi:
-		draw_circle(Vector2.ZERO, RADIUS + 6.0, Color(1.0, 0.82, 0.35, 0.35))
-	draw_circle(Vector2.ZERO, RADIUS, Color.WHITE)
+	if PlaceholderArt.draw_texture_centered(self, texture, RADIUS * 3.0):
+		return
+	PlaceholderArt.draw_mudang(self, RADIUS, sin(_bob_phase) * _bob_weight, _taegi)
