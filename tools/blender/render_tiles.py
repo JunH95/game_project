@@ -62,28 +62,55 @@ def _jittered_grid(rng, count, spread):
             yield x, y
 
 
+def _slab(name, x, y, radius, sides, rot, rim_mat, face_mat, z=0.02):
+    """돌 한 장 = 어두운 테 + 그보다 작은 밝은 윗면.
+
+    단색 다각형만 깔면 종이를 오려 붙인 것처럼 보인다. 테를 한 겹 두르면 그 폭이
+    깎인 면으로 읽혀 돌이 된다 — 명암을 계산하지 않고 입체를 내는 방법이고,
+    무신도가 굵은 먹선으로 형태를 가르는 방식과도 맞는다.
+    """
+    rim = _ngon(name + "_rim", x, y, radius, sides, rot, z, rim_mat)
+    face = _ngon(name, x, y, radius * 0.82, sides, rot, z + 0.01, face_mat)
+    return [rim, face]
+
+
 def build_stone(rng):
     """저승 돌바닥. 관문 공통 기본 타일."""
     _base_plane(rig.flat_material("base", rig.MEOK))
-    stone_a = rig.flat_material("stone_a", rig.MEOK_LIGHT)
-    stone_b = rig.flat_material("stone_b", "#3A3A4E")
+    rim = rig.flat_material("stone_rim", "#16161F")
+    faces = [rig.flat_material("stone_f%d" % i, hexc)
+             for i, hexc in enumerate((rig.MEOK_LIGHT, "#3A3A4E", "#262633", "#43435A"))]
+    pebble = rig.flat_material("pebble", "#20202C")
     made = []
-    for idx, (x, y) in enumerate(_jittered_grid(rng, 4, 0.10)):
-        mat = stone_a if rng.random() < 0.65 else stone_b
-        made.append(_ngon("stone%d" % idx, x, y, rng.uniform(0.20, 0.27),
-                          rng.choice((5, 6, 6, 7)), rng.uniform(0.0, 3.14), 0.02, mat))
+    # 큰 판돌. 크기를 넓게 흔들어야 규칙적인 벌집처럼 보이지 않는다.
+    for idx, (x, y) in enumerate(_jittered_grid(rng, 4, 0.13)):
+        made += _slab("stone%d" % idx, x, y, rng.uniform(0.17, 0.28),
+                      rng.choice((5, 6, 6, 7)), rng.uniform(0.0, 3.14),
+                      rim, rng.choice(faces))
+    # 판돌 사이를 메우는 잔돌. 빈 틈이 넓으면 바닥이 아니라 흩어진 조각으로 보인다.
+    for idx, (x, y) in enumerate(_jittered_grid(rng, 7, 0.09)):
+        if rng.random() < 0.45:
+            continue
+        made.append(_ngon("pebble%d" % idx, x, y, rng.uniform(0.045, 0.085),
+                          rng.choice((4, 5, 6)), rng.uniform(0.0, 3.14), 0.005, pebble))
     return made
 
 
 def build_crack(rng):
     """균열 바닥. 아래에서 주사홍 빛이 샌다 — 화탕 관문(design.md 5-2)의 바닥."""
     _base_plane(rig.flat_material("glow", rig.JUSA), z=0.0)
+    # 빛이 바로 먹으로 끊기면 네온처럼 보인다. 사이에 어두운 붉은색을 한 겹 둬 식어 가게 한다.
+    ember = rig.flat_material("ember", rig.JUSA_DARK)
     crust = rig.flat_material("crust", rig.MEOK)
+    top = rig.flat_material("crust_top", "#232330")
     made = []
     # 큼직한 판을 벌어지게 깔면 그 틈이 균열이 된다. 선을 그리는 것보다 자연스럽다.
-    for idx, (x, y) in enumerate(_jittered_grid(rng, 3, 0.16)):
-        made.append(_ngon("crust%d" % idx, x, y, rng.uniform(0.34, 0.42),
-                          rng.choice((5, 6, 7)), rng.uniform(0.0, 3.14), 0.02, crust))
+    for idx, (x, y) in enumerate(_jittered_grid(rng, 4, 0.14)):
+        radius = rng.uniform(0.26, 0.33)
+        sides = rng.choice((5, 6, 7))
+        rot = rng.uniform(0.0, 3.14)
+        made.append(_ngon("ember%d" % idx, x, y, radius * 1.13, sides, rot, 0.01, ember))
+        made += _slab("crust%d" % idx, x, y, radius, sides, rot, crust, top, z=0.02)
     return made
 
 
