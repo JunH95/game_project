@@ -8,7 +8,7 @@ id = &"choeyeong"
 display_name = "최영장군"
 tier = 1
 max_level = 5
-element = &"metal"
+element = &"fire"
 stat_mods = {
 "cooldown_pct": -7.0,
 "move_speed_pct": 5.0

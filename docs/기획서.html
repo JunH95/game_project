@@ -401,7 +401,7 @@
           <thead><tr><th>몸주</th><th>오행</th><th>시작 무기</th><th>몸주 패시브</th></tr></thead>
           <tbody>
             <tr><td><strong>작도대신</strong></td><td class="val">金</td><td><strong>작두</strong> (부채꼴 즉발)</td><td>작두 damage +10%</td></tr>
-            <tr><td><strong>최영장군</strong></td><td class="val">金</td><td><strong>언월도</strong> (궤도 회전)</td><td>언월도 날 수 +1 · 작두타기 게이지</td></tr>
+            <tr><td><strong>최영장군</strong></td><td class="val">火</td><td><strong>언월도</strong> (궤도 회전)</td><td>언월도 날 수 +1 · 작두타기 게이지</td></tr>
             <tr><td><strong>칠성신</strong></td><td class="val">水</td><td><strong>부적</strong> (유도 투사체)</td><td>부적 발수 +1</td></tr>
           </tbody>
         </table>
@@ -419,7 +419,7 @@
           <thead><tr><th>신</th><th>오행</th><th>몸주</th><th>모시는 신 효과 (레벨당)</th></tr></thead>
           <tbody>
             <tr><td><strong>작도대신</strong></td><td class="val">金</td><td>○ 기본</td><td>작두 damage +15%, arc +8°</td></tr>
-            <tr><td><strong>최영장군</strong></td><td class="val">金</td><td>○</td><td><strong>쿨다운 −7%</strong>, 언월도 날 수 +1(3레벨마다)</td></tr>
+            <tr><td><strong>최영장군</strong></td><td class="val">火</td><td>○</td><td><strong>쿨다운 −7%</strong>, 언월도 날 수 +1(3레벨마다)</td></tr>
             <tr><td><strong>칠성신</strong></td><td class="val">水</td><td>○</td><td>부적 damage +15%, 발수 +1(3레벨마다)</td></tr>
             <tr><td>산신</td><td class="val">土</td><td>—</td><td>max HP +12%, <strong>넉백 +20%</strong></td></tr>
             <tr><td>월광보살</td><td class="val">水</td><td>—</td><td><strong>치명률 +4%p</strong>, 이동속도 +8%</td></tr>
@@ -594,17 +594,27 @@
       </div>
 
       <h4 class="reveal">오행(五行) 상성 <span class="tag t-gak">각색</span></h4>
-      <p class="col muted reveal">&ldquo;아무리 좋은 조합도 관문마다 상성이 있어야 한다&rdquo; &mdash; 신·적·관문에 오행(木火土金水) 태그를 달고 상극으로 유·불리를 만든다. 순수 작두(金) 빌드가 화탕(火)에선 불리해 <strong>수 계열 신을 섞게</strong> 되는 식(플레이어를 벌주기보다 적 저항/약점으로 구현). 상극 ×1.25, 역상극 ×0.80. 정본 수치 <code>design.md §3-3</code>.</p>
+      <p class="col muted reveal">&ldquo;아무리 좋은 조합도 관문마다 상성이 있어야 한다&rdquo; &mdash; 신·적·관문에 오행(木火土金水) 태그를 달고 상극으로 유·불리를 만든다. 상극 ×1.25, 역상극 ×0.80. 정본 <code>design.md §3-3</code>.</p>
+
+      <div class="callout gold reveal">
+        <span class="lb">플레이어의 오행 = &ldquo;지금 실린 기운&rdquo;</span>
+        무기에 고정 오행을 박지 않는다. <strong>신내림 = 신이 몸에 실리는 것</strong>이니, 실린 신의 기운이 그대로 무기에 실린다 &mdash; <strong>테마가 곧 규칙</strong>이 되는 지점.<br>
+        <code>런의 오행 = 모시는 신(몸주 포함)을 오행별로 묶어 레벨 합산 → 최대 오행</code> (동률이면 몸주 오행)<br>
+        런 시작 기운은 몸주의 오행이고, 신을 모을수록 <strong>기운이 옮겨간다.</strong> 그래서 <strong>오행은 캐릭터 선택이 아니라 빌드 축</strong>이다 &mdash; &ldquo;화탕 가려면 水 몸주&rdquo;라는 숙제가 되지 않고, 몸주 3종만으로도 런 중에 5속성 전부에 닿는다. 지금 무슨 기운인지는 HUD에 항상 표시한다.
+      </div>
+
       <div class="tbl-wrap reveal">
         <table>
-          <thead><tr><th>관문</th><th>오행</th><th>강함 (이 속성 신)</th><th>약함</th></tr></thead>
+          <caption>관문별 상성 &mdash; &ldquo;강함/약함&rdquo;은 그 시점 <strong>실린 기운</strong> 기준</caption>
+          <thead><tr><th>관문</th><th>오행</th><th>강함 (이 기운이면)</th><th>약함</th></tr></thead>
           <tbody>
-            <tr><td>화탕(불가마)</td><td class="val">火</td><td>水 &mdash; 칠성·월광 (수극화)</td><td>金 &mdash; 작두·최영 (화극금)</td></tr>
-            <tr><td>얼음(한빙)</td><td class="val">水</td><td>土 &mdash; 산신 (토극수)</td><td>火 &mdash; 일광</td></tr>
-            <tr><td>칼산(칼의 산)</td><td class="val">金</td><td>火 &mdash; 일광 (화극금)</td><td>木</td></tr>
+            <tr><td>화탕(불가마)</td><td class="val">火</td><td>水 &mdash; 칠성신·월광보살 (수극화)</td><td>金 &mdash; 작도대신 (화극금)</td></tr>
+            <tr><td>얼음(한빙)</td><td class="val">水</td><td>土 &mdash; 산신 (토극수)</td><td>火 &mdash; 최영장군</td></tr>
+            <tr><td>칼산(칼의 산)</td><td class="val">金</td><td>火 &mdash; 최영장군 (화극금)</td><td>木</td></tr>
           </tbody>
         </table>
       </div>
+      <p class="col muted reveal">몸주 3인의 오행은 <strong>서로 다르게</strong> 둔다(金·火·水) &mdash; 시작 기운이 겹치면 이 규칙이 출발점부터 단조로워진다. <span class="tag t-gak">각색</span> 최영장군이 火인 근거: 장군신은 무(武)의 <strong>기세</strong>이고 상산거리 무복이 홍갓·붉은 구군복이며, 강림 시 격렬해지는 상태가 火의 성질이다. 지물인 언월도가 쇠라고 신까지 金일 필요는 없다 &mdash; <strong>오행은 무기가 아니라 신에게 붙는다.</strong> (MVP 5신은 木이 비어 있어, 정식 로스터에서 木 신으로 5속성을 완성한다.)</p>
 
       <h4 class="reveal">시왕 10관문 여정 <span class="tag t-go">시간축=고증</span> <span class="tag t-gak">테마=각색</span></h4>
       <p class="col muted reveal">출시 = 시왕 10관문 완주. 시왕 시간축(초칠일~3년)에 오행·테마를 배정(木火土金水 각 2). 확정 3 + 제안 7. 상세 <code>design.md §5-1</code>.</p>
