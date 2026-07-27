@@ -13,6 +13,9 @@ const RADIUS: float = 12.0
 var _god_system: Node
 ## { weapon_id: 무기 노드 } — 몸주·신이 열어 준 것만 켠다.
 var _weapons: Dictionary = {}
+var _synergy_system: Node
+## 합이 열어 주는 궤도들(OrbitBlades). 각자 required_synergy 를 들고 있다.
+var _synergy_orbits: Array = []
 var _taegi: bool = false
 var _base_speed: float = 0.0
 var _base_max_hp: float = 0.0
@@ -48,21 +51,31 @@ func _ready() -> void:
 		&"bujeok": get_node_or_null(^"%BujeokWeapon"),
 		&"eonwoldo": get_node_or_null(^"%EonwoldoWeapon"),
 	}
-	var synergy_system: Node = null
 	if not synergy_system_path.is_empty():
-		synergy_system = get_node_or_null(synergy_system_path)
+		_synergy_system = get_node_or_null(synergy_system_path)
 	for weapon in _weapons.values():
 		if weapon != null:
 			weapon.god_system = _god_system
-			# 합이 여는 기능(작두타기)이 있는 무기만 이 참조를 쓴다.
-			if &"synergy_system" in weapon:
-				weapon.synergy_system = synergy_system
 			weapon.process_mode = Node.PROCESS_MODE_DISABLED
+	# 작두타기는 합이 여는 기능이라 작두만 합 시스템을 본다.
+	var jakdu := _weapons.get(&"jakdu") as JakduWeapon
+	if jakdu != null:
+		jakdu.synergy_system = _synergy_system
+
+	# 합이 여는 궤도들. 무기가 아니라 합에 딸린 것이라 무기 맵과 따로 둔다.
+	_synergy_orbits = [get_node_or_null(^"%JakduOrbit"), get_node_or_null(^"%BujeokShield")]
+	for orbit in _synergy_orbits:
+		if orbit != null:
+			orbit.god_system = _god_system
+			orbit.process_mode = Node.PROCESS_MODE_DISABLED
 
 	if _god_system != null:
 		# player_leveled_up 은 신을 고르기 "전"에 오므로 그걸로 갱신하면 능력치가 한 픽씩 밀린다.
 		# 몸주 확정도 내부적으로 serve() 를 거치므로 이 하나로 둘 다 덮는다.
 		EventBus.god_served.connect(_on_god_served)
+	# 합 성립 신호도 직접 받는다. god_served 만 보면 SynergySystem 이 먼저 연결됐다는
+	# 우연에 기대게 된다.
+	EventBus.synergy_formed.connect(_on_synergy_formed)
 
 	# 작두타기가 발동하면 몸에 금빛이 실린다 — 지금이 그 순간임을 몸으로도 보여 준다.
 	EventBus.taegi_state_changed.connect(_on_taegi_state_changed)
@@ -79,6 +92,19 @@ func _announce_health() -> void:
 ## 신을 새로 모시면(몸주 확정 포함) 능력치와 열린 무기를 다시 계산한다.
 func _on_god_served(_god: GodData) -> void:
 	_apply_god_mods()
+
+
+func _on_synergy_formed(_synergy: SynergyData) -> void:
+	_refresh_synergy_orbits()
+
+
+## 합이 열린 궤도만 켠다. 한 번 열리면 런이 끝날 때까지 유지된다.
+func _refresh_synergy_orbits() -> void:
+	if _synergy_system == null:
+		return
+	for orbit in _synergy_orbits:
+		if orbit != null and _synergy_system.is_active(orbit.required_synergy):
+			orbit.process_mode = Node.PROCESS_MODE_INHERIT
 
 
 func _apply_god_mods() -> void:
@@ -107,6 +133,7 @@ func _apply_god_mods() -> void:
 		var weapon: Node = _weapons[weapon_id]
 		if weapon != null and _god_system.grants_weapon(weapon_id):
 			weapon.process_mode = Node.PROCESS_MODE_INHERIT
+	_refresh_synergy_orbits()
 
 
 ## 자석 반경에 들어온 픽업은 플레이어를 향해 끌려온다. 수집 판정은 픽업 쪽이 한다.

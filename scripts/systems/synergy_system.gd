@@ -10,6 +10,8 @@ extends Node
 
 const DEFAULT_SYNERGY_PATHS: PackedStringArray = [
 	"res://data/synergies/janggun_gangrim.tres",
+	"res://data/synergies/gwedo_jakdu.tres",
+	"res://data/synergies/bukdu_bangbyeok.tres",
 ]
 
 var _god_system: Node

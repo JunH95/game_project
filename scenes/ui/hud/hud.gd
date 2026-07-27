@@ -32,7 +32,7 @@ var _gate_timer: Node
 var _god_system: Node
 var _hp: float = 0.0
 var _max_hp: float = 0.0
-var _synergy_name: String = ""
+var _synergy_names: PackedStringArray = []
 var _jakdu: Node
 
 
@@ -82,7 +82,7 @@ func _on_god_served(_god: GodData) -> void:
 
 ## 합이 열리는 순간은 이 게임에서 가장 기분 좋은 지점이다. 조용히 지나가면 안 된다.
 func _on_synergy_formed(synergy: SynergyData) -> void:
-	_synergy_name = synergy.display_name
+	_synergy_names.append(synergy.display_name)
 	_synergy_label.show()
 
 
@@ -99,17 +99,21 @@ func _resolve_jakdu() -> Node:
 func _update_synergy_label() -> void:
 	if not _synergy_label.visible:
 		return
+	var text := "합 — " + " · ".join(_synergy_names)
+
+	# 작두타기는 열려 있을 때만 기세를 덧붙인다. 언제 터지는지 보이지 않으면 기다릴 수가 없다.
 	var jakdu := _resolve_jakdu()
-	if jakdu == null or not jakdu.has_method(&"get_taegi_ratio") or not jakdu.is_taegi_unlocked():
-		_synergy_label.text = "합 — %s" % _synergy_name
-		return
-	var ratio: float = jakdu.get_taegi_ratio()
-	if jakdu.is_taegi_active():
-		_synergy_label.text = "합 — %s   작두타기! %d%%" % [_synergy_name, int(ratio * 100.0)]
-		_synergy_label.add_theme_color_override(&"font_color", Color(1.0, 0.86, 0.4))
-	else:
-		_synergy_label.text = "합 — %s   기세 %d%%" % [_synergy_name, int(ratio * 100.0)]
-		_synergy_label.add_theme_color_override(&"font_color", Color(0.72, 0.64, 0.42))
+	var color := Color(0.98, 0.82, 0.35)
+	if jakdu != null and jakdu.has_method(&"get_taegi_ratio") and jakdu.is_taegi_unlocked():
+		var ratio: float = jakdu.get_taegi_ratio()
+		if jakdu.is_taegi_active():
+			text += "    작두타기! %d%%" % int(ratio * 100.0)
+			color = Color(1.0, 0.86, 0.4)
+		else:
+			text += "    기세 %d%%" % int(ratio * 100.0)
+			color = Color(0.72, 0.64, 0.42)
+	_synergy_label.text = text
+	_synergy_label.add_theme_color_override(&"font_color", color)
 
 
 func _refresh_gods() -> void:

@@ -12,3 +12,6 @@ cooldown = 0.8
 knockback = 120.0
 attack_range = 90.0
 arc_degrees = 100.0
+orbit_radius = 55.0
+orbit_speed = 2.6
+rehit_cooldown = 0.5

@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="SynergyData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/synergy_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"bukdu_bangbyeok"
+display_name = "북두 방벽"
+god_a = &"chilseong"
+god_b = &"sansin"
+effect = &"bujeok_shield"
+description = "부적이 날아가지 않고 몸 둘레에 머문다. 칠성을 깊이 모실수록 방벽이 두터워진다."
