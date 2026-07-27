@@ -247,7 +247,7 @@
           <span class="chip">규모 <b>1인 개발</b></span>
         </div>
         <div class="cover-meta">
-          보고: 개발 &rarr; 팀장 &nbsp;·&nbsp; 문서 상태: <strong>M1·M2 완료 · M3 진행 중</strong>(무기 3종·몸주·데미지 공식·합 3종 완료 / 남은 것: 신 로스터 확장·칠야) &nbsp;·&nbsp; 2026-07-22<br>
+          보고: 개발 &rarr; 팀장 &nbsp;·&nbsp; 문서 상태: <strong>M1·M2 완료 · M3 진행 중 + 게임 필 1차 패스</strong>(무기 3종·몸주·합 3종·타격감·사운드 완료 / 남은 것: 신 로스터 확장·칠야) &nbsp;·&nbsp; 2026-07-22<br>
           정본 지도 &mdash; 비전·서사: <code>vision.md</code> &nbsp;/&nbsp; 수치·스키마: <code>design.md</code> &nbsp;/&nbsp; 고증: <code>lore.md</code> &nbsp;/&nbsp; 구조: <code>architecture.md</code> &nbsp;·&nbsp; 이 문서는 그 종합 뷰(파생물)
         </div>
       </div>
@@ -702,6 +702,13 @@
         <div class="card"><h4 style="margin-top:0">피드백</h4><p class="muted" style="margin:0">데미지 숫자 팝업·킬 이펙트·레벨업 연출·화면을 채우는 신내림 컷인.</p></div>
       </div>
 
+      <div class="callout gold reveal">
+        <span class="lb">1차 패스 구현 완료</span>
+        테스트가 재미있으려면 최소한의 &ldquo;보는 맛&rdquo;이 필요해 M6의 앞부분을 당겨왔다 &mdash; 아트 없이 <strong>코드로 되는 것만</strong>.<br>
+        <strong>타격감</strong>: 히트스톱 + 스크린셰이크(<strong>치명에만</strong> &mdash; 평타마다 흔들면 멀미가 나고 치명의 특별함도 사라진다) · 데미지 숫자(치명은 크고 금색) · 처치 파편 · 저승 톤 배경과 떠다니는 넋 불빛.<br>
+        <strong>사운드</strong>: CC0 배포처가 차단된 환경이라 <strong>직접 합성</strong>했다(효과음 12종 + 앰비언트 루프). 무속 타악(징·장구·방울)의 성질을 흉내낸 플레이스홀더이고, <code>AudioManager</code>가 <strong>키만</strong> 알기 때문에 진짜 에셋으로 갈아 끼울 때 코드는 바뀌지 않는다.
+      </div>
+
       <div class="callout reveal">
         <span class="lb">순서 &mdash; 게임플레이 우선</span>
         비주얼 완성도는 셀링이지만, <strong>루프가 재밌어지기 전에 폴리시부터 하면 안 된다.</strong> M1~M5는 도형 플레이스홀더(단, 위 팔레트를 겨냥)로 재미를 먼저 잡고, <strong>M6 &lsquo;아트·비주얼 완성 패스&rsquo;</strong>에서 아트 교체와 게임 필을 집중 투입한다. 게임플레이는 비주얼을 Resource에서 읽으므로 플레이스홀더가 로직에 새지 않는다.
@@ -910,7 +917,7 @@
         <div class="node now"><div class="lab">M3 · 신내림 정식 <span class="now-badge">현재</span></div><div class="muted">완료: 몸주 선택, 몸주 3 ↔ 무기 3, 데미지 공식·치명·오행, <strong>합 프레임 + 합 3종</strong>(장군 강림·궤도 작두·북두 방벽). 남은 것: 신 로스터 확장, 칠야.</div></div>
         <div class="node"><div class="lab">M4 · 신당 메타 루프</div><div class="muted">원혼 재화, 세이브 저장/로드, 타이틀&rarr;신당&rarr;런&rarr;정산 사이클.</div></div>
         <div class="node"><div class="lab">M5 · 풀 관문 1개 (화탕)</div><div class="muted">WaveTable 램프, 관문별 적 세트, 관문 기믹, 오행 상성, 저승사자 미니보스 + 관문 보스, 클리어 흐름.</div></div>
-        <div class="node"><div class="lab">M6 · 아트 · 비주얼 완성 패스 <span class="tag t-gak" style="margin-left:.3rem">격상</span></div><div class="muted">플레이스홀더 &rarr; 무신도 톤 아트 교체 + 셰이더·파티클. 히트스톱·스크린셰이크·데미지 숫자·히트 플래시·넉백 튜닝. <strong>화려함을 여기 몰아넣는다.</strong></div></div>
+        <div class="node"><div class="lab">M6 · 아트 · 비주얼 완성 패스 <span class="tag t-gak" style="margin-left:.3rem">격상</span></div><div class="muted">플레이스홀더 &rarr; 무신도 톤 아트 교체 + 셰이더·파티클, 진짜 오디오 에셋. <strong>화려함을 여기 몰아넣는다.</strong> (히트스톱·셰이크·데미지 숫자·합성 사운드는 <strong>1차 패스로 이미 구현</strong>.)</div></div>
         <div class="node"><div class="lab">M7 · 완결 서사 빌드</div><div class="muted">시왕 10관문(1관문 시스템 &rarr; 콘텐츠 복제) + 미니보스·관문보스 + 최종보스 + 엔딩 + 타이틀/설정 + 코어 신 세트 &rarr; <strong>Steam-ready</strong>. 신·무기·하드모드는 출시 후.</div></div>
       </div>
     </div>
