@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://dexox5mrtlgpm"]
+[gd_scene load_steps=23 format=3 uid="uid://dexox5mrtlgpm"]
 
 [ext_resource type="Script" path="res://scenes/background.gd" id="1_bg"]
 [ext_resource type="PackedScene" path="res://scenes/actors/player/player.tscn" id="2_player"]
@@ -20,6 +20,9 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/pause/pause_menu.tscn" id="18_pause"]
 [ext_resource type="PackedScene" path="res://scenes/ui/momju_select/momju_select.tscn" id="19_momju"]
 [ext_resource type="Script" path="res://scripts/systems/synergy_system.gd" id="20_synergy"]
+[ext_resource type="Script" path="res://scripts/systems/fx_spawner.gd" id="21_fx"]
+[ext_resource type="PackedScene" path="res://scenes/actors/fx/damage_number.tscn" id="22_dmgnum"]
+[ext_resource type="PackedScene" path="res://scenes/actors/fx/death_burst.tscn" id="23_burst"]
 
 [node name="Main" type="Node2D"]
 
@@ -28,6 +31,8 @@ script = ExtResource("14_warm")
 enemy_scene = ExtResource("4_enemy")
 xp_gem_scene = ExtResource("7_gem")
 projectile_scene = ExtResource("15_bujeok")
+damage_number_scene = ExtResource("22_dmgnum")
+death_burst_scene = ExtResource("23_burst")
 
 [node name="Background" type="Node2D" parent="."]
 script = ExtResource("1_bg")
@@ -51,6 +56,11 @@ enemy_scene = ExtResource("4_enemy")
 enemy_data = ExtResource("5_chaser")
 rusher_data = ExtResource("16_rusher")
 tank_data = ExtResource("17_tank")
+
+[node name="FxSpawner" type="Node2D" parent="."]
+script = ExtResource("21_fx")
+damage_number_scene = ExtResource("22_dmgnum")
+death_burst_scene = ExtResource("23_burst")
 
 [node name="PickupSpawner" type="Node2D" parent="."]
 script = ExtResource("6_pickup")

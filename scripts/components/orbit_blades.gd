@@ -93,6 +93,7 @@ func _on_blade_area_entered(area: Area2D) -> void:
 	if hurtbox.health != null:
 		var result := DamageCalc.resolve(_get_base_damage(), god_system, damage_key, enemy)
 		hurtbox.health.take_damage(result["amount"])
+		EventBus.damage_dealt.emit(enemy.global_position, result["amount"], result["is_crit"])
 		if enemy.has_method(&"flash_hit"):
 			enemy.call(&"flash_hit", result["is_crit"])
 	var knockback: float = (data.knockback if data != null else 0.0) * _god_mult(&"knockback_pct")

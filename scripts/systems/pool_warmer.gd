@@ -12,6 +12,10 @@ extends Node
 @export var xp_gem_count: int = 500
 @export var projectile_scene: PackedScene
 @export var projectile_count: int = 200
+@export var damage_number_scene: PackedScene
+@export var damage_number_count: int = 120
+@export var death_burst_scene: PackedScene
+@export var death_burst_count: int = 60
 
 static var _warmed: bool = false
 
@@ -26,3 +30,7 @@ func _ready() -> void:
 		ObjectPool.prewarm(xp_gem_scene, xp_gem_count)
 	if projectile_scene != null:
 		ObjectPool.prewarm(projectile_scene, projectile_count)
+	if damage_number_scene != null:
+		ObjectPool.prewarm(damage_number_scene, damage_number_count)
+	if death_burst_scene != null:
+		ObjectPool.prewarm(death_burst_scene, death_burst_count)

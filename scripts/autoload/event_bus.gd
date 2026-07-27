@@ -8,6 +8,9 @@ extends Node
 # 선언 클래스 안에서는 안 쓰이므로 unused_signal 경고를 이 블록에서만 끈다.
 @warning_ignore_start("unused_signal")
 signal enemy_died(enemy: Node2D, world_position: Vector2)
+## 타격이 들어간 순간. 소리·데미지 숫자·히트스톱이 전부 이걸 구독한다 —
+## 무기마다 연출을 직접 호출하면 무기를 더할 때마다 빠뜨린다.
+signal damage_dealt(world_position: Vector2, amount: float, is_crit: bool)
 signal xp_collected(amount: int)
 signal wonhon_collected(amount: int)
 signal player_leveled_up(new_level: int)

@@ -70,6 +70,7 @@ func _process(delta: float) -> void:
 	_swing_direction = (target.global_position - global_position).normalized()
 	_swing_visual_left = SWING_VISUAL_TIME
 	_swing(_swing_direction)
+	AudioManager.play(&"jakdu_swing")
 	swung.emit(_swing_direction)
 	queue_redraw()
 
@@ -160,6 +161,7 @@ func _hit(enemy: Node2D, damage: float, knockback: float, offset: Vector2) -> vo
 		return
 	var result := DamageCalc.resolve(damage, god_system, &"jakdu_damage_pct", enemy)
 	health.take_damage(result["amount"])
+	EventBus.damage_dealt.emit(enemy.global_position, result["amount"], result["is_crit"])
 	if enemy.has_method(&"flash_hit"):
 		enemy.call(&"flash_hit", result["is_crit"])
 	if knockback > 0.0 and enemy.has_method(&"apply_knockback"):
