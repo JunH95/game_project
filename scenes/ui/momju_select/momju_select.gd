@@ -35,7 +35,7 @@ func _ready() -> void:
 
 
 func _show() -> void:
-	var candidates := _god_system.get_momju_candidates()
+	var candidates: Array = _god_system.get_momju_candidates()
 	if candidates.is_empty():
 		push_error("몸주 후보가 없다. GodData.is_momju 를 확인할 것.")
 		_panel.hide()

@@ -5,6 +5,7 @@
 [ext_resource type="Script" path="res://scripts/components/health_component.gd" id="3_health"]
 [ext_resource type="Script" path="res://scripts/components/hurtbox_component.gd" id="4_hurt"]
 [ext_resource type="Script" path="res://scripts/components/hitbox_component.gd" id="5_hit"]
+[ext_resource type="Script" path="res://scripts/components/enemy_skills.gd" id="9_skills"]
 
 [sub_resource type="CircleShape2D" id="Shape_body"]
 radius = 8.0
@@ -17,8 +18,6 @@ radius = 8.0
 
 [sub_resource type="CircleShape2D" id="Shape_sep"]
 radius = 20.0
-
-[ext_resource type="Script" path="res://scripts/components/enemy_skills.gd" id="9_skills"]
 
 [node name="Enemy" type="CharacterBody2D" groups=["enemy"]]
 collision_layer = 4

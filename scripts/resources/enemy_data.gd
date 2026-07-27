@@ -17,6 +17,10 @@ extends Resource
 ## 미니보스/보스 여부. 별도 씬 없이 이 플래그 + 소형 행동 스크립트로 처리
 @export var is_boss: bool = false
 
+## 오행(木火土金水). DamageCalc 가 공격자 기운과 대조해 상성 배율을 낸다(design.md 3-3).
+## 빈 값이면 무속성으로 쳐서 배율 1.0. 적의 오행은 기본적으로 관문 오행을 따른다(design.md 4절).
+@export var element: StringName
+
 @export_group("등급과 스킬 (design.md 6-4)")
 ## 잡귀에게 스킬을 주면 화면이 안 읽힌다. 스킬은 elite 이상만 가진다.
 @export_enum("minion", "elite", "miniboss", "boss") var rank: String = "minion"

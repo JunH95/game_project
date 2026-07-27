@@ -221,9 +221,25 @@ func _fill_panel(a: Strand, b: Strand, color: Color, alpha: float) -> void:
 	for i in range(count - 1):
 		# 아래로 갈수록 옅어져야 천이 공기 중으로 사라지는 것처럼 보인다.
 		var fade := alpha * (1.0 - float(i) / float(count) * 0.85)
-		draw_colored_polygon(PackedVector2Array([
+		_fill_quad(PackedVector2Array([
 			a.points[i], a.points[i + 1], b.points[i + 1], b.points[i]
 		]), Color(color, fade))
+
+
+## 넓이가 0 인 사각형은 그리지 않는다. 갈래가 겹쳐 접히는 순간(런 시작 직후처럼 천이
+## 아직 안 퍼졌을 때) 네 점이 한 줄로 서면 삼각분할이 실패해 엔진이 에러를 뱉는다.
+## 어차피 보이지 않는 면이라 건너뛰는 것이 맞다.
+func _fill_quad(points: PackedVector2Array, color: Color) -> void:
+	# 신발끈 공식. 부호는 필요 없고 크기만 본다.
+	var doubled_area := 0.0
+	var n := points.size()
+	for i in n:
+		var p := points[i]
+		var q := points[(i + 1) % n]
+		doubled_area += p.x * q.y - q.x * p.y
+	if absf(doubled_area) < 1.0:
+		return
+	draw_colored_polygon(points, color)
 
 
 func _fill_banner() -> void:
@@ -232,7 +248,7 @@ func _fill_banner() -> void:
 	var count := _banner.points.size()
 	for i in range(count - 1):
 		var fade := 0.5 * (1.0 - float(i) / float(count) * 0.6)
-		draw_colored_polygon(PackedVector2Array([
+		_fill_quad(PackedVector2Array([
 			_banner.points[i], _banner.points[i + 1],
 			_banner.points[i + 1] - Vector2(width, 0.0),
 			_banner.points[i] - Vector2(width, 0.0)
