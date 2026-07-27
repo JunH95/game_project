@@ -7,10 +7,13 @@ const RADIUS: float = 12.0
 
 ## 신내림 수정자를 물어볼 GodSystem. main.tscn 에서 주입한다.
 @export var god_system_path: NodePath
+## 합 성립을 물어볼 SynergySystem. 작두타기처럼 합이 여는 기능이 이걸 본다.
+@export var synergy_system_path: NodePath
 
 var _god_system: Node
 ## { weapon_id: 무기 노드 } — 몸주·신이 열어 준 것만 켠다.
 var _weapons: Dictionary = {}
+var _taegi: bool = false
 var _base_speed: float = 0.0
 var _base_max_hp: float = 0.0
 var _base_magnet_radius: float = 0.0
@@ -45,14 +48,24 @@ func _ready() -> void:
 		&"bujeok": get_node_or_null(^"%BujeokWeapon"),
 		&"eonwoldo": get_node_or_null(^"%EonwoldoWeapon"),
 	}
+	var synergy_system: Node = null
+	if not synergy_system_path.is_empty():
+		synergy_system = get_node_or_null(synergy_system_path)
 	for weapon in _weapons.values():
 		if weapon != null:
 			weapon.god_system = _god_system
+			# 합이 여는 기능(작두타기)이 있는 무기만 이 참조를 쓴다.
+			if &"synergy_system" in weapon:
+				weapon.synergy_system = synergy_system
 			weapon.process_mode = Node.PROCESS_MODE_DISABLED
 
 	if _god_system != null:
-		EventBus.player_leveled_up.connect(_on_leveled_up)
-		EventBus.momju_chosen.connect(_on_momju_chosen)
+		# player_leveled_up 은 신을 고르기 "전"에 오므로 그걸로 갱신하면 능력치가 한 픽씩 밀린다.
+		# 몸주 확정도 내부적으로 serve() 를 거치므로 이 하나로 둘 다 덮는다.
+		EventBus.god_served.connect(_on_god_served)
+
+	# 작두타기가 발동하면 몸에 금빛이 실린다 — 지금이 그 순간임을 몸으로도 보여 준다.
+	EventBus.taegi_state_changed.connect(_on_taegi_state_changed)
 
 	# health_changed 는 피격 때만 오므로 시작 체력을 한 번 알린다.
 	# 지연시키는 이유: 플레이어가 HUD 보다 먼저 _ready 를 돌아, 즉시 쏘면 구독 전에 사라진다.
@@ -63,14 +76,9 @@ func _announce_health() -> void:
 	EventBus.player_health_changed.emit(_health.hp, _health.max_hp)
 
 
-## 신을 새로 모시면 능력치를 다시 계산한다. 레벨업 UI 가 닫힌 뒤에 반영된다.
-func _on_leveled_up(_new_level: int) -> void:
-	_apply_god_mods.call_deferred()
-
-
-## 몸주가 정해지면 시작 무기와 패시브가 붙는다. 런 시작의 첫 갱신이다.
-func _on_momju_chosen(_god: GodData) -> void:
-	_apply_god_mods.call_deferred()
+## 신을 새로 모시면(몸주 확정 포함) 능력치와 열린 무기를 다시 계산한다.
+func _on_god_served(_god: GodData) -> void:
+	_apply_god_mods()
 
 
 func _apply_god_mods() -> void:
@@ -126,5 +134,13 @@ func _on_died() -> void:
 	EventBus.player_died.emit()
 
 
+func _on_taegi_state_changed(active: bool) -> void:
+	_taegi = active
+	queue_redraw()
+
+
 func _draw() -> void:
+	# 강림 중에는 몸 둘레에 금빛 테가 돈다. 정식 이펙트는 M6 아트 패스.
+	if _taegi:
+		draw_circle(Vector2.ZERO, RADIUS + 6.0, Color(1.0, 0.82, 0.35, 0.35))
 	draw_circle(Vector2.ZERO, RADIUS, Color.WHITE)

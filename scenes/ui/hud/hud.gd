@@ -25,12 +25,15 @@ const ELEMENT_COLORS: Dictionary = {
 @onready var _xp_bar: ProgressBar = %XpBar
 @onready var _status_label: Label = %StatusLabel
 @onready var _gods_label: Label = %GodsLabel
+@onready var _synergy_label: Label = %SynergyLabel
 
 var _level_system: Node
 var _gate_timer: Node
 var _god_system: Node
 var _hp: float = 0.0
 var _max_hp: float = 0.0
+var _synergy_name: String = ""
+var _jakdu: Node
 
 
 func _ready() -> void:
@@ -38,9 +41,10 @@ func _ready() -> void:
 	_gate_timer = _resolve(gate_timer_path, "GateTimer")
 	_god_system = _resolve(god_system_path, "GodSystem")
 	EventBus.player_health_changed.connect(_on_health_changed)
-	EventBus.player_leveled_up.connect(_on_leveled_up)
-	# 몸주가 첫 신이다. 여기서 갱신하지 않으면 런 내내 "모신 신 없음"으로 시작한다.
-	EventBus.momju_chosen.connect(_on_momju_chosen)
+	# player_leveled_up 은 신을 고르기 "전"에 오므로 목록이 한 픽씩 밀린다. 실제로 모신 순간을 본다.
+	EventBus.god_served.connect(_on_god_served)
+	EventBus.synergy_formed.connect(_on_synergy_formed)
+	_synergy_label.hide()
 
 
 func _resolve(path: NodePath, label: String) -> Node:
@@ -68,15 +72,44 @@ func _process(_delta: float) -> void:
 	_status_label.text = "Lv %d    HP %d/%d    처치 %d" % [
 		level, int(ceilf(_hp)), int(_max_hp), RunManager.kills
 	]
+	_update_synergy_label()
 
 
-## 신 목록은 몸주 확정·레벨업 때만 바뀌므로 매 프레임 다시 만들지 않는다.
-func _on_leveled_up(_new_level: int) -> void:
-	_refresh_gods.call_deferred()
+## 신 목록은 신을 모실 때만 바뀌므로 매 프레임 다시 만들지 않는다.
+func _on_god_served(_god: GodData) -> void:
+	_refresh_gods()
 
 
-func _on_momju_chosen(_god: GodData) -> void:
-	_refresh_gods.call_deferred()
+## 합이 열리는 순간은 이 게임에서 가장 기분 좋은 지점이다. 조용히 지나가면 안 된다.
+func _on_synergy_formed(synergy: SynergyData) -> void:
+	_synergy_name = synergy.display_name
+	_synergy_label.show()
+
+
+## 작두타기 게이지. 언제 터지는지 보이지 않으면 기다릴 수가 없다.
+## 플레이어 내부 노드를 직접 읽는 대신 그룹으로 한 번만 찾아 둔다.
+func _resolve_jakdu() -> Node:
+	if _jakdu != null and is_instance_valid(_jakdu):
+		return _jakdu
+	var player := get_tree().get_first_node_in_group(&"player")
+	_jakdu = player.get_node_or_null(^"%JakduWeapon") if player != null else null
+	return _jakdu
+
+
+func _update_synergy_label() -> void:
+	if not _synergy_label.visible:
+		return
+	var jakdu := _resolve_jakdu()
+	if jakdu == null or not jakdu.has_method(&"get_taegi_ratio") or not jakdu.is_taegi_unlocked():
+		_synergy_label.text = "합 — %s" % _synergy_name
+		return
+	var ratio: float = jakdu.get_taegi_ratio()
+	if jakdu.is_taegi_active():
+		_synergy_label.text = "합 — %s   작두타기! %d%%" % [_synergy_name, int(ratio * 100.0)]
+		_synergy_label.add_theme_color_override(&"font_color", Color(1.0, 0.86, 0.4))
+	else:
+		_synergy_label.text = "합 — %s   기세 %d%%" % [_synergy_name, int(ratio * 100.0)]
+		_synergy_label.add_theme_color_override(&"font_color", Color(0.72, 0.64, 0.42))
 
 
 func _refresh_gods() -> void:

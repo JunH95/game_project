@@ -18,6 +18,7 @@ momju_passive = &"jakdu_taegi_gauge"
 stat_mods = {
 "cooldown_pct": -7.0,
 "eonwoldo_count": 0.34,
-"move_speed_pct": 5.0
+"move_speed_pct": 5.0,
+"taegi_charge_pct": 10.0
 }
 description = "장군신. 손이 빨라지고 발이 가벼워진다. 모실수록 언월도의 날이 늘어난다."

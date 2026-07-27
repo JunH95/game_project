@@ -12,6 +12,11 @@ signal xp_collected(amount: int)
 signal wonhon_collected(amount: int)
 signal player_leveled_up(new_level: int)
 signal momju_chosen(god: GodData)
+## 신을 실제로 모신 순간. player_leveled_up 은 "고르기 전"에 오므로 능력치·합 판정은 이걸 봐야 한다.
+signal god_served(god: GodData)
+signal synergy_formed(synergy: SynergyData)
+## 작두타기처럼 잠시 켜졌다 꺼지는 상태. UI·연출이 구독한다.
+signal taegi_state_changed(active: bool)
 signal player_health_changed(current_hp: float, max_hp: float)
 signal player_died
 signal gate_cleared(gate_id: StringName)

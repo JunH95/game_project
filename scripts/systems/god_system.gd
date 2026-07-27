@@ -149,3 +149,4 @@ func serve(god: GodData) -> void:
 		return
 	_served[god.id] = get_level(god.id) + 1
 	RunManager.served_gods = _served.keys()
+	EventBus.god_served.emit(god)

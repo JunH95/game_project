@@ -27,15 +27,33 @@ const SWING_VISUAL_TIME: float = 0.15
 const MIN_COOLDOWN: float = 0.15
 const MAX_ARC: float = 360.0
 
+## `[고증]` 작두타기 — 합 "장군 강림"(작도대신 × 최영장군)이 열어 준다(design.md 3-5).
+## 기세가 차오르면 장군신이 내려 잠시 사방을 벤다. 수치는 `[제안]`.
+const TAEGI_GAUGE_MAX: float = 100.0
+## 한 번 휘둘러 맞힌 적 수에 비례해 찬다. 스윙당 인정 상한을 두지 않으면 무리 한가운데서 즉시 찬다.
+const TAEGI_GAIN_PER_HIT: float = 1.0
+const TAEGI_MAX_HITS_COUNTED: int = 4
+const TAEGI_DURATION: float = 6.0
+## 강림 중 보정 — 사방(360°)을 더 세게, 더 자주 벤다.
+const TAEGI_DAMAGE_MULT: float = 1.8
+const TAEGI_COOLDOWN_MULT: float = 0.6
+const TAEGI_KNOCKBACK_MULT: float = 1.5
+
 ## 신내림 수정자를 물어볼 GodSystem. 없으면 기본 수치로 동작한다.
 var god_system: Node
+## 합 성립을 물어볼 SynergySystem. 없으면 작두타기는 열리지 않는다.
+var synergy_system: Node
 
+var _gauge: float = 0.0
+var _taegi_left: float = 0.0
 var _cooldown_left: float = 0.0
 var _swing_visual_left: float = 0.0
 var _swing_direction: Vector2 = Vector2.RIGHT
 
 
 func _process(delta: float) -> void:
+	_tick_taegi(delta)
+
 	if _swing_visual_left > 0.0:
 		_swing_visual_left -= delta
 		queue_redraw()
@@ -72,6 +90,43 @@ func _find_nearest_enemy() -> Node2D:
 	return nearest
 
 
+## 작두타기가 열려 있는지(합 "장군 강림").
+func is_taegi_unlocked() -> bool:
+	return synergy_system != null and synergy_system.is_active(&"jakdu_taegi")
+
+
+func is_taegi_active() -> bool:
+	return _taegi_left > 0.0
+
+
+## HUD 표시용 0.0~1.0.
+func get_taegi_ratio() -> float:
+	if is_taegi_active():
+		return _taegi_left / TAEGI_DURATION
+	return _gauge / TAEGI_GAUGE_MAX
+
+
+func _tick_taegi(delta: float) -> void:
+	if _taegi_left <= 0.0:
+		return
+	_taegi_left -= delta
+	if _taegi_left <= 0.0:
+		_taegi_left = 0.0
+		EventBus.taegi_state_changed.emit(false)
+
+
+## 맞힌 적 수만큼 기세가 오른다. 충전 속도는 최영장군을 모실수록 빨라진다(taegi_charge_pct).
+func _charge_taegi(hit_count: int) -> void:
+	if not is_taegi_unlocked() or is_taegi_active() or hit_count <= 0:
+		return
+	var counted := mini(hit_count, TAEGI_MAX_HITS_COUNTED)
+	_gauge += TAEGI_GAIN_PER_HIT * float(counted) * _god_mult(&"taegi_charge_pct")
+	if _gauge >= TAEGI_GAUGE_MAX:
+		_gauge = 0.0
+		_taegi_left = TAEGI_DURATION
+		EventBus.taegi_state_changed.emit(true)
+
+
 ## 부채꼴 안의 모든 적을 타격한다.
 func _swing(direction: Vector2) -> void:
 	var reach := _get_range()
@@ -82,6 +137,7 @@ func _swing(direction: Vector2) -> void:
 	var damage := _get_base_damage()
 	var knockback := _get_knockback()
 
+	var hits := 0
 	for node in get_tree().get_nodes_in_group(&"enemy"):
 		var enemy := node as Node2D
 		if enemy == null or not is_instance_valid(enemy):
@@ -93,6 +149,8 @@ func _swing(direction: Vector2) -> void:
 		if not offset.is_zero_approx() and direction.dot(offset.normalized()) < half_arc_cos:
 			continue
 		_hit(enemy, damage, knockback, offset)
+		hits += 1
+	_charge_taegi(hits)
 
 
 func _hit(enemy: Node2D, damage: float, knockback: float, offset: Vector2) -> void:
@@ -119,12 +177,16 @@ func _god_add(key: StringName) -> float:
 
 
 ## 신 수정자·오행·치명은 DamageCalc 가 대상별로 처리한다. 여기서는 무기 자체의 기본값만 준다.
+## 강림 중에는 위력이 실린다.
 func _get_base_damage() -> float:
-	return data.base_damage if data != null else FALLBACK_DAMAGE
+	var base := data.base_damage if data != null else FALLBACK_DAMAGE
+	return base * TAEGI_DAMAGE_MULT if is_taegi_active() else base
 
 
 func _get_cooldown() -> float:
 	var base := data.cooldown if data != null else FALLBACK_COOLDOWN
+	if is_taegi_active():
+		base *= TAEGI_COOLDOWN_MULT
 	return maxf(MIN_COOLDOWN, base * _god_mult(&"cooldown_pct"))
 
 
@@ -132,13 +194,18 @@ func _get_range() -> float:
 	return data.attack_range if data != null else FALLBACK_RANGE
 
 
+## 강림 중에는 사방을 벤다 — 작두를 타는 동안은 겨눌 방향이 따로 없다.
 func _get_arc_degrees() -> float:
+	if is_taegi_active():
+		return MAX_ARC
 	var base := data.arc_degrees if data != null else FALLBACK_ARC
 	return minf(MAX_ARC, base + _god_add(&"jakdu_arc_deg"))
 
 
 func _get_knockback() -> float:
 	var base := data.knockback if data != null else FALLBACK_KNOCKBACK
+	if is_taegi_active():
+		base *= TAEGI_KNOCKBACK_MULT
 	return base * _god_mult(&"knockback_pct")
 
 
@@ -159,7 +226,9 @@ func _draw() -> void:
 		var t := float(i) / float(SEGMENTS)
 		points.append(Vector2.from_angle(base_angle - half_arc + half_arc * 2.0 * t) * reach)
 
-	draw_colored_polygon(points, Color(1.0, 1.0, 1.0, alpha * 0.30))
+	# 강림 중에는 금색 — 지금이 그 순간이라는 걸 한눈에 알아야 한다.
+	var tint := Color(1.0, 0.82, 0.35) if is_taegi_active() else Color.WHITE
+	draw_colored_polygon(points, Color(tint.r, tint.g, tint.b, alpha * 0.30))
 	# 바깥 테두리는 좀 더 진하게 — 사거리 끝이 어디인지 읽히게.
 	draw_arc(Vector2.ZERO, reach, base_angle - half_arc, base_angle + half_arc, SEGMENTS,
-		Color(1.0, 1.0, 1.0, alpha * 0.85), 2.0)
+		Color(tint.r, tint.g, tint.b, alpha * 0.85), 2.0)

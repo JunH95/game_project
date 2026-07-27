@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://dexox5mrtlgpm"]
+[gd_scene load_steps=20 format=3 uid="uid://dexox5mrtlgpm"]
 
 [ext_resource type="Script" path="res://scenes/background.gd" id="1_bg"]
 [ext_resource type="PackedScene" path="res://scenes/actors/player/player.tscn" id="2_player"]
@@ -19,6 +19,7 @@
 [ext_resource type="Resource" path="res://data/enemies/tank.tres" id="17_tank"]
 [ext_resource type="PackedScene" path="res://scenes/ui/pause/pause_menu.tscn" id="18_pause"]
 [ext_resource type="PackedScene" path="res://scenes/ui/momju_select/momju_select.tscn" id="19_momju"]
+[ext_resource type="Script" path="res://scripts/systems/synergy_system.gd" id="20_synergy"]
 
 [node name="Main" type="Node2D"]
 
@@ -35,8 +36,14 @@ script = ExtResource("1_bg")
 unique_name_in_owner = true
 script = ExtResource("10_god")
 
+[node name="SynergySystem" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("20_synergy")
+god_system_path = NodePath("../GodSystem")
+
 [node name="Player" parent="." instance=ExtResource("2_player")]
 god_system_path = NodePath("../GodSystem")
+synergy_system_path = NodePath("../SynergySystem")
 
 [node name="SpawnDirector" type="Node2D" parent="."]
 script = ExtResource("3_spawn")
