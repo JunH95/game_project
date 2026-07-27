@@ -247,7 +247,7 @@
           <span class="chip">규모 <b>1인 개발</b></span>
         </div>
         <div class="cover-meta">
-          보고: 개발 &rarr; 팀장 &nbsp;·&nbsp; 문서 상태: <strong>M1·M2 완료 · M3 진행 중</strong>(무기 3종·몸주 선택 완료 / 남은 것: 데미지 공식·합·작두타기) &nbsp;·&nbsp; 2026-07-22<br>
+          보고: 개발 &rarr; 팀장 &nbsp;·&nbsp; 문서 상태: <strong>M1·M2 완료 · M3 진행 중</strong>(무기 3종·몸주 선택·데미지 공식 완료 / 남은 것: 합·작두타기) &nbsp;·&nbsp; 2026-07-22<br>
           정본 지도 &mdash; 비전·서사: <code>vision.md</code> &nbsp;/&nbsp; 수치·스키마: <code>design.md</code> &nbsp;/&nbsp; 고증: <code>lore.md</code> &nbsp;/&nbsp; 구조: <code>architecture.md</code> &nbsp;·&nbsp; 이 문서는 그 종합 뷰(파생물)
         </div>
       </div>
@@ -501,9 +501,9 @@
       <p class="col muted reveal"><strong>시작 무기는 몸주가 준다</strong>(§5.1) &mdash; 몸주 3종 ↔ 무기 3종이 1:1 대응. 추가 무기는 신이 부여한다. 동시 보유 상한 3. <strong>무기 레벨은 없다</strong> &mdash; 성장은 오직 신을 통해서(그래서 무기마다 그 축을 건드리는 신을 최소 3 보장한다).</p>
 
       <div class="callout reveal">
-        <span class="lb">데미지 공식 &amp; 치명</span>
+        <span class="lb">데미지 공식 &amp; 치명 <span class="tag t-gak" style="margin-left:.4rem">구현 완료 M3</span></span>
         <code>최종 데미지 = 기본 × (1 + 신 데미지% 합계/100) × 오행 배율 × (치명 시 배율)</code><br>
-        신 효과를 곱연산으로 쌓으면 신을 모을수록 폭발하므로 <strong>가산 후 1회 곱</strong>으로 고정한다. <strong>치명</strong>: 기본 확률 5% · 배율 ×2.0(신이 올린다). 정본 <code>design.md §2-2</code>.
+        신 효과를 곱연산으로 쌓으면 신을 모을수록 폭발하므로 <strong>가산 후 1회 곱</strong>으로 고정한다. <strong>치명</strong>: 기본 확률 5% · 배율 ×2.0(월광보살이 올린다) &mdash; <strong>타격마다 개별 판정</strong>이라 부적 7발도 발마다 굴린다. 무기 셋이 각자 굴리면 어긋나므로 계산은 <code>DamageCalc</code> 한 곳을 거친다. 정본 <code>design.md §2-2</code>.
       </div>
 
       <div class="grid g3 reveal">
@@ -907,7 +907,7 @@
         <div class="node done"><div class="lab">M0 · 초석 <span class="tag t-go" style="margin-left:.3rem">완료</span></div><div class="muted">폴더·규칙·<code>design.md</code>·인풋맵·충돌 레이어·git·부트스트랩 씬 + autoload 스텁. 게임플레이 없음.</div></div>
         <div class="node done"><div class="lab">M1 · 코어 루프 슬라이스 <span class="tag t-go" style="margin-left:.3rem">완료</span></div><div class="muted">8방향 이동 + 작두 자동공격 + 추격 적 스폰/처치 + XP 젬/레벨업 + 신 3택1 + 5분 관문·결과 화면. 도형 플레이스홀더.</div></div>
         <div class="node done"><div class="lab">M2 · 무기 확장 + 풀링 <span class="tag t-go" style="margin-left:.3rem">완료</span></div><div class="muted"><code>ObjectPool</code> · 부적(유도) · <strong>언월도(궤도)</strong> · 적 3종 · 정식 HUD · 일시정지.</div></div>
-        <div class="node now"><div class="lab">M3 · 신내림 정식 <span class="now-badge">현재</span></div><div class="muted">완료: 몸주 선택 화면, 몸주 3 ↔ 무기 3 배선. 남은 것: 데미지 공식·치명, 신 로스터 확장, 기본 &lsquo;합&rsquo;(<code>SynergyData</code>), 작두타기.</div></div>
+        <div class="node now"><div class="lab">M3 · 신내림 정식 <span class="now-badge">현재</span></div><div class="muted">완료: 몸주 선택 화면, 몸주 3 ↔ 무기 3 배선, <strong>데미지 공식·치명·오행 배율</strong>. 남은 것: 신 로스터 확장, 기본 &lsquo;합&rsquo;(<code>SynergyData</code>), 작두타기.</div></div>
         <div class="node"><div class="lab">M4 · 신당 메타 루프</div><div class="muted">원혼 재화, 세이브 저장/로드, 타이틀&rarr;신당&rarr;런&rarr;정산 사이클.</div></div>
         <div class="node"><div class="lab">M5 · 풀 관문 1개 (화탕)</div><div class="muted">WaveTable 램프, 관문별 적 세트, 관문 기믹, 오행 상성, 저승사자 미니보스 + 관문 보스, 클리어 흐름.</div></div>
         <div class="node"><div class="lab">M6 · 아트 · 비주얼 완성 패스 <span class="tag t-gak" style="margin-left:.3rem">격상</span></div><div class="muted">플레이스홀더 &rarr; 무신도 톤 아트 교체 + 셰이더·파티클. 히트스톱·스크린셰이크·데미지 숫자·히트 플래시·넉백 튜닝. <strong>화려함을 여기 몰아넣는다.</strong></div></div>
