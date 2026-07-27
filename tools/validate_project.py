@@ -102,13 +102,14 @@ def check_resource_refs(path: str, text: str) -> None:
     defined: set[str] = set()
     for m in re.finditer(r"\[ext_resource ([^\]]*)\]", text):
         attrs = m.group(1)
-        idm = re.search(r'id="([^"]+)"', attrs)
+        # \b 가 없으면 uid="uid://..." 안의 id= 를 잡아 UID 를 진짜 id 로 착각한다.
+        idm = re.search(r'\bid="([^"]+)"', attrs)
         pathm = re.search(r'path="(res://[^"]+)"', attrs)
         if idm:
             defined.add(idm.group(1))
         if pathm and not os.path.exists(res_to_path(pathm.group(1))):
             errors.append(f"{rel(path)}: ext_resource 경로 없음 -> {pathm.group(1)}")
-    for m in re.finditer(r'\[sub_resource [^\]]*id="([^"]+)"', text):
+    for m in re.finditer(r'\[sub_resource [^\]]*\bid="([^"]+)"', text):
         defined.add(m.group(1))
     for m in re.finditer(r'(?:ExtResource|SubResource)\("([^"]+)"\)', text):
         if m.group(1) not in defined:
@@ -121,10 +122,19 @@ def check_tres_properties(path: str, text: str) -> None:
     header = re.search(r"\[gd_resource ([^\]]*)\]", text)
     if not header or 'script_class="' not in header.group(1):
         return
-    script_ref = re.search(r'\[ext_resource type="Script" path="(res://[^"]+)"', text)
-    if not script_ref:
+    # 속성 순서에 기대면 안 된다 — Godot 이 다시 저장하면 type 과 path 사이에 uid 가 끼어든다.
+    script_ref = None
+    for m in re.finditer(r"\[ext_resource ([^\]]*)\]", text):
+        attrs = m.group(1)
+        if 'type="Script"' not in attrs:
+            continue
+        pathm = re.search(r'\bpath="(res://[^"]+)"', attrs)
+        if pathm:
+            script_ref = pathm.group(1)
+            break
+    if script_ref is None:
         return
-    gd_path = res_to_path(script_ref.group(1))
+    gd_path = res_to_path(script_ref)
     if not os.path.exists(gd_path):
         return
     props = exported_properties(gd_path)
