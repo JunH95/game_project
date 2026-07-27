@@ -392,7 +392,40 @@
         <span class="lb">동시에 모시는 규모</span>
         <strong>몸주 1 (캐릭터로 고정) + 모시는 신 최대 6 = 총 7신</strong>을 동시에 모신다. 몸주는 레벨업으로 뽑는 게 아니라 <strong>런 시작 때 캐릭터 선택</strong>으로 정해지고, 그 위에 6명을 레벨업으로 쌓아간다. (수치는 튜닝 대상.)
       </div>
-      <p class="col muted reveal">이렇게 나누면 <strong>캐릭터 다양성(몸주)과 런 다양성(모시는 신)이 두 축으로 분리</strong>된다. &ldquo;신을 여럿 모시되 중심은 하나&rdquo;라는 위계 구조 자체는 고증이고, 3택1·스택·최대 신 수는 게임 수치다.</p>
+      <p class="col muted reveal">이렇게 나누면 <strong>캐릭터 다양성(몸주)과 런 다양성(모시는 신)이 두 축으로 분리</strong>된다. &ldquo;신을 여럿 모시되 중심은 하나&rdquo;라는 위계 구조 자체는 고증이고, 3택1·스택·최대 신 수는 게임 수치다. <strong>몸주도 Lv1로 시작해 3택1 풀에 포함</strong>된다 &mdash; 몸주와의 인연이 깊어지는 것을 게임으로 표현하고, 동시에 &ldquo;내 무기를 강화하는 선택지가 하나도 안 뜨는&rdquo; 사고를 구조적으로 줄인다.</p>
+
+      <h4 class="reveal">몸주 ↔ 무기 1:1 대응</h4>
+      <p class="col muted reveal">몸주 3종이 <strong>각기 다른 무기</strong>로 시작한다. 같은 무기를 주는 몸주가 둘이면 캐릭터를 나눈 의미가 절반 죽는다.</p>
+      <div class="tbl-wrap reveal">
+        <table>
+          <thead><tr><th>몸주</th><th>오행</th><th>시작 무기</th><th>몸주 패시브</th></tr></thead>
+          <tbody>
+            <tr><td><strong>작도대신</strong></td><td class="val">金</td><td><strong>작두</strong> (부채꼴 즉발)</td><td>작두 damage +10%</td></tr>
+            <tr><td><strong>최영장군</strong></td><td class="val">金</td><td><strong>언월도</strong> (궤도 회전)</td><td>언월도 날 수 +1 · 작두타기 게이지</td></tr>
+            <tr><td><strong>칠성신</strong></td><td class="val">水</td><td><strong>부적</strong> (유도 투사체)</td><td>부적 발수 +1</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout reveal">
+        <span class="lb">몸주는 고르는 게 아니라 내려온다 <span class="tag t-go" style="margin-left:.4rem">고증</span></span>
+        실제 입무 절차는 <strong>무병 → 허주풀이 → 내림굿</strong>이다. 이 원형을 첫 경험에 그대로 쓴다 &mdash; <strong>첫 플레이(프롤로그)에서는 몸주를 고르지 않는다.</strong> 무병을 앓고 잡귀를 쫓아낸 뒤 내림굿에서 <strong>작도대신이 실린다</strong>(튜토리얼 겸 도입부). 이후는 장르 관례를 따라 <span class="tag t-gak">각색</span> 신당에서 원혼으로 새 내림굿을 치러 몸주를 해금하고, 매 런 시작 시 해금된 몸주 중 고른다. 첫 몸주가 작도대신인 이유: 작두가 이 게임의 얼굴이고, 나머지 몸주 해금이 신당의 첫 목표가 된다.
+      </div>
+
+      <h4 class="reveal">MVP 신 세트 <span class="tag t-gak">초안 수치</span></h4>
+      <div class="tbl-wrap reveal">
+        <table>
+          <caption>M1~M3에서 구현할 최소 세트 (정본 <code>design.md §3-4</code>) &mdash; 굵게 = 모든 무기에 적용되는 범용 수정자</caption>
+          <thead><tr><th>신</th><th>오행</th><th>몸주</th><th>모시는 신 효과 (레벨당)</th></tr></thead>
+          <tbody>
+            <tr><td><strong>작도대신</strong></td><td class="val">金</td><td>○ 기본</td><td>작두 damage +15%, arc +8°</td></tr>
+            <tr><td><strong>최영장군</strong></td><td class="val">金</td><td>○</td><td><strong>쿨다운 −7%</strong>, 언월도 날 수 +1(3레벨마다)</td></tr>
+            <tr><td><strong>칠성신</strong></td><td class="val">水</td><td>○</td><td>부적 damage +15%, 발수 +1(3레벨마다)</td></tr>
+            <tr><td>산신</td><td class="val">土</td><td>—</td><td>max HP +12%, <strong>넉백 +20%</strong></td></tr>
+            <tr><td>월광보살</td><td class="val">水</td><td>—</td><td><strong>치명률 +4%p</strong>, 이동속도 +8%</td></tr>
+          </tbody>
+        </table>
+      </div>
 
       <h4 class="reveal">신 로스터 &mdash; 문헌 확인된 신격만 <span class="tag t-go">이름·상징=고증</span> <span class="tag t-gak">효과=각색</span></h4>
       <div class="tbl-wrap reveal">
@@ -401,7 +434,7 @@
           <thead><tr><th>신</th><th>상징 (고증)</th><th>게임 효과 (각색)</th><th>비고</th></tr></thead>
           <tbody>
             <tr><td><strong>작도대신</strong></td><td>작두의 신격</td><td>작두 damage↑ · arc↑</td><td><strong>MVP · 기본 몸주</strong></td></tr>
-            <tr><td><strong>최영장군</strong></td><td>실존 무장의 신격화, 장군신 대표</td><td>공격속도↑ · 돌진 / <strong>작두타기 발동 조건</strong></td><td><strong>MVP</strong></td></tr>
+            <tr><td><strong>최영장군</strong></td><td>실존 무장의 신격화, 장군신 대표</td><td>언월도 · 쿨다운↑ / <strong>작두타기 발동 조건</strong></td><td><strong>MVP · 몸주</strong></td></tr>
             <tr><td><strong>산신</strong></td><td>산·지형 관장</td><td>방벽·지형, 호랑이 권속</td><td>MVP</td></tr>
             <tr><td><strong>칠성신</strong></td><td>북두칠성</td><td>부적 7발 다발, 수명/부활</td><td>MVP</td></tr>
             <tr><td>일광보살</td><td>해</td><td>낮 상태·광역</td><td>월광과 상호 배타</td></tr>
@@ -443,38 +476,75 @@
       <p class="col muted reveal">출시엔 <strong>몸주별 시그니처 합 소수</strong>로 기본을 잡고, <code>SynergyData</code>(<code>.tres</code>)로 데이터만 추가하면 합이 늘어나게 설계해 <strong>출시 후 대량 확장</strong>한다. 로스터가 커질수록 합도 늘어난다. (MVP 신 세트·합 정본 수치는 <code>design.md §3-4/3-5</code>.)</p>
 
       <!-- 5.3 무기 -->
-      <h3 class="reveal">5.3 무기 &mdash; 작두 &amp; 부적</h3>
+      <h3 class="reveal">5.3 무기 &mdash; 작두 · 부적 · 언월도</h3>
+      <div class="callout gold reveal">
+        <span class="lb">설계 원칙 &mdash; 무기는 DPS가 아니라 &lsquo;기하학&rsquo;으로 가른다</span>
+        무기끼리 &ldquo;누가 더 센가&rdquo;로 경쟁시키면 항상 하나가 사장된다(초기 설계의 부적이 그랬다 &mdash; 데미지도 낮고 쿨도 길어 작두의 완전한 하위호환이었다). 그래서 무기는 <strong>닿는 모양</strong>과 <strong>잘 잡는 대상</strong>으로 가른다. 셋 다 단일 표적 DPS는 비슷하게 두고, <strong>차이는 형태에서</strong> 낸다.
+      </div>
+      <div class="tbl-wrap reveal">
+        <table>
+          <thead><tr><th>무기</th><th>형태</th><th>잘 잡는 대상</th><th>약점</th><th>성장축</th></tr></thead>
+          <tbody>
+            <tr><td><strong>작두</strong></td><td>부채꼴 즉발</td><td><strong>뭉친 적</strong></td><td>사거리 밖은 못 건드림</td><td>arc(넓이) · 쿨</td></tr>
+            <tr><td><strong>부적</strong></td><td>유도 투사체</td><td><strong>흩어진 적 · 먼 적</strong></td><td>한 번에 소수</td><td>count(발수) · 관통</td></tr>
+            <tr><td><strong>언월도</strong></td><td>궤도 회전</td><td><strong>접근 차단(상시)</strong></td><td>반경 고정, 집중 불가</td><td>count(날 수) · 반경</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="col muted reveal"><strong>시작 무기는 몸주가 준다</strong>(§5.1) &mdash; 몸주 3종 ↔ 무기 3종이 1:1 대응. 추가 무기는 신이 부여한다. 동시 보유 상한 3. <strong>무기 레벨은 없다</strong> &mdash; 성장은 오직 신을 통해서(그래서 무기마다 그 축을 건드리는 신을 최소 3 보장한다).</p>
+
+      <div class="callout reveal">
+        <span class="lb">데미지 공식 &amp; 치명</span>
+        <code>최종 데미지 = 기본 × (1 + 신 데미지% 합계/100) × 오행 배율 × (치명 시 배율)</code><br>
+        신 효과를 곱연산으로 쌓으면 신을 모을수록 폭발하므로 <strong>가산 후 1회 곱</strong>으로 고정한다. <strong>치명</strong>: 기본 확률 5% · 배율 ×2.0(신이 올린다). 정본 <code>design.md §2-2</code>.
+      </div>
+
+      <div class="grid g3 reveal">
+        <div class="tbl-wrap" style="margin:0">
+          <table>
+            <caption>작두 (jakdu) &mdash; 부채꼴 즉발</caption>
+            <thead><tr><th>파라미터</th><th class="num">기본값</th></tr></thead>
+            <tbody>
+              <tr><td>damage</td><td class="num val">10</td></tr>
+              <tr><td>cooldown</td><td class="num val">0.8 s</td></tr>
+              <tr><td>arc</td><td class="num val">100°</td></tr>
+              <tr><td>attack_range</td><td class="num val">90 px</td></tr>
+              <tr><td>knockback</td><td class="num val">120</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-wrap" style="margin:0">
+          <table>
+            <caption>부적 (bujeok) &mdash; 유도 투사체</caption>
+            <thead><tr><th>파라미터</th><th class="num">기본값</th></tr></thead>
+            <tbody>
+              <tr><td>damage</td><td class="num val">14</td></tr>
+              <tr><td>cooldown</td><td class="num val">1.2 s</td></tr>
+              <tr><td>count</td><td class="num val">1 → 7</td></tr>
+              <tr><td>pierce</td><td class="num val">1</td></tr>
+              <tr><td>speed / homing</td><td class="num val">320 / 4</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-wrap" style="margin:0">
+          <table>
+            <caption>언월도 (eonwoldo) &mdash; 궤도 회전 <span class="tag t-gak">신설</span></caption>
+            <thead><tr><th>파라미터</th><th class="num">기본값</th></tr></thead>
+            <tbody>
+              <tr><td>damage</td><td class="num val">8</td></tr>
+              <tr><td>궤도 반경</td><td class="num val">70 px</td></tr>
+              <tr><td>회전 속도</td><td class="num val">2.0 rad/s</td></tr>
+              <tr><td>날 수</td><td class="num val">2 → 6</td></tr>
+              <tr><td>재타격 쿨</td><td class="num val">0.5 s</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <p class="col muted reveal">부적 damage를 작두보다 <strong>높게</strong> 둔 이유: 한 번에 소수만 때리는 무기가 발당 위력까지 낮으면 존재 이유가 없다(단일 표적 DPS 작두 12.5 / 부적 11.7로 비슷). 언월도는 DPS가 가장 낮지만 <strong>공백이 없고 전방위</strong>라, 뒤에서 붙는 적을 신경 쓰지 않아도 되는 값을 지불받는다. <span class="tag t-go">고증</span> 언월도는 장군신 상산거리 무복의 지물로 기록돼 있다(궤도 회전이라는 형태는 각색).</p>
+
       <div class="callout reveal">
         <span class="lb">작두타기 = 조건부 발동 <span class="tag t-go" style="margin-left:.4rem">프로젝트 최대 수확</span></span>
         고증상 작두타기는 상설 절차가 아니라 <strong>&ldquo;장군신이 실제로 강림했을 때만&rdquo;</strong> 발동된다. 그래서 무기를 2단으로 나눈다: <strong>평상시 = 작두 근접 부채꼴 베기</strong> / <strong>장군신 계열(최영장군)을 모신 상태에서 조건 충족 시 = 작두타기 발동</strong>(궁극기, M3에서 정식 반영). 주무기와 신내림이 고증상 직결되는 지점.
-      </div>
-      <div class="grid g2 reveal">
-        <div class="tbl-wrap" style="margin:0">
-          <table>
-            <caption>작두 (jakdu) &mdash; 근접, 자동 부채꼴 베기</caption>
-            <thead><tr><th>파라미터</th><th class="num">기본값</th><th>레벨 스케일</th></tr></thead>
-            <tbody>
-              <tr><td>damage</td><td class="num val">10</td><td>레벨당 +3</td></tr>
-              <tr><td>cooldown</td><td class="num val">0.8 s</td><td>3레벨마다 −0.1s</td></tr>
-              <tr><td>arc</td><td class="num val">100°</td><td>3레벨마다 +20°</td></tr>
-              <tr><td>range</td><td class="num val">90 px</td><td>—</td></tr>
-              <tr><td>knockback</td><td class="num val">120</td><td>—</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="tbl-wrap" style="margin:0">
-          <table>
-            <caption>부적 (bujeok) &mdash; 원거리 유도 · 칠성신 7발(북두칠성)</caption>
-            <thead><tr><th>파라미터</th><th class="num">기본값</th><th>레벨 스케일</th></tr></thead>
-            <tbody>
-              <tr><td>damage</td><td class="num val">7</td><td>레벨당 +2</td></tr>
-              <tr><td>cooldown</td><td class="num val">1.2 s</td><td>—</td></tr>
-              <tr><td>proj. speed</td><td class="num val">320</td><td>—</td></tr>
-              <tr><td>homing</td><td class="num val">4 rad/s</td><td>—</td></tr>
-              <tr><td>pierce / count</td><td class="num val">1 / 1</td><td>pierce 2Lv당 +1, count 고Lv +1</td></tr>
-            </tbody>
-          </table>
-        </div>
       </div>
 
       <!-- 5.4 적 -->
@@ -637,8 +707,8 @@
         <table>
           <thead><tr><th></th><th>무엇</th><th>시점</th></tr></thead>
           <tbody>
-            <tr><td><strong>완결 = 서사</strong></td><td>시나리오 · 시왕 10관문 여정 · 엔딩</td><td>출시에 완성</td></tr>
-            <tr><td><strong>확장 = 폭</strong></td><td>신 리스트 · 무기 · 하드/무한 · 추가 몸주 · 합</td><td>출시 후 무료 업데이트</td></tr>
+            <tr><td><strong>완결 = 서사</strong></td><td>시나리오 · 시왕 10관문 여정 · 엔딩 · <strong>몸주 3 × 무기 3</strong>(핵심 플레이 축)</td><td>출시에 완성</td></tr>
+            <tr><td><strong>확장 = 폭</strong></td><td>추가 신 · 추가 무기/몸주 · 하드/무한 · 합 대량 확장</td><td>출시 후 무료 업데이트</td></tr>
           </tbody>
         </table>
       </div>
@@ -648,22 +718,26 @@
           <div class="stats" style="grid-template-columns:repeat(2,1fr); margin:.6rem 0 0">
             <div class="stat"><div class="k">관문</div><div class="v">10</div></div>
             <div class="stat"><div class="k">최종보스</div><div class="v">1</div></div>
-            <div class="stat"><div class="k">무기</div><div class="v">2</div></div>
+            <div class="stat"><div class="k">몸주</div><div class="v">3</div></div>
+            <div class="stat"><div class="k">무기</div><div class="v">3</div></div>
             <div class="stat"><div class="k">코어 신</div><div class="v">8</div></div>
             <div class="stat"><div class="k">기본 합</div><div class="v">4<span class="u">+</span></div></div>
-            <div class="stat"><div class="k">엔딩</div><div class="v">1</div></div>
           </div>
-          <p class="muted" style="margin:1rem 0 0">+ 관문별 미니보스·보스·기믹·적 · 신당(해금/강화) · 타이틀+설정+세이브.</p>
+          <p class="muted" style="margin:1rem 0 0">+ 엔딩 · 관문별 미니보스·보스·기믹·적 · 신당(해금/강화) · 타이틀+설정+세이브.</p>
         </div>
         <div class="card reveal">
           <h4 style="margin-top:0">출시 후 확장 (폭)</h4>
           <ul class="clean" style="margin-bottom:0">
-            <li>추가 신 · 무기 · 캐릭터(몸주)</li>
+            <li>추가 신 · 추가 무기 · 추가 몸주</li>
             <li>&lsquo;합&rsquo; 대량 확장 (<code>SynergyData</code>)</li>
             <li>하드 · 무한 모드</li>
           </ul>
-          <p class="muted" style="margin:.8rem 0 0; font-size:.86rem">관문·서사는 출시에 완결 &mdash; 확장이 아니다.</p>
+          <p class="muted" style="margin:.8rem 0 0; font-size:.86rem">관문·서사와 <strong>몸주 3 × 무기 3</strong>은 출시에 완결 &mdash; 확장이 아니다.</p>
         </div>
+      </div>
+      <div class="callout gold reveal">
+        <span class="lb">스코프 원칙</span>
+        <strong>출시 시점 완성도 우선 &mdash; 업데이트로 미루지 않는다.</strong> 무기가 2종이면 몸주 3 중 둘이 같은 무기로 시작해 캐릭터를 나눈 의미가 절반 죽는다. 그래서 언월도를 더해 <strong>몸주 3 ↔ 무기 3</strong>을 출시 범위에 넣었다. 폭을 늘리는 건 나중에도 되지만, <strong>핵심 축이 비어 있는 건 나중에 고칠 수 없다.</strong>
       </div>
     </div>
   </section>
