@@ -124,6 +124,17 @@ static func draw_mudang(canvas: CanvasItem, r: float, bob: float, taegi: bool) -
 	canvas.draw_circle(Vector2(0.0, -r * 1.02 + lift), r * 0.16, GEUMBAK)
 
 
+## 무구를 쥔 손의 위치(몸 로컬). 지전이 여기 매달리므로 **그리기와 천이 같은 값을 봐야 한다** —
+## 각자 계산하면 손과 종이 술이 따로 논다. draw_shaman_body 와 인자가 같다.
+static func shaman_hand(r: float, bob: float, facing: float, swing: float) -> Vector2:
+	var lift := -bob * r * 0.08
+	var dir := Vector2.from_angle(facing)
+	var lean := dir * (r * 0.26 * swing)
+	var side := 1.0 if dir.x >= 0.0 else -1.0
+	var shoulder := Vector2(r * 0.42 * side, -r * 0.2 + lift) + lean
+	return shoulder + dir * (r * (0.62 + swing * 0.85))
+
+
 ## 무당의 몸만. 무복은 ClothBody 가 물리로 그리므로 여기서는 그 위에 얹히는 것만 그린다.
 ## 천까지 여기서 그리면 도형과 물리가 겹쳐 두 벌을 입은 것처럼 보인다.
 ##
@@ -154,8 +165,8 @@ static func draw_shaman_body(canvas: CanvasItem, r: float, bob: float, taegi: bo
 	var shoulder_off := Vector2(-r * 0.42 * side, -r * 0.2 + lift) + lean * 0.4
 
 	# 뒷팔 먼저 — 몸 뒤에 깔려야 앞팔이 위로 읽힌다. 앞팔과 반대로 움직여 균형을 잡는다.
-	canvas.draw_line(shoulder_off, shoulder_off - dir * (r * (0.34 + swing * 0.30)),
-		Color(0.96, 0.91, 0.83), r * 0.17)
+	canvas.draw_line(shoulder_off, shoulder_off - dir * (r * (0.40 + swing * 0.30)),
+		Color(0.96, 0.91, 0.83), r * 0.20)
 
 	# 어깨 — 무복 위로 드러나는 부분만.
 	canvas.draw_line(Vector2(-r * 0.5, -r * 0.26 + lift) + lean,
@@ -173,10 +184,10 @@ static func draw_shaman_body(canvas: CanvasItem, r: float, bob: float, taegi: bo
 	]), Color(0.93, 0.94, 0.97))
 
 	# 앞팔 — 무구를 쥔 손. 여기가 모션의 주역이라 마지막에 그려 맨 위로 올린다.
-	var hand := shoulder_main + dir * (r * (0.55 + swing * 0.85))
-	canvas.draw_line(shoulder_main, hand, Color(0.96, 0.91, 0.83), r * 0.19)
+	var hand := shaman_hand(r, bob, facing, swing)
+	canvas.draw_line(shoulder_main, hand, Color(0.96, 0.91, 0.83), r * 0.23)
 	# 손. 무기가 어디서 나가는지 한 점으로 찍어 준다.
-	canvas.draw_circle(hand, r * 0.13, Color(0.96, 0.91, 0.83))
+	canvas.draw_circle(hand, r * 0.15, Color(0.96, 0.91, 0.83))
 	# 내지르는 순간에만 손끝에 잔광. 언제 터졌는지가 눈에 들어와야 한다(0-2 읽히는 설계).
 	if swing > 0.25:
 		var glow := GEUMBAK if taegi else HOBUN

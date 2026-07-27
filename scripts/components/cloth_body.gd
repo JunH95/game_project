@@ -51,8 +51,8 @@ class Strand:
 @export var cloth_weight: float = 1.0
 ## 치마 갈래 수. 많을수록 넓게 퍼진다.
 @export var rib_count: int = 7
-## 갈래 하나의 마디 길이(px).
-@export var segment_length: float = 9.0
+## 갈래 하나의 마디 길이(px). 치마는 이것의 8배까지 자라므로 몸(약 32px)과의 비례를 본다.
+@export var segment_length: float = 2.6
 ## 옆으로 벌어지려는 힘. 0 이면 치마가 다리처럼 붙는다.
 @export var spread: float = 1.0
 
@@ -80,6 +80,10 @@ func _ready() -> void:
 
 
 ## 몸주가 바뀌거나 신을 더 모시면 다시 짠다. 갈래 수·길이가 달라지기 때문이다.
+##
+## `[치수 규약]` 여기 길이는 **플레이어 몸(RADIUS 12, 고깔부터 발까지 약 32px)에 맞춘 픽셀**이다.
+## 처음 값은 몸의 2~3배여서 치마가 화면을 덮고 몸이 그 안에 묻혔다 — 천이 주역이 되면
+## 팔·고깔 같은 실루엣이 안 읽힌다. 새 몸주를 넣을 때 이 비례를 넘지 않는지 본다.
 func rebuild() -> void:
 	var seg := segment_length / maxf(0.2, cloth_weight)
 	var length := int(round(8.0 * _growth))
@@ -88,21 +92,22 @@ func rebuild() -> void:
 	for i in rib_count:
 		var t := 0.5 if rib_count <= 1 else float(i) / float(rib_count - 1)
 		_skirt.append(Strand.new(length, seg, (t - 0.5) * 2.0 * spread,
-			Vector2((t - 0.5) * 15.0, 0.0)))
+			Vector2((t - 0.5) * 9.0, 0.0)))
 
 	_sleeves.clear()
 	for side in [-1.0, 1.0]:
-		_sleeves.append(Strand.new(6, seg, side * spread, Vector2(side * 17.0, -14.0)))
+		_sleeves.append(Strand.new(5, seg, side * spread, Vector2(side * 8.0, -5.0)))
 
 	# 지전(紙錢) — 무구에 매다는 흰 종이 술. 이 하나가 무기를 무구(巫具)로 만든다.
 	_jijeon.clear()
 	for i in 5:
-		_jijeon.append(Strand.new(4, 5.5, (float(i) - 2.0) * 0.5, Vector2.ZERO, true))
+		_jijeon.append(Strand.new(4, 2.0, (float(i) - 2.0) * 0.5, Vector2.ZERO, true))
 
-	_sash = Strand.new(int(round(13.0 * _growth)), 8.5, 0.0, Vector2(-4.0, 2.0))
+	# 홍띠는 가장 길고 밝아 시선을 끄는 주역이지만, 몸보다 길면 붉은 막대로만 보인다.
+	_sash = Strand.new(int(round(10.0 * _growth)), seg * 0.95, 0.0, Vector2(-2.0, 1.0))
 	# 댕기 — 버려진 일곱째 공주. 땋은 머리가 있어야 젊은 여성으로 읽힌다.
-	_braid = Strand.new(9, 7.5, 0.0, Vector2(0.0, -20.0))
-	_banner = Strand.new(10, 9.0, 0.0, Vector2(-6.0, -14.0))
+	_braid = Strand.new(8, 2.3, 0.0, Vector2(0.0, -9.0))
+	_banner = Strand.new(9, 2.8, 0.0, Vector2(-3.0, -6.0))
 
 	_all.clear()
 	_all.append_array(_skirt)

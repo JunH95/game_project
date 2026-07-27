@@ -9,9 +9,6 @@ const RADIUS: float = 12.0
 const BOB_SPEED: float = 11.0
 const BOB_SETTLE: float = 8.0
 
-## 무구를 쥔 손의 위치(몸 기준). 지전이 여기 매달려 흔들린다.
-const GRIP_ANGLE: float = 1.15
-const GRIP_DISTANCE: float = 18.0
 const FACE_TURN_RATE: float = 9.0
 
 ## 휘두름 모션. 예비(뒤로 감음) → 타격(내지름) → 복귀 세 마디로 나눈다.
@@ -224,10 +221,11 @@ func _physics_process(delta: float) -> void:
 		# 휘두르는 동안에는 걷는 쪽으로 몸을 돌리지 않는다 — 벤 방향을 보고 있어야 한다.
 		# 즉시 돌리면 지전이 덜덜 떨리므로 부드럽게 좇는다.
 		_facing = rotate_toward(_facing, direction.angle(), FACE_TURN_RATE * delta)
-	# 무구를 쥔 손 — 지전이 여기 매달린다. 무기 노드가 아니라 여기서 정하는 이유는
-	# 몸주마다 드는 무기가 달라도 매다는 위치는 "손"으로 같기 때문이다.
+	# 무구를 쥔 손 — 지전이 여기 매달린다. 그리기와 같은 함수를 써야 종이 술이 손에서 논다.
+	# 무기 노드가 아니라 여기서 정하는 이유는 몸주마다 드는 무기가 달라도 매다는 위치는 "손"으로 같기 때문이다.
 	if _cloth != null:
-		_cloth.set_grip(Vector2.from_angle(_facing + GRIP_ANGLE) * GRIP_DISTANCE)
+		_cloth.set_grip(PlaceholderArt.shaman_hand(RADIUS,
+			sin(_bob_phase) * _bob_weight, _facing, _swing_reach()))
 	queue_redraw()
 
 

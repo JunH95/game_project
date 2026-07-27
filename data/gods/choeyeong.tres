@@ -26,5 +26,5 @@ robe_color = Color(0.557, 0.173, 0.133, 1)
 sash_color = Color(0.953, 0.788, 0.471, 1)
 cloth_weight = 1.45
 rib_count = 5
-segment_length = 7.2
+segment_length = 2.4
 cloth_spread = 0.72
