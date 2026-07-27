@@ -100,6 +100,23 @@ func is_taegi_active() -> bool:
 	return _taegi_left > 0.0
 
 
+## 기세가 가득 찼는지. 강림을 부를 수 있는 상태다.
+func is_taegi_ready() -> bool:
+	return is_taegi_unlocked() and not is_taegi_active() and _gauge >= TAEGI_GAUGE_MAX
+
+
+## 플레이어가 강림을 부른다. `[고증]` 신은 저절로 오지 않고 불러야 온다.
+## 부를 수 없는 상태면 false 를 돌려 호출자가 헛발질을 알 수 있게 한다.
+func invoke_taegi() -> bool:
+	if not is_taegi_ready():
+		return false
+	_gauge = 0.0
+	_taegi_left = TAEGI_DURATION
+	EventBus.taegi_state_changed.emit(true)
+	AudioManager.play(&"taegi")
+	return true
+
+
 ## HUD 표시용 0.0~1.0.
 func get_taegi_ratio() -> float:
 	if is_taegi_active():
@@ -121,11 +138,12 @@ func _charge_taegi(hit_count: int) -> void:
 	if not is_taegi_unlocked() or is_taegi_active() or hit_count <= 0:
 		return
 	var counted := mini(hit_count, TAEGI_MAX_HITS_COUNTED)
-	_gauge += TAEGI_GAIN_PER_HIT * float(counted) * _god_mult(&"taegi_charge_pct")
+	# 가득 차면 멈춘다. 내리는 것은 플레이어가 정한다 — 자동으로 터지면 판단이 사라지고,
+	# 이 게임에서 가장 극적인 순간이 그냥 지나간다.
+	_gauge = minf(TAEGI_GAUGE_MAX,
+		_gauge + TAEGI_GAIN_PER_HIT * float(counted) * _god_mult(&"taegi_charge_pct"))
 	if _gauge >= TAEGI_GAUGE_MAX:
-		_gauge = 0.0
-		_taegi_left = TAEGI_DURATION
-		EventBus.taegi_state_changed.emit(true)
+		EventBus.taegi_ready.emit()
 
 
 ## 부채꼴 안의 모든 적을 타격한다.

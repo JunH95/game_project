@@ -18,6 +18,7 @@ const JUSA: Color = Color(0.702, 0.208, 0.165)
 const GUNCHEONG: Color = Color(0.145, 0.251, 0.478)
 const GEUMBAK: Color = Color(0.851, 0.643, 0.255)
 const MEOK: Color = Color(0.106, 0.106, 0.141)
+const HOBUN: Color = Color(0.949, 0.929, 0.891)
 
 ## 넋·혼불 계열의 푸른빛. 배경 넋 불빛과 같은 계열이라 화면이 하나로 읽힌다.
 const NEOK: Color = Color(0.62, 0.72, 0.95)
@@ -121,6 +122,34 @@ static func draw_mudang(canvas: CanvasItem, r: float, bob: float, taegi: bool) -
 	canvas.draw_circle(Vector2(0.0, -r * 0.66 + lift), r * 0.4, Color(0.96, 0.91, 0.83))
 	# 머리 위 방울 — 무구(巫具)를 한 점으로 암시한다.
 	canvas.draw_circle(Vector2(0.0, -r * 1.02 + lift), r * 0.16, GEUMBAK)
+
+
+## 무당의 몸만. 무복은 ClothBody 가 물리로 그리므로 여기서는 그 위에 얹히는 것만 그린다.
+## 천까지 여기서 그리면 도형과 물리가 겹쳐 두 벌을 입은 것처럼 보인다.
+static func draw_shaman_body(canvas: CanvasItem, r: float, bob: float, taegi: bool) -> void:
+	if taegi:
+		# 강림 중에는 뒤에 금빛이 번지고 발밑에 작두날이 깔린다 — 무당이 작두에 오르는 도상.
+		canvas.draw_circle(Vector2.ZERO, r * 2.4, Color(GEUMBAK.r, GEUMBAK.g, GEUMBAK.b, 0.14))
+		canvas.draw_circle(Vector2.ZERO, r * 1.5, Color(GEUMBAK.r, GEUMBAK.g, GEUMBAK.b, 0.28))
+		for offset in [-0.55, 0.55]:
+			canvas.draw_line(Vector2(-r * 1.5, r * (1.35 + offset * 0.5)),
+				Vector2(r * 1.5, r * (1.35 + offset * 0.5)), Color(0.86, 0.89, 0.93, 0.95), 2.5)
+	else:
+		# 발밑 그림자. 없으면 캐릭터가 바닥에서 떠 보인다.
+		canvas.draw_circle(Vector2(0.0, r * 0.95), r * 0.72, Color(0.0, 0.0, 0.0, 0.28))
+
+	var lift := -bob * r * 0.08
+	# 어깨 — 무복 위로 드러나는 부분만.
+	canvas.draw_line(Vector2(-r * 0.5, -r * 0.26 + lift), Vector2(r * 0.5, -r * 0.26 + lift),
+		GUNCHEONG, r * 0.2)
+	canvas.draw_circle(Vector2(0.0, -r * 0.66 + lift), r * 0.4, Color(0.96, 0.91, 0.83))
+	# 눈 두 점. 없으면 발광체지 사람이 아니다.
+	_draw_eyes(canvas, Vector2(0.0, -r * 0.62 + lift), r * 0.17, r * 0.07, Color(0.11, 0.11, 0.14))
+	# 고깔 — 강신무의 관
+	canvas.draw_colored_polygon(PackedVector2Array([
+		Vector2(0.0, -r * 1.7 + lift), Vector2(r * 0.5, -r * 0.9 + lift),
+		Vector2(-r * 0.5, -r * 0.9 + lift)
+	]), Color(0.93, 0.94, 0.97))
 
 
 ## 부적 — 세로로 긴 종이. 진행 방향이 X 축이 되도록 그린다(호출부가 rotation 을 준다).

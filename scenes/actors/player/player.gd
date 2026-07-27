@@ -9,6 +9,11 @@ const RADIUS: float = 12.0
 const BOB_SPEED: float = 11.0
 const BOB_SETTLE: float = 8.0
 
+## 무구를 쥔 손의 위치(몸 기준). 지전이 여기 매달려 흔들린다.
+const GRIP_ANGLE: float = 1.15
+const GRIP_DISTANCE: float = 18.0
+const FACE_TURN_RATE: float = 9.0
+
 ## 정식 아트가 들어오면 여기에 물리고, 도형 실루엣은 자동으로 비켜난다.
 @export var texture: Texture2D
 
@@ -27,6 +32,7 @@ var _taegi: bool = false
 var _bob_phase: float = 0.0
 ## 0.0~1.0. 걸을수록 오르고 멈추면 내려간다. 흔들림의 크기를 여기에 곱한다.
 var _bob_weight: float = 0.0
+var _facing: float = 0.0
 var _base_speed: float = 0.0
 var _base_max_hp: float = 0.0
 var _base_magnet_radius: float = 0.0
@@ -35,6 +41,7 @@ var _base_magnet_radius: float = 0.0
 @onready var _health: HealthComponent = %HealthComponent
 @onready var _hurtbox: HurtboxComponent = %HurtboxComponent
 @onready var _magnet: Area2D = %PickupMagnet
+@onready var _cloth: ClothBody = get_node_or_null(^"%ClothBody")
 
 
 func _ready() -> void:
@@ -102,6 +109,26 @@ func _announce_health() -> void:
 ## 신을 새로 모시면(몸주 확정 포함) 능력치와 열린 무기를 다시 계산한다.
 func _on_god_served(_god: GodData) -> void:
 	_apply_god_mods()
+	_apply_cloth()
+
+
+## 무복은 몸주가 정하고, 모실수록 자락이 자란다. 새 그림이 아니라 값이라 여기서 끝난다.
+func _apply_cloth() -> void:
+	if _cloth == null or _god_system == null:
+		return
+	var momju: GodData = _god_system.get_momju() if _god_system.has_method(&"get_momju") else null
+	if momju != null:
+		_cloth.robe_color = momju.robe_color
+		_cloth.sash_color = momju.sash_color
+		_cloth.cloth_weight = momju.cloth_weight
+		_cloth.rib_count = momju.rib_count
+		_cloth.segment_length = momju.segment_length
+		_cloth.spread = momju.cloth_spread
+		_cloth.rebuild()
+	# 최영장군을 모시면 등 뒤에 전기가 나부낀다 — 표식도 천이라 같은 물리에 얹힌다.
+	_cloth.set_banner_visible(_god_system.get_level(&"choeyeong") > 0)
+	_cloth.set_growth(_god_system.get_served_count()
+		if _god_system.has_method(&"get_served_count") else 0)
 
 
 func _on_synergy_formed(_synergy: SynergyData) -> void:
@@ -152,6 +179,15 @@ func _on_magnet_area_entered(area: Area2D) -> void:
 		area.call(&"attract_to", self)
 
 
+func _unhandled_input(event: InputEvent) -> void:
+	# `[고증]` 신은 저절로 오지 않고 불러야 온다. 자동 발동이면 판단이 사라진다.
+	if not event.is_action_pressed(&"gangrim"):
+		return
+	var jakdu := _weapons.get(&"jakdu") as JakduWeapon
+	if jakdu != null and jakdu.invoke_taegi():
+		get_viewport().set_input_as_handled()
+
+
 func _physics_process(delta: float) -> void:
 	var direction := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	_movement.move(direction)
@@ -162,6 +198,12 @@ func _physics_process(delta: float) -> void:
 	_bob_weight = move_toward(_bob_weight, target_weight, BOB_SETTLE * delta)
 	if _bob_weight > 0.0:
 		_bob_phase += BOB_SPEED * delta
+		# 몸이 향한 쪽. 즉시 돌리면 지전이 덜덜 떨리므로 부드럽게 좇는다.
+		_facing = rotate_toward(_facing, direction.angle(), FACE_TURN_RATE * delta)
+	# 무구를 쥔 손 — 지전이 여기 매달린다. 무기 노드가 아니라 여기서 정하는 이유는
+	# 몸주마다 드는 무기가 달라도 매다는 위치는 "손"으로 같기 때문이다.
+	if _cloth != null:
+		_cloth.set_grip(Vector2.from_angle(_facing + GRIP_ANGLE) * GRIP_DISTANCE)
 	queue_redraw()
 
 
@@ -181,10 +223,17 @@ func _on_died() -> void:
 
 func _on_taegi_state_changed(active: bool) -> void:
 	_taegi = active
+	if _cloth != null:
+		_cloth.set_gangrim(active)
+		# 신이 내리는 순간 자락이 위로 솟구친다.
+		if active:
+			_cloth.impulse(Vector2.UP, 2.2)
 	queue_redraw()
 
 
 func _draw() -> void:
 	if PlaceholderArt.draw_texture_centered(self, texture, RADIUS * 3.0):
 		return
-	PlaceholderArt.draw_mudang(self, RADIUS, sin(_bob_phase) * _bob_weight, _taegi)
+	# 무복은 ClothBody 가 물리로 그린다. 여기서는 그 위에 얹히는 몸만 그린다 —
+	# 천까지 여기서 그리면 도형과 물리가 겹쳐 두 벌을 입은 것처럼 보인다.
+	PlaceholderArt.draw_shaman_body(self, RADIUS, sin(_bob_phase) * _bob_weight, _taegi)

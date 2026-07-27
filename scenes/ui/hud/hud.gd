@@ -109,6 +109,10 @@ func _update_synergy_label() -> void:
 		if jakdu.is_taegi_active():
 			text += "    작두타기! %d%%" % int(ratio * 100.0)
 			color = Color(1.0, 0.86, 0.4)
+		elif jakdu.has_method(&"is_taegi_ready") and jakdu.is_taegi_ready():
+			# 부를 수 있다는 사실과 **어느 키를 누르는지**가 같이 보여야 실제로 쓴다.
+			text += "    강림 준비 — [Space]"
+			color = Color(1.0, 0.95, 0.72)
 		else:
 			text += "    기세 %d%%" % int(ratio * 100.0)
 			color = Color(0.72, 0.64, 0.42)

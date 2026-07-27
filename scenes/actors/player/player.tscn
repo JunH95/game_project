@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3]
+[gd_scene load_steps=17 format=3]
 
 [ext_resource type="Script" path="res://scenes/actors/player/player.gd" id="1_player"]
 [ext_resource type="Script" path="res://scripts/components/movement_component.gd" id="2_move"]
@@ -21,10 +21,17 @@ radius = 12.0
 [sub_resource type="CircleShape2D" id="Shape_magnet"]
 radius = 40.0
 
+[ext_resource type="Script" path="res://scripts/components/cloth_body.gd" id="99_cloth"]
+
 [node name="Player" type="CharacterBody2D" groups=["player"]]
 collision_layer = 2
 collision_mask = 1
 script = ExtResource("1_player")
+
+[node name="ClothBody" type="Node2D" parent="."]
+unique_name_in_owner = true
+script = ExtResource("99_cloth")
+
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("Shape_body")

@@ -29,6 +29,19 @@ extends Resource
 ## 몸주로 골랐을 때만 붙는 특수 훅 키(작두타기 게이지처럼 수치로 표현 못 하는 것).
 @export var momju_passive: StringName
 
+@export_subgroup("무복 (몸주일 때 입는 옷)")
+## 무복 색. 몸주가 바뀌면 외형이 갈리는 첫 번째 축이다.
+@export var robe_color: Color = Color("F2EDE3")
+@export var sash_color: Color = Color("E4543F")
+## 천의 무게. 갑주 위 전포는 무겁게(1.45), 도포는 가볍게(0.70) — 같은 물리에 값만 다르다.
+@export_range(0.3, 2.5) var cloth_weight: float = 1.0
+## 치마 갈래 수. 많을수록 넓게 퍼진다.
+@export_range(3, 12) var rib_count: int = 7
+## 갈래 한 마디의 길이(px).
+@export_range(4.0, 16.0) var segment_length: float = 9.0
+## 옆으로 벌어지려는 힘. 0 이면 치마가 다리처럼 붙는다.
+@export_range(0.0, 2.0) var cloth_spread: float = 1.0
+
 ## 시그니처 메커닉 훅 키. 없으면 빈 값 (손님신/바리공주 같은 특수 신만 사용)
 @export var special: StringName
 

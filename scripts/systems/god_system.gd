@@ -88,6 +88,11 @@ func get_multiplier(key: StringName) -> float:
 	return maxf(0.0, 1.0 + get_mod(key) * 0.01)
 
 
+## 모시는 신 가짓수(레벨이 아니라 종류). 자락이 자라는 정도를 여기서 본다.
+func get_served_count() -> int:
+	return _served.size()
+
+
 func get_level(god_id: StringName) -> int:
 	return int(_served.get(god_id, 0))
 

@@ -19,6 +19,9 @@ signal momju_chosen(god: GodData)
 signal god_served(god: GodData)
 signal synergy_formed(synergy: SynergyData)
 ## 작두타기처럼 잠시 켜졌다 꺼지는 상태. UI·연출이 구독한다.
+## 기세가 가득 차 강림을 부를 수 있게 됐다. HUD 가 이걸로 버튼을 밝힌다.
+signal taegi_ready
+
 signal taegi_state_changed(active: bool)
 signal player_health_changed(current_hp: float, max_hp: float)
 signal player_died

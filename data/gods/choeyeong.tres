@@ -22,3 +22,9 @@ stat_mods = {
 "taegi_charge_pct": 10.0
 }
 description = "장군신. 손이 빨라지고 발이 가벼워진다. 모실수록 언월도의 날이 늘어난다."
+robe_color = Color(0.557, 0.173, 0.133, 1)
+sash_color = Color(0.953, 0.788, 0.471, 1)
+cloth_weight = 1.45
+rib_count = 5
+segment_length = 7.2
+cloth_spread = 0.72

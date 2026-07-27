@@ -19,3 +19,9 @@ stat_mods = {
 "jakdu_damage_pct": 15.0
 }
 description = "작두의 신. 베는 힘과 휘두르는 폭이 늘어난다."
+robe_color = Color(0.949, 0.929, 0.891, 1)
+sash_color = Color(0.894, 0.329, 0.247, 1)
+cloth_weight = 1.0
+rib_count = 7
+segment_length = 9.0
+cloth_spread = 1.0
