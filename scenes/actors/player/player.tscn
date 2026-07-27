@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://scenes/actors/player/player.gd" id="1_player"]
 [ext_resource type="Script" path="res://scripts/components/movement_component.gd" id="2_move"]
@@ -6,6 +6,9 @@
 [ext_resource type="Script" path="res://scripts/components/hurtbox_component.gd" id="4_hurt"]
 [ext_resource type="Script" path="res://scripts/components/jakdu_weapon.gd" id="5_jakdu"]
 [ext_resource type="Resource" path="res://data/weapons/jakdu.tres" id="6_jakdu_data"]
+[ext_resource type="Script" path="res://scripts/components/bujeok_weapon.gd" id="7_bujeok"]
+[ext_resource type="Resource" path="res://data/weapons/bujeok.tres" id="8_bujeok_data"]
+[ext_resource type="PackedScene" path="res://scenes/actors/projectiles/bujeok.tscn" id="9_bujeok_proj"]
 
 [sub_resource type="CircleShape2D" id="Shape_body"]
 radius = 12.0
@@ -54,5 +57,11 @@ shape = SubResource("Shape_magnet")
 unique_name_in_owner = true
 script = ExtResource("5_jakdu")
 data = ExtResource("6_jakdu_data")
+
+[node name="BujeokWeapon" type="Node2D" parent="."]
+unique_name_in_owner = true
+script = ExtResource("7_bujeok")
+data = ExtResource("8_bujeok_data")
+projectile_scene = ExtResource("9_bujeok_proj")
 
 [node name="Camera2D" type="Camera2D" parent="."]

@@ -80,7 +80,9 @@ func _spawn_at(angle: float) -> void:
 		return
 	if get_tree().get_nodes_in_group(&"enemy").size() >= max_alive:
 		return
-	var enemy := enemy_scene.instantiate()
-	enemy.data = enemy_data
+	var enemy := ObjectPool.acquire(enemy_scene, get_parent())
+	if enemy == null:
+		return
+	# acquire 안에서 _pool_reset 이 이미 돌았으므로, data 교체는 setup 으로 다시 반영한다.
+	enemy.setup(enemy_data)
 	enemy.global_position = _target.global_position + Vector2.from_angle(angle) * spawn_radius
-	get_parent().add_child(enemy)

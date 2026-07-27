@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://dexox5mrtlgpm"]
+[gd_scene load_steps=15 format=3 uid="uid://dexox5mrtlgpm"]
 
 [ext_resource type="Script" path="res://scenes/background.gd" id="1_bg"]
 [ext_resource type="PackedScene" path="res://scenes/actors/player/player.tscn" id="2_player"]
@@ -13,8 +13,16 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/level_up/god_select.tscn" id="11_select"]
 [ext_resource type="Script" path="res://scripts/systems/gate_timer.gd" id="12_timer"]
 [ext_resource type="PackedScene" path="res://scenes/ui/run_result/run_result.tscn" id="13_result"]
+[ext_resource type="Script" path="res://scripts/systems/pool_warmer.gd" id="14_warm"]
+[ext_resource type="PackedScene" path="res://scenes/actors/projectiles/bujeok.tscn" id="15_bujeok"]
 
 [node name="Main" type="Node2D"]
+
+[node name="PoolWarmer" type="Node" parent="."]
+script = ExtResource("14_warm")
+enemy_scene = ExtResource("4_enemy")
+xp_gem_scene = ExtResource("7_gem")
+projectile_scene = ExtResource("15_bujeok")
 
 [node name="Background" type="Node2D" parent="."]
 script = ExtResource("1_bg")

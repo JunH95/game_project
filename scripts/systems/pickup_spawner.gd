@@ -13,11 +13,12 @@ func _ready() -> void:
 func _on_enemy_died(enemy: Node2D, world_position: Vector2) -> void:
 	if xp_gem_scene == null:
 		return
-	var gem := xp_gem_scene.instantiate()
+	var gem := ObjectPool.acquire(xp_gem_scene, self)
+	if gem == null:
+		return
 	gem.global_position = world_position
-	# 시그널은 queue_free 직전에 오므로 이 시점의 적은 아직 유효하다.
+	# 시그널은 반납 직전에 오므로 이 시점의 적 데이터는 아직 유효하다.
 	if enemy != null and is_instance_valid(enemy):
 		var data: EnemyData = enemy.get(&"data")
 		if data != null:
 			gem.value = data.xp_reward
-	add_child(gem)

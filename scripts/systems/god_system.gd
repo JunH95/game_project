@@ -63,6 +63,39 @@ func get_level(god_id: StringName) -> int:
 	return int(_served.get(god_id, 0))
 
 
+## 모시는 신 중 이 무기를 부여하는 신이 있는지(design.md 2-1).
+func grants_weapon(weapon_id: StringName) -> bool:
+	for god in available_gods:
+		if god == null or not _served.has(god.id):
+			continue
+		if god.grants_weapon == weapon_id:
+			return true
+	return false
+
+
+## 지금 실린 기운(design.md 3-3). 모시는 신을 오행별로 묶어 레벨 합이 가장 큰 오행.
+## 동률이거나 모신 신이 없으면 빈 값 — 몸주 오행은 몸주 선택이 생기는 M4 에서 넘겨받는다.
+func get_element() -> StringName:
+	var totals: Dictionary = {}
+	for god in available_gods:
+		if god == null or not _served.has(god.id) or god.element == &"":
+			continue
+		totals[god.element] = int(totals.get(god.element, 0)) + int(_served[god.id])
+
+	var best: StringName = &""
+	var best_total := 0
+	var tied := false
+	for element in totals:
+		var total: int = totals[element]
+		if total > best_total:
+			best = element
+			best_total = total
+			tied = false
+		elif total == best_total:
+			tied = true
+	return &"" if tied else best
+
+
 func get_served() -> Dictionary:
 	return _served.duplicate()
 

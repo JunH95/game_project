@@ -9,8 +9,10 @@ display_name = "칠성신"
 tier = 1
 max_level = 5
 element = &"water"
+grants_weapon = &"bujeok"
 stat_mods = {
-"max_hp_pct": 8.0,
-"pickup_radius_pct": 12.0
+"bujeok_count": 0.34,
+"bujeok_damage_pct": 15.0,
+"max_hp_pct": 8.0
 }
-description = "북두칠성. 명이 길어지고 넋이 따라온다. (부적은 훗날 이 신을 통해 온다)"
+description = "북두칠성. 이 신을 모시면 부적이 날아든다. 모실수록 발수가 늘어 일곱에 이른다."

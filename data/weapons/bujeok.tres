@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/weapon_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"bujeok"
+display_name = "부적"
+is_melee = false
+base_damage = 14.0
+cooldown = 1.2
+knockback = 40.0
+projectile_speed = 320.0
+homing_turn_rate = 4.0
+pierce = 1
+count = 1
+lifetime = 2.5

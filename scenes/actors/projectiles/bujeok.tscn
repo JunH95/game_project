@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scenes/actors/projectiles/bujeok.gd" id="1_bujeok"]
+
+[sub_resource type="CircleShape2D" id="Shape_bujeok"]
+radius = 6.0
+
+[node name="Bujeok" type="Area2D"]
+collision_layer = 32
+collision_mask = 16
+monitoring = true
+monitorable = true
+script = ExtResource("1_bujeok")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("Shape_bujeok")

@@ -1,0 +1,106 @@
+extends Area2D
+
+## 부적 투사체. 발사 후 가장 가까운 적을 향해 완만히 방향을 틀며 날아간다(유도).
+## 관통 횟수를 다 쓰거나 수명이 다하면 풀에 반납된다.
+## 플레이스홀더 외형 = 노랑 삼각(design.md 9절).
+
+const SIZE: float = 6.0
+
+var damage: float = 14.0
+var speed: float = 320.0
+var homing_turn_rate: float = 4.0
+var pierce: int = 1
+var lifetime: float = 2.5
+var knockback: float = 0.0
+
+var _direction: Vector2 = Vector2.RIGHT
+var _life_left: float = 0.0
+var _pierce_left: int = 0
+## 같은 적을 관통 중 여러 번 때리지 않도록 기록한다.
+var _hit: Array[Node] = []
+
+
+func _ready() -> void:
+	area_entered.connect(_on_area_entered)
+
+
+## 무기가 발사 직후 호출한다.
+func launch(direction: Vector2) -> void:
+	_direction = direction.normalized() if not direction.is_zero_approx() else Vector2.RIGHT
+	_life_left = lifetime
+	_pierce_left = pierce
+	_hit.clear()
+	rotation = _direction.angle()
+
+
+func _pool_reset() -> void:
+	_hit.clear()
+	collision_layer = 32
+	set_deferred(&"monitoring", true)
+	set_deferred(&"monitorable", true)
+
+
+func _pool_exit() -> void:
+	_hit.clear()
+	collision_layer = 0
+	set_deferred(&"monitoring", false)
+	set_deferred(&"monitorable", false)
+
+
+func _physics_process(delta: float) -> void:
+	_life_left -= delta
+	if _life_left <= 0.0:
+		ObjectPool.release(self)
+		return
+
+	var target := _find_nearest_enemy()
+	if target != null:
+		# 목표 방향으로 조금씩 튼다. 즉시 꺾으면 유도가 아니라 순간이동처럼 보인다.
+		var desired := (target.global_position - global_position).normalized()
+		_direction = _direction.slerp(desired, minf(homing_turn_rate * delta, 1.0)).normalized()
+		rotation = _direction.angle()
+
+	global_position += _direction * speed * delta
+	queue_redraw()
+
+
+func _find_nearest_enemy() -> Node2D:
+	var nearest: Node2D = null
+	var nearest_dist_sq := INF
+	for node in get_tree().get_nodes_in_group(&"enemy"):
+		var enemy := node as Node2D
+		if enemy == null or not is_instance_valid(enemy) or _hit.has(enemy):
+			continue
+		var dist_sq := global_position.distance_squared_to(enemy.global_position)
+		if dist_sq < nearest_dist_sq:
+			nearest_dist_sq = dist_sq
+			nearest = enemy
+	return nearest
+
+
+func _on_area_entered(area: Area2D) -> void:
+	# 적의 hurtbox 를 맞힌다. hurtbox 는 컴포넌트라 소유 액터를 거슬러 올라간다.
+	var hurtbox := area as HurtboxComponent
+	if hurtbox == null:
+		return
+	var enemy := hurtbox.get_parent()
+	if enemy == null or _hit.has(enemy):
+		return
+	_hit.append(enemy)
+
+	if hurtbox.health != null:
+		hurtbox.health.take_damage(damage)
+	if knockback > 0.0 and enemy.has_method(&"apply_knockback"):
+		enemy.call(&"apply_knockback", _direction * knockback)
+
+	_pierce_left -= 1
+	if _pierce_left <= 0:
+		ObjectPool.release(self)
+
+
+## 노랑 삼각. 진행 방향이 코끝이 되도록 rotation 을 따른다.
+func _draw() -> void:
+	var points := PackedVector2Array([
+		Vector2(SIZE, 0.0), Vector2(-SIZE * 0.7, SIZE * 0.6), Vector2(-SIZE * 0.7, -SIZE * 0.6)
+	])
+	draw_colored_polygon(points, Color(0.95, 0.82, 0.28))

@@ -19,13 +19,29 @@ func attract_to(target: Node2D) -> void:
 	_target = target
 
 
+## 풀에서 꺼내질 때. value 와 위치는 호출자가 넣어 준다.
+func _pool_reset() -> void:
+	_target = null
+	collision_layer = 128
+	set_deferred(&"monitorable", true)
+	add_to_group(&"pickup")
+
+
+## 풀에 반납될 때. 자석이 이미 수집한 젬을 다시 끌어당기지 않게 한다.
+func _pool_exit() -> void:
+	_target = null
+	remove_from_group(&"pickup")
+	collision_layer = 0
+	set_deferred(&"monitorable", false)
+
+
 func _process(delta: float) -> void:
 	if _target == null or not is_instance_valid(_target):
 		return
 	var offset := _target.global_position - global_position
 	if offset.length() <= COLLECT_DIST:
 		EventBus.xp_collected.emit(value)
-		queue_free()
+		ObjectPool.release(self)
 		return
 	global_position += offset.normalized() * ATTRACT_SPEED * delta
 

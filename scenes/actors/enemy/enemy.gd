@@ -28,16 +28,55 @@ var _knockback: Vector2 = Vector2.ZERO
 
 
 func _ready() -> void:
-	if data != null:
-		_movement.speed = data.move_speed
-		_health.setup(data.max_hp)
-		_hitbox.damage = data.contact_damage
-		var circle := _body_shape.shape as CircleShape2D
-		if circle != null:
-			circle.radius = data.radius
 	_hurtbox.health = _health
 	_health.died.connect(_on_died)
+	# 씬의 CircleShape2D 는 인스턴스끼리 공유된다. 적마다 반지름이 다르므로 복제해서 쓴다.
+	if _body_shape.shape != null:
+		_body_shape.shape = _body_shape.shape.duplicate()
+	_apply_data()
+
+
+## 스폰 직후 스포너가 호출한다. 풀에서 꺼낸 개체는 이전 종류의 스탯을 들고 있으므로
+## data 를 갈아끼운 뒤 반드시 다시 반영해야 한다.
+func setup(new_data: EnemyData) -> void:
+	data = new_data
+	_apply_data()
+
+
+## data 의 스탯·외형을 노드에 반영한다. 최초 _ready 와 풀 재사용 양쪽에서 부른다.
+func _apply_data() -> void:
+	if data == null:
+		return
+	_movement.speed = data.move_speed
+	_health.setup(data.max_hp)
+	_hitbox.damage = data.contact_damage
+	var circle := _body_shape.shape as CircleShape2D
+	if circle != null:
+		circle.radius = data.radius
+	queue_redraw()
+
+
+## 풀에서 꺼내질 때. 스폰 위치와 data 는 호출자가 먼저 넣어 준다.
+func _pool_reset() -> void:
+	_knockback = Vector2.ZERO
+	velocity = Vector2.ZERO
+	modulate = Color.WHITE
+	_apply_data()
 	_target = get_tree().get_first_node_in_group("player")
+	add_to_group(&"enemy")
+	collision_layer = 4
+	_hurtbox.set_deferred(&"monitoring", true)
+	_hitbox.set_deferred(&"monitorable", true)
+	_separation.set_deferred(&"monitoring", true)
+
+
+## 풀에 반납될 때. 그룹에 남아 있으면 죽은 적이 무기 판정에 계속 잡힌다.
+func _pool_exit() -> void:
+	remove_from_group(&"enemy")
+	collision_layer = 0
+	_hurtbox.set_deferred(&"monitoring", false)
+	_hitbox.set_deferred(&"monitorable", false)
+	_separation.set_deferred(&"monitoring", false)
 
 
 func _physics_process(delta: float) -> void:
@@ -79,7 +118,7 @@ func apply_knockback(impulse: Vector2) -> void:
 
 func _on_died() -> void:
 	EventBus.enemy_died.emit(self, global_position)
-	queue_free()
+	ObjectPool.release(self)
 
 
 func _draw() -> void:
