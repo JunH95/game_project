@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://dexox5mrtlgpm"]
+[gd_scene load_steps=18 format=3 uid="uid://dexox5mrtlgpm"]
 
 [ext_resource type="Script" path="res://scenes/background.gd" id="1_bg"]
 [ext_resource type="PackedScene" path="res://scenes/actors/player/player.tscn" id="2_player"]
@@ -15,6 +15,9 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/run_result/run_result.tscn" id="13_result"]
 [ext_resource type="Script" path="res://scripts/systems/pool_warmer.gd" id="14_warm"]
 [ext_resource type="PackedScene" path="res://scenes/actors/projectiles/bujeok.tscn" id="15_bujeok"]
+[ext_resource type="Resource" path="res://data/enemies/rusher.tres" id="16_rusher"]
+[ext_resource type="Resource" path="res://data/enemies/tank.tres" id="17_tank"]
+[ext_resource type="PackedScene" path="res://scenes/ui/pause/pause_menu.tscn" id="18_pause"]
 
 [node name="Main" type="Node2D"]
 
@@ -38,6 +41,8 @@ god_system_path = NodePath("../GodSystem")
 script = ExtResource("3_spawn")
 enemy_scene = ExtResource("4_enemy")
 enemy_data = ExtResource("5_chaser")
+rusher_data = ExtResource("16_rusher")
+tank_data = ExtResource("17_tank")
 
 [node name="PickupSpawner" type="Node2D" parent="."]
 script = ExtResource("6_pickup")
@@ -54,8 +59,11 @@ script = ExtResource("12_timer")
 [node name="Hud" parent="." instance=ExtResource("9_hud")]
 level_system_path = NodePath("../LevelSystem")
 gate_timer_path = NodePath("../GateTimer")
+god_system_path = NodePath("../GodSystem")
 
 [node name="GodSelect" parent="." instance=ExtResource("11_select")]
 god_system_path = NodePath("../GodSystem")
+
+[node name="PauseMenu" parent="." instance=ExtResource("18_pause")]
 
 [node name="RunResult" parent="." instance=ExtResource("13_result")]

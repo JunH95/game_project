@@ -1,17 +1,89 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scenes/ui/hud/hud.gd" id="1_hud"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_bar_bg"]
+bg_color = Color(0.09, 0.09, 0.13, 0.85)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_hp_fill"]
+bg_color = Color(0.702, 0.208, 0.165, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_xp_fill"]
+bg_color = Color(0.851, 0.643, 0.255, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
 
 [node name="Hud" type="CanvasLayer"]
 process_mode = 3
 script = ExtResource("1_hud")
 
-[node name="StatusLabel" type="Label" parent="."]
+[node name="Root" type="MarginContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 16
+
+[node name="Column" type="VBoxContainer" parent="Root"]
+layout_mode = 2
+size_flags_vertical = 0
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="TimeLabel" type="Label" parent="Root/Column"]
 unique_name_in_owner = true
-offset_left = 16.0
-offset_top = 12.0
-offset_right = 616.0
-offset_bottom = 44.0
-theme_override_colors/font_color = Color(0.95, 0.9, 0.75, 1)
-theme_override_font_sizes/font_size = 22
+layout_mode = 2
+theme_override_colors/font_color = Color(0.878, 0.784, 0.451, 1)
+theme_override_font_sizes/font_size = 34
+text = "5:00"
+
+[node name="HpBar" type="ProgressBar" parent="Root/Column"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(320, 16)
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_styles/background = SubResource("StyleBox_bar_bg")
+theme_override_styles/fill = SubResource("StyleBox_hp_fill")
+max_value = 100.0
+value = 100.0
+show_percentage = false
+
+[node name="XpBar" type="ProgressBar" parent="Root/Column"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(320, 8)
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_styles/background = SubResource("StyleBox_bar_bg")
+theme_override_styles/fill = SubResource("StyleBox_xp_fill")
+max_value = 5.0
+value = 0.0
+show_percentage = false
+
+[node name="StatusLabel" type="Label" parent="Root/Column"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.925, 0.898, 0.839, 1)
+theme_override_font_sizes/font_size = 17
 text = "Lv 1"
+
+[node name="GodsLabel" type="Label" parent="Root/Column"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.61, 0.58, 0.518, 1)
+theme_override_font_sizes/font_size = 15
+text = "모신 신 없음"

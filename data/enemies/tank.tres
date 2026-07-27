@@ -4,13 +4,14 @@
 
 [resource]
 script = ExtResource("1_script")
-id = &"chaser"
-display_name = "추격 원귀"
-max_hp = 10.0
-move_speed = 60.0
-contact_damage = 8.0
-xp_reward = 1
-wonhon_chance = 0.05
+id = &"tank"
+display_name = "업(業)덩이"
+max_hp = 60.0
+move_speed = 34.0
+contact_damage = 16.0
+xp_reward = 5
+wonhon_chance = 0.15
 is_boss = false
 element = &"fire"
-radius = 8.0
+radius = 16.0
+placeholder_color = Color(0.45, 0.09, 0.12, 1)

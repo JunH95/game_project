@@ -7,7 +7,18 @@ extends Node2D
 ## 관문별 배율·적 구성·시그니처 기믹은 GateData/WaveTable 로 옮긴다(M5).
 
 @export var enemy_scene: PackedScene
+## 기본 적(추격). 관문 내내 나온다.
 @export var enemy_data: EnemyData
+
+@export_group("적 구성")
+## 러시형. 약하고 빠르다. 이 시각(초) 이후 섞여 나온다.
+@export var rusher_data: EnemyData
+@export var rusher_after_sec: float = 60.0
+@export_range(0.0, 1.0) var rusher_ratio: float = 0.35
+## 탱크형. 느리고 단단하다. 등장이 늦고 비율이 낮다 — 초반에 나오면 진행이 막힌다.
+@export var tank_data: EnemyData
+@export var tank_after_sec: float = 120.0
+@export_range(0.0, 1.0) var tank_ratio: float = 0.12
 
 @export_group("스폰 램프")
 ## 관문 시작 시점의 초당 스폰 수.
@@ -68,14 +79,25 @@ func _current_rate() -> float:
 
 
 ## 버스트는 한 방향에 뭉쳐서 낸다. 사방에 고르게 뿌리면 트리클과 구분이 안 돼 "몰려온다"는 느낌이 죽는다.
+## 한 버스트는 한 종류로 낸다 — 섞으면 "무엇이 몰려오는지"가 읽히지 않는다.
 func _spawn_burst() -> void:
 	var count := int(round(lerpf(float(burst_min), float(burst_max), _progress())))
 	var base_angle := randf() * TAU
+	var data := _pick_data()
 	for i in count:
-		_spawn_at(base_angle + randf_range(-0.6, 0.6))
+		_spawn_at(base_angle + randf_range(-0.6, 0.6), data)
 
 
-func _spawn_at(angle: float) -> void:
+## 시간이 지나면 새 종류가 섞인다. 탱크는 늦게·드물게 — 초반에 나오면 진행이 막힌다.
+func _pick_data() -> EnemyData:
+	if tank_data != null and _elapsed >= tank_after_sec and randf() < tank_ratio:
+		return tank_data
+	if rusher_data != null and _elapsed >= rusher_after_sec and randf() < rusher_ratio:
+		return rusher_data
+	return enemy_data
+
+
+func _spawn_at(angle: float, data: EnemyData = null) -> void:
 	if enemy_scene == null:
 		return
 	if get_tree().get_nodes_in_group(&"enemy").size() >= max_alive:
@@ -84,5 +106,5 @@ func _spawn_at(angle: float) -> void:
 	if enemy == null:
 		return
 	# acquire 안에서 _pool_reset 이 이미 돌았으므로, data 교체는 setup 으로 다시 반영한다.
-	enemy.setup(enemy_data)
+	enemy.setup(data if data != null else _pick_data())
 	enemy.global_position = _target.global_position + Vector2.from_angle(angle) * spawn_radius

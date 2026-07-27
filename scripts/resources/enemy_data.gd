@@ -19,3 +19,7 @@ extends Resource
 
 @export var texture: Texture2D
 @export var radius: float = 8.0
+
+## 도형 플레이스홀더 색(design.md 9절). 종류가 눈에 구분돼야 위협을 가늠할 수 있다.
+## 아트 패스에서 texture 로 대체된다.
+@export var placeholder_color: Color = Color(0.85, 0.16, 0.16)

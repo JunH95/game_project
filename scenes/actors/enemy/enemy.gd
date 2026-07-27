@@ -123,4 +123,5 @@ func _on_died() -> void:
 
 func _draw() -> void:
 	var r := data.radius if data != null else 8.0
-	draw_circle(Vector2.ZERO, r, Color(0.85, 0.16, 0.16))
+	var color := data.placeholder_color if data != null else Color(0.85, 0.16, 0.16)
+	draw_circle(Vector2.ZERO, r, color)
