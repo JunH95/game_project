@@ -14,6 +14,17 @@ const GRIP_ANGLE: float = 1.15
 const GRIP_DISTANCE: float = 18.0
 const FACE_TURN_RATE: float = 9.0
 
+## 휘두름 모션. 예비(뒤로 감음) → 타격(내지름) → 복귀 세 마디로 나눈다.
+## 한 마디짜리로 그냥 뻗기만 하면 때리는 게 아니라 미는 것처럼 보인다.
+const SWING_WINDUP: float = 0.07
+const SWING_STRIKE: float = 0.06
+const SWING_RECOVER: float = 0.15
+## 예비에서 뒤로 감는 깊이(음수), 타격에서 내지르는 길이(양수).
+const SWING_BACK: float = -0.38
+const SWING_FORWARD: float = 1.0
+## 타격 순간 무복을 미는 세기. 몸이 움직이면 천이 따라 휘는 것이 화려함의 본체다.
+const SWING_CLOTH_POWER: float = 1.5
+
 ## 정식 아트가 들어오면 여기에 물리고, 도형 실루엣은 자동으로 비켜난다.
 @export var texture: Texture2D
 
@@ -29,6 +40,9 @@ var _synergy_system: Node
 ## 합이 열어 주는 궤도들(OrbitBlades). 각자 required_synergy 를 들고 있다.
 var _synergy_orbits: Array = []
 var _taegi: bool = false
+## 휘두름 경과 시간. 0 보다 크면 모션 중이다.
+var _swing_time: float = 0.0
+var _swing_total: float = 0.0
 var _bob_phase: float = 0.0
 ## 0.0~1.0. 걸을수록 오르고 멈추면 내려간다. 흔들림의 크기를 여기에 곱한다.
 var _bob_weight: float = 0.0
@@ -78,6 +92,8 @@ func _ready() -> void:
 	var jakdu := _weapons.get(&"jakdu") as JakduWeapon
 	if jakdu != null:
 		jakdu.synergy_system = _synergy_system
+		# 무기가 혼자 움직이면 미는 것처럼 보인다. 몸이 같이 나가야 때리는 것이 된다.
+		jakdu.swung.connect(_on_weapon_swung)
 
 	# 합이 여는 궤도들. 무기가 아니라 합에 딸린 것이라 무기 맵과 따로 둔다.
 	_synergy_orbits = [get_node_or_null(^"%JakduOrbit"), get_node_or_null(^"%BujeokShield")]
@@ -198,7 +214,15 @@ func _physics_process(delta: float) -> void:
 	_bob_weight = move_toward(_bob_weight, target_weight, BOB_SETTLE * delta)
 	if _bob_weight > 0.0:
 		_bob_phase += BOB_SPEED * delta
-		# 몸이 향한 쪽. 즉시 돌리면 지전이 덜덜 떨리므로 부드럽게 좇는다.
+
+	if _swing_total > 0.0:
+		_swing_time += delta
+		if _swing_time >= _swing_total:
+			_swing_total = 0.0
+			_swing_time = 0.0
+	elif _bob_weight > 0.0:
+		# 휘두르는 동안에는 걷는 쪽으로 몸을 돌리지 않는다 — 벤 방향을 보고 있어야 한다.
+		# 즉시 돌리면 지전이 덜덜 떨리므로 부드럽게 좇는다.
 		_facing = rotate_toward(_facing, direction.angle(), FACE_TURN_RATE * delta)
 	# 무구를 쥔 손 — 지전이 여기 매달린다. 무기 노드가 아니라 여기서 정하는 이유는
 	# 몸주마다 드는 무기가 달라도 매다는 위치는 "손"으로 같기 때문이다.
@@ -221,6 +245,32 @@ func _on_died() -> void:
 	EventBus.player_died.emit()
 
 
+## 무기가 휘둘렸다. 몸도 같이 나가고, 그 바람에 무복이 휩쓸린다.
+func _on_weapon_swung(direction: Vector2) -> void:
+	_swing_time = 0.0
+	_swing_total = SWING_WINDUP + SWING_STRIKE + SWING_RECOVER
+	# 겨눈 쪽을 즉시 본다 — 걷는 방향과 베는 방향이 다를 때 몸이 엉뚱한 데를 보면 어색하다.
+	if not direction.is_zero_approx():
+		_facing = direction.angle()
+	if _cloth != null:
+		_cloth.impulse(direction, SWING_CLOTH_POWER)
+
+
+## 휘두름 진행도를 -1~1 로. 음수는 뒤로 감는 예비, 양수는 내지르는 타격이다.
+func _swing_reach() -> float:
+	if _swing_total <= 0.0:
+		return 0.0
+	if _swing_time < SWING_WINDUP:
+		return lerpf(0.0, SWING_BACK, _swing_time / SWING_WINDUP)
+	var struck := _swing_time - SWING_WINDUP
+	if struck < SWING_STRIKE:
+		# 내지르는 구간은 짧고 급해야 한다. 여기가 완만하면 타격이 아니라 뻗기가 된다.
+		return lerpf(SWING_BACK, SWING_FORWARD, struck / SWING_STRIKE)
+	var back := (struck - SWING_STRIKE) / SWING_RECOVER
+	# 복귀는 천천히 — ease-out 이라야 힘을 쓰고 난 뒤처럼 보인다.
+	return lerpf(SWING_FORWARD, 0.0, back * back)
+
+
 func _on_taegi_state_changed(active: bool) -> void:
 	_taegi = active
 	if _cloth != null:
@@ -236,4 +286,5 @@ func _draw() -> void:
 		return
 	# 무복은 ClothBody 가 물리로 그린다. 여기서는 그 위에 얹히는 몸만 그린다 —
 	# 천까지 여기서 그리면 도형과 물리가 겹쳐 두 벌을 입은 것처럼 보인다.
-	PlaceholderArt.draw_shaman_body(self, RADIUS, sin(_bob_phase) * _bob_weight, _taegi)
+	PlaceholderArt.draw_shaman_body(self, RADIUS, sin(_bob_phase) * _bob_weight, _taegi,
+		_facing, _swing_reach())

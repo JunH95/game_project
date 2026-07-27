@@ -126,7 +126,13 @@ static func draw_mudang(canvas: CanvasItem, r: float, bob: float, taegi: bool) -
 
 ## 무당의 몸만. 무복은 ClothBody 가 물리로 그리므로 여기서는 그 위에 얹히는 것만 그린다.
 ## 천까지 여기서 그리면 도형과 물리가 겹쳐 두 벌을 입은 것처럼 보인다.
-static func draw_shaman_body(canvas: CanvasItem, r: float, bob: float, taegi: bool) -> void:
+##
+## facing 은 몸이 향한 각(rad), swing 은 휘두름의 진행도다.
+## swing 이 음수면 뒤로 감는 예비 동작, 양수면 앞으로 내지르는 타격이다(0 이면 평상시).
+## 몸통을 회전시키지 않는 이유: 자식으로 달린 무기(부채꼴·궤도)까지 같이 돌아간다.
+## 그래서 회전 대신 **팔·상체를 facing 쪽으로 밀어** 방향을 낸다.
+static func draw_shaman_body(canvas: CanvasItem, r: float, bob: float, taegi: bool,
+		facing: float = 0.0, swing: float = 0.0) -> void:
 	if taegi:
 		# 강림 중에는 뒤에 금빛이 번지고 발밑에 작두날이 깔린다 — 무당이 작두에 오르는 도상.
 		canvas.draw_circle(Vector2.ZERO, r * 2.4, Color(GEUMBAK.r, GEUMBAK.g, GEUMBAK.b, 0.14))
@@ -139,17 +145,42 @@ static func draw_shaman_body(canvas: CanvasItem, r: float, bob: float, taegi: bo
 		canvas.draw_circle(Vector2(0.0, r * 0.95), r * 0.72, Color(0.0, 0.0, 0.0, 0.28))
 
 	var lift := -bob * r * 0.08
+	var dir := Vector2.from_angle(facing)
+	# 상체가 휘두르는 쪽으로 쏠린다. 예비 동작(swing<0)에서는 반대로 젖혀진다.
+	var lean := dir * (r * 0.26 * swing)
+	# 팔을 어느 어깨에서 낼지. 향한 쪽 어깨에서 나가야 몸을 가로지르지 않는다.
+	var side := 1.0 if dir.x >= 0.0 else -1.0
+	var shoulder_main := Vector2(r * 0.42 * side, -r * 0.2 + lift) + lean
+	var shoulder_off := Vector2(-r * 0.42 * side, -r * 0.2 + lift) + lean * 0.4
+
+	# 뒷팔 먼저 — 몸 뒤에 깔려야 앞팔이 위로 읽힌다. 앞팔과 반대로 움직여 균형을 잡는다.
+	canvas.draw_line(shoulder_off, shoulder_off - dir * (r * (0.34 + swing * 0.30)),
+		Color(0.96, 0.91, 0.83), r * 0.17)
+
 	# 어깨 — 무복 위로 드러나는 부분만.
-	canvas.draw_line(Vector2(-r * 0.5, -r * 0.26 + lift), Vector2(r * 0.5, -r * 0.26 + lift),
-		GUNCHEONG, r * 0.2)
-	canvas.draw_circle(Vector2(0.0, -r * 0.66 + lift), r * 0.4, Color(0.96, 0.91, 0.83))
+	canvas.draw_line(Vector2(-r * 0.5, -r * 0.26 + lift) + lean,
+		Vector2(r * 0.5, -r * 0.26 + lift) + lean, GUNCHEONG, r * 0.2)
+	canvas.draw_circle(Vector2(0.0, -r * 0.66 + lift) + lean, r * 0.4, Color(0.96, 0.91, 0.83))
 	# 눈 두 점. 없으면 발광체지 사람이 아니다.
-	_draw_eyes(canvas, Vector2(0.0, -r * 0.62 + lift), r * 0.17, r * 0.07, Color(0.11, 0.11, 0.14))
-	# 고깔 — 강신무의 관
+	_draw_eyes(canvas, Vector2(0.0, -r * 0.62 + lift) + lean, r * 0.17, r * 0.07,
+		Color(0.11, 0.11, 0.14))
+	# 고깔 — 강신무의 관. 상체보다 덜 따라와야 관성이 있는 것처럼 보인다.
+	var hat_lean := lean * 0.55
 	canvas.draw_colored_polygon(PackedVector2Array([
-		Vector2(0.0, -r * 1.7 + lift), Vector2(r * 0.5, -r * 0.9 + lift),
-		Vector2(-r * 0.5, -r * 0.9 + lift)
+		Vector2(0.0, -r * 1.7 + lift) + hat_lean,
+		Vector2(r * 0.5, -r * 0.9 + lift) + hat_lean,
+		Vector2(-r * 0.5, -r * 0.9 + lift) + hat_lean
 	]), Color(0.93, 0.94, 0.97))
+
+	# 앞팔 — 무구를 쥔 손. 여기가 모션의 주역이라 마지막에 그려 맨 위로 올린다.
+	var hand := shoulder_main + dir * (r * (0.55 + swing * 0.85))
+	canvas.draw_line(shoulder_main, hand, Color(0.96, 0.91, 0.83), r * 0.19)
+	# 손. 무기가 어디서 나가는지 한 점으로 찍어 준다.
+	canvas.draw_circle(hand, r * 0.13, Color(0.96, 0.91, 0.83))
+	# 내지르는 순간에만 손끝에 잔광. 언제 터졌는지가 눈에 들어와야 한다(0-2 읽히는 설계).
+	if swing > 0.25:
+		var glow := GEUMBAK if taegi else HOBUN
+		canvas.draw_circle(hand, r * 0.32 * swing, Color(glow.r, glow.g, glow.b, 0.34 * swing))
 
 
 ## 부적 — 세로로 긴 종이. 진행 방향이 X 축이 되도록 그린다(호출부가 rotation 을 준다).

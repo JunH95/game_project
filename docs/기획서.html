@@ -247,7 +247,7 @@
           <span class="chip">규모 <b>1인 개발</b></span>
         </div>
         <div class="cover-meta">
-          보고: 개발 &rarr; 팀장 &nbsp;·&nbsp; 문서 상태: <strong>M1·M2 완료 · M3 진행 중 + 게임 필 1차 패스</strong>(무기 3종·몸주·합 3종·타격감·사운드 완료 / 남은 것: 신 로스터 확장·칠야) &nbsp;·&nbsp; 2026-07-22<br>
+          보고: 개발 &rarr; 팀장 &nbsp;·&nbsp; 문서 상태: <strong>M1·M2 완료 · M3 진행 중 + 게임 필 2차 패스</strong>(무기 3종·몸주·합 3종·타격감·사운드·<strong>휘두름 모션</strong> 완료 / 남은 것: 신 로스터 확장·칠야) &nbsp;·&nbsp; 2026-07-27<br>
           정본 지도 &mdash; 비전·서사: <code>vision.md</code> &nbsp;/&nbsp; 수치·스키마: <code>design.md</code> &nbsp;/&nbsp; 고증: <code>lore.md</code> &nbsp;/&nbsp; 구조: <code>architecture.md</code> &nbsp;·&nbsp; 이 문서는 그 종합 뷰(파생물)
         </div>
       </div>
@@ -759,7 +759,9 @@
       <div class="callout gold reveal">
         <span class="lb">1차 패스 구현 완료</span>
         테스트가 재미있으려면 최소한의 &ldquo;보는 맛&rdquo;이 필요해 M6의 앞부분을 당겨왔다 &mdash; 아트 없이 <strong>코드로 되는 것만</strong>.<br>
-        <strong>타격감</strong>: 히트스톱 + 스크린셰이크(<strong>치명에만</strong> &mdash; 평타마다 흔들면 멀미가 나고 치명의 특별함도 사라진다) · 데미지 숫자(치명은 크고 금색) · 처치 파편 · 저승 톤 배경과 떠다니는 넋 불빛.<br>
+        <strong>타격감</strong>: 히트스톱 + 스크린셰이크 · 데미지 숫자(치명은 크고 금색) · 처치 파편 · 저승 톤 배경과 떠다니는 넋 불빛.<br>
+        <strong>멈추는 것과 흔드는 것을 갈라 쓴다</strong>: 셰이크는 <strong>치명에만</strong>(평타마다 흔들면 멀미가 나고 치명의 특별함도 사라진다). 다만 <strong>히트스톱은 평타에도 아주 짧게</strong> 건다 &mdash; 치명 확률이 기본 5%라, 이게 없으면 95%의 타격이 아무 저항 없이 통과해 &ldquo;때렸다&rdquo;가 손에 오지 않는다. 부채꼴 한 번에 수십 마리를 때리므로 <strong>프레임당 한 번으로 묶어</strong> 요청한다.<br>
+        <strong>휘두름 모션</strong>: 무기만 움직이고 몸은 서 있어서 미는 것처럼 보였다 &mdash; 애초에 <strong>팔이 없었다</strong>. 팔을 넣고 휘두름을 <strong>예비&rarr;타격&rarr;복귀</strong> 세 마디로 나눴다. 타격 순간 무복에 충격을 실어 <strong>천이 채찍처럼 휩쓸린다</strong>. 절차적 천이 이미 있어 몸이 움직이면 화려함의 절반이 따라온다 &mdash; 새 그림이 필요 없다.<br>
         <strong>사운드</strong>: CC0 배포처가 차단된 환경이라 <strong>직접 합성</strong>했다(효과음 12종 + 앰비언트 루프). 무속 타악(징·장구·방울)의 성질을 흉내낸 플레이스홀더이고, <code>AudioManager</code>가 <strong>키만</strong> 알기 때문에 진짜 에셋으로 갈아 끼울 때 코드는 바뀌지 않는다.
       </div>
 

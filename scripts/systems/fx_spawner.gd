@@ -16,8 +16,18 @@ const BIG_HITSTOP: float = 0.12
 const BIG_SHAKE: float = 11.0
 const BIG_SHAKE_TIME: float = 0.35
 
+## 평타에도 아주 짧게 시간을 씹어야 "맞았다"가 손에 온다. 셰이크는 여기에 붙이지 않는다
+## (14-1: 평타마다 흔들면 멀미가 난다) — 흔들지 않고 멈추기만 한다.
+const HIT_HITSTOP: float = 0.018
+## 한 번에 여러 마리를 벨수록 조금 더 씹힌다. 상한이 없으면 무리 한가운데서 화면이 정지한다.
+const HIT_HITSTOP_PER_EXTRA: float = 0.004
+const HIT_HITSTOP_MAX: float = 0.042
+
 ## 체력이 줄었는지 판정하려고 직전 값을 들고 있는다.
 var _last_hp: float = 0.0
+## 같은 프레임에 들어온 타격 수. damage_dealt 는 맞은 적마다 오므로 부채꼴 한 번에 수십 번
+## 올 수 있고, 그때마다 히트스톱을 걸면 화면이 멎는다. 프레임당 한 번으로 묶는다.
+var _frame_hits: int = 0
 
 
 func _ready() -> void:
@@ -37,9 +47,20 @@ func _on_damage_dealt(world_position: Vector2, amount: float, is_crit: bool) -> 
 			# 적 머리 위에서 뜨게 살짝 올린다.
 			number.global_position = world_position + Vector2(0.0, -14.0)
 			number.setup(amount, is_crit)
+	_frame_hits += 1
 	if is_crit:
 		GameFeel.hitstop(CRIT_HITSTOP)
 		GameFeel.shake(CRIT_SHAKE, CRIT_SHAKE_TIME)
+
+
+## 프레임이 끝날 때 그 프레임의 타격을 한 번으로 묶어 씹는다.
+## GameFeel.hitstop 은 더 센 요청이 이기므로 치명이 섞여 있으면 치명 쪽이 그대로 남는다.
+func _process(_delta: float) -> void:
+	if _frame_hits <= 0:
+		return
+	var extra := float(_frame_hits - 1) * HIT_HITSTOP_PER_EXTRA
+	GameFeel.hitstop(minf(HIT_HITSTOP + extra, HIT_HITSTOP_MAX))
+	_frame_hits = 0
 
 
 func _on_enemy_died(enemy: Node2D, world_position: Vector2) -> void:
