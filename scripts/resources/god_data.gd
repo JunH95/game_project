@@ -23,7 +23,10 @@ extends Resource
 @export var is_momju: bool = false
 ## 몸주로 골랐을 때 쥐고 시작하는 무기 id. 몸주 3종이 서로 다른 무기를 준다(design.md 3-1-1).
 @export var momju_weapon: StringName
-## 몸주로 골랐을 때만 붙는 패시브 훅 키.
+## 몸주로 골랐을 때만 한 번 붙는 스탯 수정자(레벨과 무관). stat_mods 와 키 체계는 같다.
+## 수치형 패시브를 문자열 훅으로 처리하면 키마다 코드 분기가 생겨 데이터로 둔다.
+@export var momju_stat_mods: Dictionary
+## 몸주로 골랐을 때만 붙는 특수 훅 키(작두타기 게이지처럼 수치로 표현 못 하는 것).
 @export var momju_passive: StringName
 
 ## 시그니처 메커닉 훅 키. 없으면 빈 값 (손님신/바리공주 같은 특수 신만 사용)

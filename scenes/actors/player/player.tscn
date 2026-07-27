@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://scenes/actors/player/player.gd" id="1_player"]
 [ext_resource type="Script" path="res://scripts/components/movement_component.gd" id="2_move"]
@@ -9,6 +9,8 @@
 [ext_resource type="Script" path="res://scripts/components/bujeok_weapon.gd" id="7_bujeok"]
 [ext_resource type="Resource" path="res://data/weapons/bujeok.tres" id="8_bujeok_data"]
 [ext_resource type="PackedScene" path="res://scenes/actors/projectiles/bujeok.tscn" id="9_bujeok_proj"]
+[ext_resource type="Script" path="res://scripts/components/eonwoldo_weapon.gd" id="10_eonwoldo"]
+[ext_resource type="Resource" path="res://data/weapons/eonwoldo.tres" id="11_eonwoldo_data"]
 
 [sub_resource type="CircleShape2D" id="Shape_body"]
 radius = 12.0
@@ -63,5 +65,10 @@ unique_name_in_owner = true
 script = ExtResource("7_bujeok")
 data = ExtResource("8_bujeok_data")
 projectile_scene = ExtResource("9_bujeok_proj")
+
+[node name="EonwoldoWeapon" type="Node2D" parent="."]
+unique_name_in_owner = true
+script = ExtResource("10_eonwoldo")
+data = ExtResource("11_eonwoldo_data")
 
 [node name="Camera2D" type="Camera2D" parent="."]

@@ -9,7 +9,8 @@ const RADIUS: float = 12.0
 @export var god_system_path: NodePath
 
 var _god_system: Node
-var _bujeok: Node
+## { weapon_id: 무기 노드 } — 몸주·신이 열어 준 것만 켠다.
+var _weapons: Dictionary = {}
 var _base_speed: float = 0.0
 var _base_max_hp: float = 0.0
 var _base_magnet_radius: float = 0.0
@@ -37,17 +38,21 @@ func _ready() -> void:
 		magnet_shape.shape = magnet_shape.shape.duplicate()
 		_base_magnet_radius = (magnet_shape.shape as CircleShape2D).radius
 
-	var jakdu := get_node_or_null(^"%JakduWeapon")
-	if jakdu != null:
-		jakdu.god_system = _god_system
-	_bujeok = get_node_or_null(^"%BujeokWeapon")
-	if _bujeok != null:
-		_bujeok.god_system = _god_system
-		# 부적은 시작 무기가 아니다. 칠성신을 모셔야 열린다(design.md 2-1).
-		_bujeok.process_mode = Node.PROCESS_MODE_DISABLED
+	# 어떤 무기를 들고 시작할지는 몸주가 정한다(design.md 3-1-1). 그래서 전부 꺼 두고
+	# 몸주·신이 열어 주는 것만 켠다. 작두도 예외가 아니다 — 작도대신의 시작 무기일 뿐이다.
+	_weapons = {
+		&"jakdu": get_node_or_null(^"%JakduWeapon"),
+		&"bujeok": get_node_or_null(^"%BujeokWeapon"),
+		&"eonwoldo": get_node_or_null(^"%EonwoldoWeapon"),
+	}
+	for weapon in _weapons.values():
+		if weapon != null:
+			weapon.god_system = _god_system
+			weapon.process_mode = Node.PROCESS_MODE_DISABLED
 
 	if _god_system != null:
 		EventBus.player_leveled_up.connect(_on_leveled_up)
+		EventBus.momju_chosen.connect(_on_momju_chosen)
 
 	# health_changed 는 피격 때만 오므로 시작 체력을 한 번 알린다.
 	# 지연시키는 이유: 플레이어가 HUD 보다 먼저 _ready 를 돌아, 즉시 쏘면 구독 전에 사라진다.
@@ -60,6 +65,11 @@ func _announce_health() -> void:
 
 ## 신을 새로 모시면 능력치를 다시 계산한다. 레벨업 UI 가 닫힌 뒤에 반영된다.
 func _on_leveled_up(_new_level: int) -> void:
+	_apply_god_mods.call_deferred()
+
+
+## 몸주가 정해지면 시작 무기와 패시브가 붙는다. 런 시작의 첫 갱신이다.
+func _on_momju_chosen(_god: GodData) -> void:
 	_apply_god_mods.call_deferred()
 
 
@@ -84,9 +94,11 @@ func _apply_god_mods() -> void:
 	# 방어 계열 신(신장)은 받는 피해를 줄인다.
 	_hurtbox.damage_multiplier = _god_system.get_multiplier(&"damage_taken_pct")
 
-	# 신이 무기를 열어 준다. 한 번 열리면 런이 끝날 때까지 유지된다.
-	if _bujeok != null and _god_system.grants_weapon(&"bujeok"):
-		_bujeok.process_mode = Node.PROCESS_MODE_INHERIT
+	# 몸주와 신이 무기를 열어 준다. 한 번 열리면 런이 끝날 때까지 유지된다.
+	for weapon_id: StringName in _weapons:
+		var weapon: Node = _weapons[weapon_id]
+		if weapon != null and _god_system.grants_weapon(weapon_id):
+			weapon.process_mode = Node.PROCESS_MODE_INHERIT
 
 
 ## 자석 반경에 들어온 픽업은 플레이어를 향해 끌려온다. 수집 판정은 픽업 쪽이 한다.

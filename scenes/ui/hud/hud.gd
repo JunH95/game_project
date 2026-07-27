@@ -39,6 +39,8 @@ func _ready() -> void:
 	_god_system = _resolve(god_system_path, "GodSystem")
 	EventBus.player_health_changed.connect(_on_health_changed)
 	EventBus.player_leveled_up.connect(_on_leveled_up)
+	# 몸주가 첫 신이다. 여기서 갱신하지 않으면 런 내내 "모신 신 없음"으로 시작한다.
+	EventBus.momju_chosen.connect(_on_momju_chosen)
 
 
 func _resolve(path: NodePath, label: String) -> Node:
@@ -68,8 +70,12 @@ func _process(_delta: float) -> void:
 	]
 
 
-## 신 목록은 레벨업 때만 바뀌므로 매 프레임 다시 만들지 않는다.
+## 신 목록은 몸주 확정·레벨업 때만 바뀌므로 매 프레임 다시 만들지 않는다.
 func _on_leveled_up(_new_level: int) -> void:
+	_refresh_gods.call_deferred()
+
+
+func _on_momju_chosen(_god: GodData) -> void:
 	_refresh_gods.call_deferred()
 
 

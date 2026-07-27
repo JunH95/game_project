@@ -11,6 +11,7 @@ signal enemy_died(enemy: Node2D, world_position: Vector2)
 signal xp_collected(amount: int)
 signal wonhon_collected(amount: int)
 signal player_leveled_up(new_level: int)
+signal momju_chosen(god: GodData)
 signal player_health_changed(current_hp: float, max_hp: float)
 signal player_died
 signal gate_cleared(gate_id: StringName)

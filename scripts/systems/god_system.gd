@@ -25,10 +25,13 @@ const DEFAULT_GOD_PATHS: PackedStringArray = [
 
 ## { god_id: level }
 var _served: Dictionary = {}
+## 이번 런의 몸주. 시작 무기와 패시브의 출처이고, 기운의 기본값이다(design.md 3-1).
+var _momju: GodData = null
 
 
 func _ready() -> void:
 	_served.clear()
+	_momju = null
 	if available_gods.is_empty():
 		_load_default_gods()
 
@@ -42,15 +45,41 @@ func _load_default_gods() -> void:
 		available_gods.append(god)
 
 
-## 해당 수정자 키의 총합. 신마다 (레벨당 값 × 레벨)을 더한다.
+## 몸주로 고를 수 있는 신 목록(런 시작 화면용). 해금 연동은 M4(신당).
+func get_momju_candidates() -> Array[GodData]:
+	var candidates: Array[GodData] = []
+	for god in available_gods:
+		if god != null and god.is_momju:
+			candidates.append(god)
+	return candidates
+
+
+func get_momju() -> GodData:
+	return _momju
+
+
+## 런 시작 시 한 번. 몸주는 Lv1 로 모신 상태에서 출발한다(design.md 3-1 — 3택1 풀에도 포함된다).
+func set_momju(god: GodData) -> void:
+	if god == null:
+		push_error("GodSystem.set_momju: god 이 null 이다.")
+		return
+	_momju = god
+	RunManager.momju_id = god.id
+	serve(god)
+	EventBus.momju_chosen.emit(god)
+
+
+## 해당 수정자 키의 총합. 신마다 (레벨당 값 × 레벨)을 더하고, 몸주면 패시브를 한 번 더 얹는다.
 func get_mod(key: StringName) -> float:
 	var total := 0.0
 	for god in available_gods:
 		if god == null or not _served.has(god.id):
 			continue
-		if not god.stat_mods.has(key):
-			continue
-		total += float(god.stat_mods[key]) * float(_served[god.id])
+		if god.stat_mods.has(key):
+			total += float(god.stat_mods[key]) * float(_served[god.id])
+	# 몸주 패시브는 레벨과 무관하게 한 번만 붙는다.
+	if _momju != null and _momju.momju_stat_mods.has(key):
+		total += float(_momju.momju_stat_mods[key])
 	return total
 
 
@@ -63,8 +92,10 @@ func get_level(god_id: StringName) -> int:
 	return int(_served.get(god_id, 0))
 
 
-## 모시는 신 중 이 무기를 부여하는 신이 있는지(design.md 2-1).
+## 이 무기를 지금 들고 있는지 — 몸주가 준 시작 무기이거나, 모시는 신이 부여했거나(design.md 2-1).
 func grants_weapon(weapon_id: StringName) -> bool:
+	if _momju != null and _momju.momju_weapon == weapon_id:
+		return true
 	for god in available_gods:
 		if god == null or not _served.has(god.id):
 			continue
@@ -74,7 +105,7 @@ func grants_weapon(weapon_id: StringName) -> bool:
 
 
 ## 지금 실린 기운(design.md 3-3). 모시는 신을 오행별로 묶어 레벨 합이 가장 큰 오행.
-## 동률이거나 모신 신이 없으면 빈 값 — 몸주 오행은 몸주 선택이 생기는 M4 에서 넘겨받는다.
+## 동률이면 몸주의 오행으로 확정한다 — 런 시작 기운이 몸주 오행인 것도 이 규칙에서 나온다.
 func get_element() -> StringName:
 	var totals: Dictionary = {}
 	for god in available_gods:
@@ -93,7 +124,9 @@ func get_element() -> StringName:
 			tied = false
 		elif total == best_total:
 			tied = true
-	return &"" if tied else best
+	if tied or best == &"":
+		return _momju.element if _momju != null else &""
+	return best
 
 
 func get_served() -> Dictionary:

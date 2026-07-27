@@ -9,6 +9,11 @@ display_name = "작도대신"
 tier = 1
 max_level = 5
 element = &"metal"
+is_momju = true
+momju_weapon = &"jakdu"
+momju_stat_mods = {
+"jakdu_damage_pct": 10.0
+}
 stat_mods = {
 "jakdu_arc_deg": 8.0,
 "jakdu_damage_pct": 15.0

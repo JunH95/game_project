@@ -8,6 +8,8 @@ var elapsed_sec: float = 0.0
 var level: int = 1
 var kills: int = 0
 var served_gods: Array = []
+## 이번 런의 몸주 id. 런 시작 화면에서 정해진다(design.md 3-1).
+var momju_id: StringName = &""
 
 
 func _ready() -> void:
@@ -25,3 +27,4 @@ func reset_run() -> void:
 	level = 1
 	kills = 0
 	served_gods.clear()
+	momju_id = &""

@@ -9,6 +9,11 @@ display_name = "칠성신"
 tier = 1
 max_level = 5
 element = &"water"
+is_momju = true
+momju_weapon = &"bujeok"
+momju_stat_mods = {
+"bujeok_count": 1.0
+}
 grants_weapon = &"bujeok"
 stat_mods = {
 "bujeok_count": 0.34,
