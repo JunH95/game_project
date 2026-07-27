@@ -247,7 +247,7 @@
           <span class="chip">규모 <b>1인 개발</b></span>
         </div>
         <div class="cover-meta">
-          보고: 개발 &rarr; 팀장 &nbsp;·&nbsp; 문서 상태: <strong>M1·M2 완료 · M3 진행 중</strong>(무기 3종·몸주·데미지 공식·합 프레임·작두타기 완료 / 남은 것: 신 로스터 확장·합 3종) &nbsp;·&nbsp; 2026-07-22<br>
+          보고: 개발 &rarr; 팀장 &nbsp;·&nbsp; 문서 상태: <strong>M1·M2 완료 · M3 진행 중</strong>(무기 3종·몸주·데미지 공식·합 3종 완료 / 남은 것: 신 로스터 확장·칠야) &nbsp;·&nbsp; 2026-07-22<br>
           정본 지도 &mdash; 비전·서사: <code>vision.md</code> &nbsp;/&nbsp; 수치·스키마: <code>design.md</code> &nbsp;/&nbsp; 고증: <code>lore.md</code> &nbsp;/&nbsp; 구조: <code>architecture.md</code> &nbsp;·&nbsp; 이 문서는 그 종합 뷰(파생물)
         </div>
       </div>
@@ -474,13 +474,13 @@
           <thead><tr><th>몸주</th><th>+ 모시는 신</th><th>시그니처 &lsquo;합&rsquo; (초안)</th></tr></thead>
           <tbody>
             <tr><td rowspan="2"><strong>작도대신</strong></td><td>최영장군</td><td><strong>장군 강림</strong> <span class="tag t-gak">구현 완료</span> &mdash; 작두타기를 연다. 기세가 차면 6초간 사방(360°) 베기</td></tr>
-            <tr><td>산신</td><td>작두 공격이 <strong>궤도형(orbit)</strong>으로 변해 상시 주변을 벤다</td></tr>
-            <tr><td rowspan="2"><strong>칠성신</strong></td><td>월광보살</td><td>야간에 부적 7발이 <strong>유도 폭발</strong>로 전환</td></tr>
-            <tr><td>신장</td><td>부적 명중 시 잡귀가 튀어나와 <strong>적을 결박</strong></td></tr>
+            <tr><td>산신</td><td><strong>궤도 작두</strong> <span class="tag t-gak">구현 완료</span> &mdash; 흰 날 3개가 상시 회전(damage 60%). 작두 스윙은 <strong>그대로 유지</strong></td></tr>
+            <tr><td rowspan="2"><strong>칠성신</strong></td><td>월광보살</td><td>칠야(七夜) &mdash; 부적 착탄 시 소폭발 <span class="tag t-mi">미구현</span></td></tr>
+            <tr><td>산신</td><td><strong>북두 방벽</strong> <span class="tag t-gak">구현 완료</span> &mdash; 부적이 몸 둘레를 돈다(damage 50%). 칠성신을 깊이 모실수록 두터워진다</td></tr>
           </tbody>
         </table>
       </div>
-      <p class="col muted reveal"><strong>프레임 구현 완료(M3)</strong> &mdash; 합 성립 판정은 <code>SynergySystem</code>이 하고 효과 실행은 각 시스템이 맡는다(효과를 한곳에 모으면 합이 늘 때마다 부푼다). 첫 합 <strong>장군 강림</strong>이 <span class="tag t-go">고증</span> 작두타기를 연다 &mdash; 장군신이 실제로 강림했을 때만 작두를 탄다는 원형이 그대로 규칙이 됐다. 나머지 3종은 각자 host 메커닉(무기 궤도 재사용·밤 상태)이 없어 미구현.<br>출시엔 <strong>몸주별 시그니처 합 소수</strong>로 기본을 잡고, <code>SynergyData</code>(<code>.tres</code>)로 데이터만 추가하면 합이 늘어나게 설계해 <strong>출시 후 대량 확장</strong>한다. 로스터가 커질수록 합도 늘어난다. (MVP 신 세트·합 정본 수치는 <code>design.md §3-4/3-5</code>.)</p>
+      <p class="col muted reveal"><strong>프레임 구현 완료(M3)</strong> &mdash; 합 성립 판정은 <code>SynergySystem</code>이 하고 효과 실행은 각 시스템이 맡는다(효과를 한곳에 모으면 합이 늘 때마다 부푼다). 첫 합 <strong>장군 강림</strong>이 <span class="tag t-go">고증</span> 작두타기를 연다 &mdash; 장군신이 실제로 강림했을 때만 작두를 탄다는 원형이 그대로 규칙이 됐다. <strong>궤도는 <code>OrbitBlades</code> 컴포넌트 하나가 셋을 다 돌린다</strong>(언월도 + 합 궤도 2종) &mdash; 반경·속도를 갈라 눈으로 구분된다(언월도 70 / 궤도 작두 55 / 북두 방벽 95). 남은 건 <strong>칠야</strong> 하나로, "밤 상태"가 정의된 적 없어 host부터 정해야 한다.<br>출시엔 <strong>몸주별 시그니처 합 소수</strong>로 기본을 잡고, <code>SynergyData</code>(<code>.tres</code>)로 데이터만 추가하면 합이 늘어나게 설계해 <strong>출시 후 대량 확장</strong>한다. 로스터가 커질수록 합도 늘어난다. (MVP 신 세트·합 정본 수치는 <code>design.md §3-4/3-5</code>.)</p>
 
       <!-- 5.3 무기 -->
       <h3 class="reveal">5.3 무기 &mdash; 작두 · 부적 · 언월도</h3>
@@ -907,7 +907,7 @@
         <div class="node done"><div class="lab">M0 · 초석 <span class="tag t-go" style="margin-left:.3rem">완료</span></div><div class="muted">폴더·규칙·<code>design.md</code>·인풋맵·충돌 레이어·git·부트스트랩 씬 + autoload 스텁. 게임플레이 없음.</div></div>
         <div class="node done"><div class="lab">M1 · 코어 루프 슬라이스 <span class="tag t-go" style="margin-left:.3rem">완료</span></div><div class="muted">8방향 이동 + 작두 자동공격 + 추격 적 스폰/처치 + XP 젬/레벨업 + 신 3택1 + 5분 관문·결과 화면. 도형 플레이스홀더.</div></div>
         <div class="node done"><div class="lab">M2 · 무기 확장 + 풀링 <span class="tag t-go" style="margin-left:.3rem">완료</span></div><div class="muted"><code>ObjectPool</code> · 부적(유도) · <strong>언월도(궤도)</strong> · 적 3종 · 정식 HUD · 일시정지.</div></div>
-        <div class="node now"><div class="lab">M3 · 신내림 정식 <span class="now-badge">현재</span></div><div class="muted">완료: 몸주 선택, 몸주 3 ↔ 무기 3, 데미지 공식·치명·오행, <strong>합 프레임 + 장군 강림(작두타기)</strong>. 남은 것: 신 로스터 확장, 나머지 합 3종.</div></div>
+        <div class="node now"><div class="lab">M3 · 신내림 정식 <span class="now-badge">현재</span></div><div class="muted">완료: 몸주 선택, 몸주 3 ↔ 무기 3, 데미지 공식·치명·오행, <strong>합 프레임 + 합 3종</strong>(장군 강림·궤도 작두·북두 방벽). 남은 것: 신 로스터 확장, 칠야.</div></div>
         <div class="node"><div class="lab">M4 · 신당 메타 루프</div><div class="muted">원혼 재화, 세이브 저장/로드, 타이틀&rarr;신당&rarr;런&rarr;정산 사이클.</div></div>
         <div class="node"><div class="lab">M5 · 풀 관문 1개 (화탕)</div><div class="muted">WaveTable 램프, 관문별 적 세트, 관문 기믹, 오행 상성, 저승사자 미니보스 + 관문 보스, 클리어 흐름.</div></div>
         <div class="node"><div class="lab">M6 · 아트 · 비주얼 완성 패스 <span class="tag t-gak" style="margin-left:.3rem">격상</span></div><div class="muted">플레이스홀더 &rarr; 무신도 톤 아트 교체 + 셰이더·파티클. 히트스톱·스크린셰이크·데미지 숫자·히트 플래시·넉백 튜닝. <strong>화려함을 여기 몰아넣는다.</strong></div></div>
