@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://dexox5mrtlgpm"]
+[gd_scene load_steps=13 format=3 uid="uid://dexox5mrtlgpm"]
 
 [ext_resource type="Script" path="res://scenes/background.gd" id="1_bg"]
 [ext_resource type="PackedScene" path="res://scenes/actors/player/player.tscn" id="2_player"]
@@ -11,6 +11,8 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/hud/hud.tscn" id="9_hud"]
 [ext_resource type="Script" path="res://scripts/systems/god_system.gd" id="10_god"]
 [ext_resource type="PackedScene" path="res://scenes/ui/level_up/god_select.tscn" id="11_select"]
+[ext_resource type="Script" path="res://scripts/systems/gate_timer.gd" id="12_timer"]
+[ext_resource type="PackedScene" path="res://scenes/ui/run_result/run_result.tscn" id="13_result"]
 
 [node name="Main" type="Node2D"]
 
@@ -37,8 +39,15 @@ xp_gem_scene = ExtResource("7_gem")
 unique_name_in_owner = true
 script = ExtResource("8_level")
 
+[node name="GateTimer" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("12_timer")
+
 [node name="Hud" parent="." instance=ExtResource("9_hud")]
 level_system_path = NodePath("../LevelSystem")
+gate_timer_path = NodePath("../GateTimer")
 
 [node name="GodSelect" parent="." instance=ExtResource("11_select")]
 god_system_path = NodePath("../GodSystem")
+
+[node name="RunResult" parent="." instance=ExtResource("13_result")]

@@ -75,6 +75,9 @@ func _apply_god_mods() -> void:
 		var circle := magnet_shape.shape as CircleShape2D
 		circle.radius = _base_magnet_radius * _god_system.get_multiplier(&"pickup_radius_pct")
 
+	# 방어 계열 신(신장)은 받는 피해를 줄인다.
+	_hurtbox.damage_multiplier = _god_system.get_multiplier(&"damage_taken_pct")
+
 
 ## 자석 반경에 들어온 픽업은 플레이어를 향해 끌려온다. 수집 판정은 픽업 쪽이 한다.
 func _on_magnet_area_entered(area: Area2D) -> void:
@@ -95,9 +98,10 @@ func _on_health_changed(current: float, maximum: float) -> void:
 	tween.tween_property(self, "modulate", Color.WHITE, 0.3)
 
 
+## 죽으면 알리기만 한다. 결과 화면 표시와 재시작은 RunResult 가 맡는다
+## (즉시 리로드하면 무엇 때문에 죽었는지 볼 새도 없이 판이 넘어간다).
 func _on_died() -> void:
 	EventBus.player_died.emit()
-	get_tree().reload_current_scene()
 
 
 func _draw() -> void:

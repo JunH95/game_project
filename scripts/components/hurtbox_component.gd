@@ -9,6 +9,9 @@ extends Area2D
 ## 피격 후 무적 시간(i-frame). 겹침 지속 시 이 주기마다 다시 맞는다. 0 이면 매 프레임.
 @export var invuln_time: float = 0.0
 
+## 받는 피해 배율. 방어 계열 신(신장)이 이 값을 낮춘다. 소유 액터가 갱신한다.
+var damage_multiplier: float = 1.0
+
 var _invuln_left: float = 0.0
 var _overlapping: Array[HitboxComponent] = []
 
@@ -30,7 +33,7 @@ func _process(delta: float) -> void:
 		if is_instance_valid(hitbox):
 			dmg = maxf(dmg, hitbox.damage)
 	if dmg > 0.0:
-		health.take_damage(dmg)
+		health.take_damage(dmg * damage_multiplier)
 		_invuln_left = invuln_time
 
 

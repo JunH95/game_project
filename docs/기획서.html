@@ -247,7 +247,7 @@
           <span class="chip">규모 <b>1인 개발</b></span>
         </div>
         <div class="cover-meta">
-          보고: 개발 &rarr; 팀장 &nbsp;·&nbsp; 문서 상태: <strong>M1 코어 루프 구현 중</strong>(이동·적·작두·XP·신 3택1 완료) &nbsp;·&nbsp; 2026-07-22<br>
+          보고: 개발 &rarr; 팀장 &nbsp;·&nbsp; 문서 상태: <strong>M1 코어 루프 완료</strong>(이동·적·작두·XP/레벨업·신 3택1·5분 관문) &nbsp;·&nbsp; 2026-07-22<br>
           정본 지도 &mdash; 비전·서사: <code>vision.md</code> &nbsp;/&nbsp; 수치·스키마: <code>design.md</code> &nbsp;/&nbsp; 고증: <code>lore.md</code> &nbsp;/&nbsp; 구조: <code>architecture.md</code> &nbsp;·&nbsp; 이 문서는 그 종합 뷰(파생물)
         </div>
       </div>
@@ -421,11 +421,13 @@
             <tr><td><strong>작도대신</strong></td><td class="val">金</td><td>○ 기본</td><td>작두 damage +15%, arc +8°</td></tr>
             <tr><td><strong>최영장군</strong></td><td class="val">火</td><td>○</td><td><strong>쿨다운 −7%</strong>, 언월도 날 수 +1(3레벨마다)</td></tr>
             <tr><td><strong>칠성신</strong></td><td class="val">水</td><td>○</td><td>부적 damage +15%, 발수 +1(3레벨마다)</td></tr>
-            <tr><td>산신</td><td class="val">土</td><td>—</td><td>max HP +12%, <strong>넉백 +20%</strong></td></tr>
+            <tr><td>산신</td><td class="val">木</td><td>—</td><td>max HP +12%, <strong>넉백 +20%</strong></td></tr>
             <tr><td>월광보살</td><td class="val">水</td><td>—</td><td><strong>치명률 +4%p</strong>, 이동속도 +8%</td></tr>
+            <tr><td>신장</td><td class="val">土</td><td>—</td><td><strong>받는 피해 −6%</strong>, 넉백 +10%</td></tr>
           </tbody>
         </table>
       </div>
+      <p class="col muted reveal"><strong>오행 5속성 완비</strong> &mdash; 金 작도대신 · 火 최영장군 · 水 칠성신·월광보살 · 木 산신 · 土 신장. &ldquo;실린 기운&rdquo; 규칙은 5속성 전부에 닿아야 의미가 살기 때문에 MVP부터 빈 속성을 두지 않는다. <span class="tag t-gak">각색</span> 산신이 木인 근거는 산=숲·나무·호랑이의 영역이고 효과도 max HP(생명)이기 때문. 土는 땅의 잡귀를 부리는 <strong>신장</strong>이 가져가며 <strong>방어(받는 피해 감소)</strong>라는 새 축을 연다.</p>
 
       <h4 class="reveal">신 로스터 &mdash; 문헌 확인된 신격만 <span class="tag t-go">이름·상징=고증</span> <span class="tag t-gak">효과=각색</span></h4>
       <div class="tbl-wrap reveal">
@@ -609,8 +611,8 @@
           <thead><tr><th>관문</th><th>오행</th><th>강함 (이 기운이면)</th><th>약함</th></tr></thead>
           <tbody>
             <tr><td>화탕(불가마)</td><td class="val">火</td><td>水 &mdash; 칠성신·월광보살 (수극화)</td><td>金 &mdash; 작도대신 (화극금)</td></tr>
-            <tr><td>얼음(한빙)</td><td class="val">水</td><td>土 &mdash; 산신 (토극수)</td><td>火 &mdash; 최영장군</td></tr>
-            <tr><td>칼산(칼의 산)</td><td class="val">金</td><td>火 &mdash; 최영장군 (화극금)</td><td>木</td></tr>
+            <tr><td>얼음(한빙)</td><td class="val">水</td><td>土 &mdash; 신장 (토극수)</td><td>火 &mdash; 최영장군</td></tr>
+            <tr><td>칼산(칼의 산)</td><td class="val">金</td><td>火 &mdash; 최영장군 (화극금)</td><td>木 &mdash; 산신</td></tr>
           </tbody>
         </table>
       </div>
@@ -887,8 +889,8 @@
       <p class="lead col reveal">철학은 하나 &mdash; <strong>&ldquo;작동하는 최소 버전&rdquo;</strong>. 큰 그림은 크게, 첫 조각은 작게. 각 마일스톤은 그 자체로 플레이 가능한 증분이다.</p>
       <div class="axis reveal" style="margin-top:1.6rem">
         <div class="node done"><div class="lab">M0 · 초석 <span class="tag t-go" style="margin-left:.3rem">완료</span></div><div class="muted">폴더·규칙·<code>design.md</code>·인풋맵·충돌 레이어·git·부트스트랩 씬 + autoload 스텁. 게임플레이 없음.</div></div>
-        <div class="node now"><div class="lab">M1 · 코어 루프 슬라이스 <span class="now-badge">현재</span></div><div class="muted">8방향 이동 + 작두 자동공격 + 추격 적 1종 스폰/처치 + XP 젬/레벨업 + 신 3택1 + 5분 생존. 도형 플레이스홀더.</div></div>
-        <div class="node"><div class="lab">M2 · 2번째 무기 + 풀링</div><div class="muted">부적 유도, <code>ObjectPool</code>, 적 2~3종, HUD, 일시정지.</div></div>
+        <div class="node done"><div class="lab">M1 · 코어 루프 슬라이스 <span class="tag t-go" style="margin-left:.3rem">완료</span></div><div class="muted">8방향 이동 + 작두 자동공격 + 추격 적 스폰/처치 + XP 젬/레벨업 + 신 3택1 + 5분 관문·결과 화면. 도형 플레이스홀더.</div></div>
+        <div class="node now"><div class="lab">M2 · 2번째 무기 + 풀링 <span class="now-badge">다음</span></div><div class="muted">부적 유도, <code>ObjectPool</code>, 적 2~3종, HUD, 일시정지.</div></div>
         <div class="node"><div class="lab">M3 · 신내림 정식</div><div class="muted"><code>GodData</code> 리소스, 신 4, 스택, 실제 3택1 UI, 작두타기 2단, 기본 &lsquo;합&rsquo;(<code>SynergyData</code>).</div></div>
         <div class="node"><div class="lab">M4 · 신당 메타 루프</div><div class="muted">원혼 재화, 세이브 저장/로드, 타이틀&rarr;신당&rarr;런&rarr;정산 사이클.</div></div>
         <div class="node"><div class="lab">M5 · 풀 관문 1개 (화탕)</div><div class="muted">WaveTable 램프, 관문별 적 세트, 관문 기믹, 오행 상성, 저승사자 미니보스 + 관문 보스, 클리어 흐름.</div></div>

@@ -20,6 +20,7 @@ const DEFAULT_GOD_PATHS: PackedStringArray = [
 	"res://data/gods/sansin.tres",
 	"res://data/gods/wolgwang.tres",
 	"res://data/gods/chilseong.tres",
+	"res://data/gods/sinjang.tres",
 ]
 
 ## { god_id: level }

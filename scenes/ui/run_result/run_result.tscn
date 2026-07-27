@@ -1,0 +1,48 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scenes/ui/run_result/run_result.gd" id="1_result"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.039216, 0.039216, 0.070588, 0.85)
+
+[node name="RunResult" type="CanvasLayer"]
+layer = 20
+process_mode = 3
+script = ExtResource("1_result")
+
+[node name="Panel" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="Center" type="CenterContainer" parent="Panel"]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="Panel/Center"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="TitleLabel" type="Label" parent="Panel/Center/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 48
+text = "관문을 넘었다"
+horizontal_alignment = 1
+
+[node name="StatsLabel" type="Label" parent="Panel/Center/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "버틴 시간 0:00    처치 0    레벨 1"
+horizontal_alignment = 1
+
+[node name="HintLabel" type="Label" parent="Panel/Center/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.61176, 0.58039, 0.51765, 1)
+theme_override_font_sizes/font_size = 16
+text = "Enter · Esc — 다시 시작"
+horizontal_alignment = 1

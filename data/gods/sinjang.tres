@@ -4,13 +4,13 @@
 
 [resource]
 script = ExtResource("1_script")
-id = &"sansin"
-display_name = "산신"
+id = &"sinjang"
+display_name = "신장"
 tier = 1
 max_level = 5
-element = &"wood"
+element = &"earth"
 stat_mods = {
-"knockback_pct": 20.0,
-"max_hp_pct": 12.0
+"damage_taken_pct": -6.0,
+"knockback_pct": 10.0
 }
-description = "산의 신. 숲의 기운으로 명이 붙고, 후려치는 힘이 실린다."
+description = "잡귀를 부리는 신. 땅의 기운이 몸을 지켜 맞는 피해가 줄어든다."
