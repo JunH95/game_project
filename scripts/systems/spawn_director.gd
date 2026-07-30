@@ -43,7 +43,10 @@ extends Node2D
 @export var elite_interval: float = 38.0
 
 @export_group("공통")
-@export var spawn_radius: float = 700.0
+## 화면 밖 링의 반지름. 카메라 줌 1.6 에서 보이는 범위의 반대각선이 약 413px 이므로,
+## 그보다 조금 밖에 둔다. 너무 멀면 적이 도착하기까지 화면이 비고, 너무 가까우면
+## 눈앞에서 튀어나온다.
+@export var spawn_radius: float = 460.0
 @export var max_alive: int = 200
 
 var _target: Node2D

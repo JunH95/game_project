@@ -101,3 +101,4 @@ blade_color = Color(0.95, 0.82, 0.28, 0.9)
 required_synergy = &"bujeok_shield"
 
 [node name="Camera2D" type="Camera2D" parent="."]
+zoom = Vector2(1.6, 1.6)
