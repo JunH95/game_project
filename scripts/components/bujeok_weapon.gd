@@ -6,6 +6,9 @@ extends Node2D
 ##
 ## 사거리 제약이 사실상 없어 조준 대상만 있으면 쏜다. 발수(count)는 칠성신 계열이 늘린다.
 
+## 쏜 순간을 알린다. 몸이 던지는 동작을 해야 무기가 혼자 날아가는 것처럼 보이지 않는다.
+signal fired(direction: Vector2)
+
 @export var data: WeaponData
 @export var projectile_scene: PackedScene
 
@@ -33,7 +36,9 @@ func _process(delta: float) -> void:
 	if target == null:
 		return
 	_cooldown_left = _get_cooldown()
-	_fire((target.global_position - global_position).normalized())
+	var direction := (target.global_position - global_position).normalized()
+	_fire(direction)
+	fired.emit(direction)
 
 
 func _find_nearest_enemy() -> Node2D:

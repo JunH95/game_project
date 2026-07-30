@@ -40,6 +40,8 @@ var _taegi: bool = false
 ## 휘두름 경과 시간. 0 보다 크면 모션 중이다.
 var _swing_time: float = 0.0
 var _swing_total: float = 0.0
+## 지금 하고 있는 동작의 종류(베기/던지기/들기). 마지막으로 나간 무기가 정한다.
+var _pose: StringName = PlaceholderArt.POSE_SLASH
 var _bob_phase: float = 0.0
 ## 0.0~1.0. 걸을수록 오르고 멈추면 내려간다. 흔들림의 크기를 여기에 곱한다.
 var _bob_weight: float = 0.0
@@ -90,7 +92,10 @@ func _ready() -> void:
 	if jakdu != null:
 		jakdu.synergy_system = _synergy_system
 		# 무기가 혼자 움직이면 미는 것처럼 보인다. 몸이 같이 나가야 때리는 것이 된다.
-		jakdu.swung.connect(_on_weapon_swung)
+		jakdu.swung.connect(_on_weapon_swung.bind(PlaceholderArt.POSE_SLASH))
+	var bujeok := _weapons.get(&"bujeok") as BujeokWeapon
+	if bujeok != null:
+		bujeok.fired.connect(_on_weapon_swung.bind(PlaceholderArt.POSE_THROW))
 
 	# 합이 여는 궤도들. 무기가 아니라 합에 딸린 것이라 무기 맵과 따로 둔다.
 	_synergy_orbits = [get_node_or_null(^"%JakduOrbit"), get_node_or_null(^"%BujeokShield")]
@@ -225,7 +230,7 @@ func _physics_process(delta: float) -> void:
 	# 무기 노드가 아니라 여기서 정하는 이유는 몸주마다 드는 무기가 달라도 매다는 위치는 "손"으로 같기 때문이다.
 	if _cloth != null:
 		_cloth.set_grip(PlaceholderArt.shaman_hand(RADIUS,
-			sin(_bob_phase) * _bob_weight, _facing, _swing_reach()))
+			sin(_bob_phase) * _bob_weight, _facing, _swing_reach(), _pose))
 	queue_redraw()
 
 
@@ -243,8 +248,10 @@ func _on_died() -> void:
 	EventBus.player_died.emit()
 
 
-## 무기가 휘둘렸다. 몸도 같이 나가고, 그 바람에 무복이 휩쓸린다.
-func _on_weapon_swung(direction: Vector2) -> void:
+## 무기가 나갔다. 몸도 같이 나가고, 그 바람에 무복이 휩쓸린다.
+## pose 는 무엇을 들었는지 — 베기와 던지기는 손이 다르게 가야 무기가 구분된다.
+func _on_weapon_swung(direction: Vector2, pose: StringName) -> void:
+	_pose = pose
 	_swing_time = 0.0
 	_swing_total = SWING_WINDUP + SWING_STRIKE + SWING_RECOVER
 	# 겨눈 쪽을 즉시 본다 — 걷는 방향과 베는 방향이 다를 때 몸이 엉뚱한 데를 보면 어색하다.
@@ -285,4 +292,4 @@ func _draw() -> void:
 	# 무복은 ClothBody 가 물리로 그린다. 여기서는 그 위에 얹히는 몸만 그린다 —
 	# 천까지 여기서 그리면 도형과 물리가 겹쳐 두 벌을 입은 것처럼 보인다.
 	PlaceholderArt.draw_shaman_body(self, RADIUS, sin(_bob_phase) * _bob_weight, _taegi,
-		_facing, _swing_reach())
+		_facing, _swing_reach(), _pose)

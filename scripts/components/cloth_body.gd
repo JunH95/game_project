@@ -51,8 +51,9 @@ class Strand:
 @export var cloth_weight: float = 1.0
 ## 치마 갈래 수. 많을수록 넓게 퍼진다.
 @export var rib_count: int = 7
-## 갈래 하나의 마디 길이(px). 치마는 이것의 8배까지 자라므로 몸(약 32px)과의 비례를 본다.
-@export var segment_length: float = 2.6
+## 갈래 하나의 마디 길이(px). 치마는 이것의 9배까지 자라므로 몸(약 32px)과의 비례를 본다.
+## 밑단이 발(y≈12)을 넘으면 다리가 가려지니 그 선을 넘지 않게 잡는다.
+@export var segment_length: float = 1.2
 ## 옆으로 벌어지려는 힘. 0 이면 치마가 다리처럼 붙는다.
 @export var spread: float = 1.0
 
@@ -86,13 +87,18 @@ func _ready() -> void:
 ## 팔·고깔 같은 실루엣이 안 읽힌다. 새 몸주를 넣을 때 이 비례를 넘지 않는지 본다.
 func rebuild() -> void:
 	var seg := segment_length / maxf(0.2, cloth_weight)
-	var length := int(round(8.0 * _growth))
+	# 모실수록 자라되 **길이는 조금만** 늘린다. 치마가 발을 덮으면 다리가 안 보이고,
+	# 다리가 안 보이면 걷는지 베는지가 읽히지 않는다. 자란 티는 아래 폭(spread)이 낸다.
+	var length := int(round(8.0 * minf(_growth, 1.15)))
 
+	# 치마 뿌리를 가슴 밑(y = -1.5)에 둔다. 한복은 허리가 아니라 **가슴 아래에서** 퍼지고,
+	# 그 높은 허리선이 실루엣의 핵심이다. 대신 길이는 짧게 — 발까지 덮으면 다리가 안 보인다.
 	_skirt.clear()
 	for i in rib_count:
 		var t := 0.5 if rib_count <= 1 else float(i) / float(rib_count - 1)
-		_skirt.append(Strand.new(length, seg, (t - 0.5) * 2.0 * spread,
-			Vector2((t - 0.5) * 9.0, 0.0)))
+		# 성장은 길이가 아니라 **퍼지는 폭**으로 보인다 — 치맛자락이 넓어진다.
+		_skirt.append(Strand.new(length, seg, (t - 0.5) * 2.0 * spread * _growth,
+			Vector2((t - 0.5) * 7.5, -1.5)))
 
 	_sleeves.clear()
 	for side in [-1.0, 1.0]:
@@ -231,20 +237,28 @@ func _fill_panel(a: Strand, b: Strand, color: Color, alpha: float) -> void:
 		]), Color(color, fade))
 
 
-## 넓이가 0 인 사각형은 그리지 않는다. 갈래가 겹쳐 접히는 순간(런 시작 직후처럼 천이
-## 아직 안 퍼졌을 때) 네 점이 한 줄로 서면 삼각분할이 실패해 엔진이 에러를 뱉는다.
-## 어차피 보이지 않는 면이라 건너뛰는 것이 맞다.
+## 사각형을 **삼각형 둘로 쪼개** 그린다. 사각형 그대로 넘기면 갈래가 서로 꼬일 때
+## 나비넥타이꼴(자기교차)이 되어 삼각분할이 실패한다 — 넓이 검사로는 이걸 못 거른다.
+## 삼각형은 정의상 꼬일 수 없으므로 애초에 그 경우가 없어진다.
+##
+## `[사고 기록]` 마디 길이를 몸 기준으로 줄이자 갈래 간격이 촘촘해져 꼬임이 급증했고,
+## 프레임마다 수십 번씩 에러가 나 로그가 5MB 로 불어나며 에디터가 죽었다.
 func _fill_quad(points: PackedVector2Array, color: Color) -> void:
-	# 신발끈 공식. 부호는 필요 없고 크기만 본다.
-	var doubled_area := 0.0
-	var n := points.size()
-	for i in n:
-		var p := points[i]
-		var q := points[(i + 1) % n]
-		doubled_area += p.x * q.y - q.x * p.y
-	if absf(doubled_area) < 1.0:
+	if points.size() < 4:
 		return
-	draw_colored_polygon(points, color)
+	_fill_triangle(points[0], points[1], points[2], color)
+	_fill_triangle(points[0], points[2], points[3], color)
+
+
+## 넓이가 0 에 가까운(세 점이 한 줄에 선) 삼각형은 건너뛴다. 보이지도 않는데 엔진이 에러를 뱉는다.
+func _fill_triangle(a: Vector2, b: Vector2, c: Vector2, color: Color) -> void:
+	# 물리가 발산하면 좌표가 NaN 이 되는데, 그대로 넘기면 삼각분할이 조용히 실패한다.
+	if not (a.is_finite() and b.is_finite() and c.is_finite()):
+		return
+	# 외적의 크기 = 평행사변형 넓이. 부호는 필요 없다.
+	if absf((b - a).cross(c - a)) < 0.05:
+		return
+	draw_colored_polygon(PackedVector2Array([a, b, c]), color)
 
 
 func _fill_banner() -> void:

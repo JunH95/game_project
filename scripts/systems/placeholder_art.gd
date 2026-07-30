@@ -124,15 +124,35 @@ static func draw_mudang(canvas: CanvasItem, r: float, bob: float, taegi: bool) -
 	canvas.draw_circle(Vector2(0.0, -r * 1.02 + lift), r * 0.16, GEUMBAK)
 
 
+## 무기별 손동작. 같은 "휘두름"이라도 무엇을 들었느냐로 손이 다르게 가야 무기가 구분된다.
+const POSE_SLASH: StringName = &"slash"    ## 작두 — 옆에서 앞으로 쓸어 벤다
+const POSE_THROW: StringName = &"throw"    ## 부적 — 뒤로 당겼다 앞으로 튕겨 놓는다
+const POSE_HOLD: StringName = &"hold"      ## 언월도 — 돌아가는 날을 따라 들고 있는다
+
+
 ## 무구를 쥔 손의 위치(몸 로컬). 지전이 여기 매달리므로 **그리기와 천이 같은 값을 봐야 한다** —
 ## 각자 계산하면 손과 종이 술이 따로 논다. draw_shaman_body 와 인자가 같다.
-static func shaman_hand(r: float, bob: float, facing: float, swing: float) -> Vector2:
+##
+## swing 이 음수면 예비(뒤로), 양수면 타격(앞으로)이다. pose 가 그 궤적의 모양을 정한다.
+static func shaman_hand(r: float, bob: float, facing: float, swing: float,
+		pose: StringName = POSE_SLASH) -> Vector2:
 	var lift := -bob * r * 0.08
-	var dir := Vector2.from_angle(facing)
-	var lean := dir * (r * 0.26 * swing)
-	var side := 1.0 if dir.x >= 0.0 else -1.0
-	var shoulder := Vector2(r * 0.42 * side, -r * 0.2 + lift) + lean
-	return shoulder + dir * (r * (0.62 + swing * 0.85))
+	var shoulder := Vector2(0.0, -r * 0.16 + lift)
+
+	match pose:
+		POSE_THROW:
+			# 던지기 — 방향은 그대로 두고 거리만 확 바뀐다. 뒤로 당겼다가 앞으로 튕긴다.
+			var reach := r * (0.55 + swing * 1.05)
+			return shoulder + Vector2.from_angle(facing) * reach
+		POSE_HOLD:
+			# 들고 있는 자세 — 몸에서 일정 거리로 내밀고, 휘두름에는 조금만 반응한다.
+			return shoulder + Vector2.from_angle(facing) * (r * (0.78 + swing * 0.22))
+		_:
+			# 베기 — 손이 호를 그린다. 예비에서 뒤(+각), 타격에서 앞(−각)으로 쓸고 지나간다.
+			# 거리보다 **각도**가 움직여야 "휘둘렀다"로 읽힌다.
+			var sweep := lerpf(0.95, -0.62, clampf((swing + 0.38) / 1.38, 0.0, 1.0))
+			var dist := r * (0.62 + maxf(swing, 0.0) * 0.55)
+			return shoulder + Vector2.from_angle(facing + sweep) * dist
 
 
 ## 무당의 몸만. 무복은 ClothBody 가 물리로 그리므로 여기서는 그 위에 얹히는 것만 그린다.
@@ -142,8 +162,9 @@ static func shaman_hand(r: float, bob: float, facing: float, swing: float) -> Ve
 ## swing 이 음수면 뒤로 감는 예비 동작, 양수면 앞으로 내지르는 타격이다(0 이면 평상시).
 ## 몸통을 회전시키지 않는 이유: 자식으로 달린 무기(부채꼴·궤도)까지 같이 돌아간다.
 ## 그래서 회전 대신 **팔·상체를 facing 쪽으로 밀어** 방향을 낸다.
+## pose 는 무엇을 들었는지다(POSE_SLASH/THROW/HOLD). 무기마다 손이 다르게 가야 구분된다.
 static func draw_shaman_body(canvas: CanvasItem, r: float, bob: float, taegi: bool,
-		facing: float = 0.0, swing: float = 0.0) -> void:
+		facing: float = 0.0, swing: float = 0.0, pose: StringName = POSE_SLASH) -> void:
 	if taegi:
 		# 강림 중에는 뒤에 금빛이 번지고 발밑에 작두날이 깔린다 — 무당이 작두에 오르는 도상.
 		canvas.draw_circle(Vector2.ZERO, r * 2.4, Color(GEUMBAK.r, GEUMBAK.g, GEUMBAK.b, 0.14))
@@ -158,40 +179,70 @@ static func draw_shaman_body(canvas: CanvasItem, r: float, bob: float, taegi: bo
 	var lift := -bob * r * 0.08
 	var dir := Vector2.from_angle(facing)
 	# 상체가 휘두르는 쪽으로 쏠린다. 예비 동작(swing<0)에서는 반대로 젖혀진다.
-	var lean := dir * (r * 0.26 * swing)
-	# 팔을 어느 어깨에서 낼지. 향한 쪽 어깨에서 나가야 몸을 가로지르지 않는다.
-	var side := 1.0 if dir.x >= 0.0 else -1.0
-	var shoulder_main := Vector2(r * 0.42 * side, -r * 0.2 + lift) + lean
-	var shoulder_off := Vector2(-r * 0.42 * side, -r * 0.2 + lift) + lean * 0.4
+	var lean := dir * (r * 0.24 * swing)
+	var skin := Color(0.96, 0.91, 0.83)
 
-	# 뒷팔 먼저 — 몸 뒤에 깔려야 앞팔이 위로 읽힌다. 앞팔과 반대로 움직여 균형을 잡는다.
-	canvas.draw_line(shoulder_off, shoulder_off - dir * (r * (0.40 + swing * 0.30)),
-		Color(0.96, 0.91, 0.83), r * 0.20)
+	# --- 다리 ---
+	# 걸을 때 앞뒤로 엇갈리고, 벨 때는 앞뒤로 벌려 버틴다. 치마 밑으로 이만큼은 보여야
+	# "움직이고 있다"가 읽힌다(치마를 짧게 둔 이유가 이것이다).
+	var stride := bob * r * 0.30
+	# 벨 때는 향한 쪽으로 앞발이 나가 버틴다.
+	var brace := dir.x * absf(swing) * r * 0.22
+	for leg in [1.0, -1.0]:
+		var hip := Vector2(r * 0.17 * leg, r * 0.34 + lift)
+		var foot := Vector2(r * 0.17 * leg + stride * leg + brace * leg, r * 1.02)
+		canvas.draw_line(hip, foot, skin, r * 0.16)
+		# 버선 — 코가 살짝 들린 흰 신. 발끝에 흰 점 하나로 암시한다.
+		canvas.draw_circle(foot, r * 0.13, HOBUN)
 
-	# 어깨 — 무복 위로 드러나는 부분만.
-	canvas.draw_line(Vector2(-r * 0.5, -r * 0.26 + lift) + lean,
-		Vector2(r * 0.5, -r * 0.26 + lift) + lean, GUNCHEONG, r * 0.2)
-	canvas.draw_circle(Vector2(0.0, -r * 0.66 + lift) + lean, r * 0.4, Color(0.96, 0.91, 0.83))
+	# --- 뒷팔 --- 몸 뒤에 깔려야 앞팔이 위로 읽힌다. 앞팔과 반대로 움직여 균형을 잡는다.
+	var shoulder_off := Vector2(-r * 0.30 * dir.x, -r * 0.20 + lift) + lean * 0.4
+	canvas.draw_line(shoulder_off, shoulder_off - dir * (r * (0.36 + maxf(swing, 0.0) * 0.28)),
+		skin, r * 0.17)
+
+	# --- 치마 위로 드러나는 저고리 --- 한복은 저고리가 짧고 치마가 가슴 밑에서 퍼진다.
+	# 그 경계가 실루엣의 핵심이라 저고리를 짧은 사다리꼴로 둔다.
+	var chest := -r * 0.16 + lift
+	var waist := r * 0.10 + lift
+	canvas.draw_colored_polygon(PackedVector2Array([
+		Vector2(-r * 0.40, chest) + lean, Vector2(r * 0.40, chest) + lean,
+		Vector2(r * 0.34, waist) + lean, Vector2(-r * 0.34, waist) + lean
+	]), HOBUN)
+	# 깃·동정 — 목에서 V 로 여미는 선. 한복으로 읽히게 하는 가장 싼 한 획이다.
+	var neck := Vector2(0.0, -r * 0.30 + lift) + lean
+	canvas.draw_line(neck, Vector2(-r * 0.22, chest + r * 0.16) + lean, GUNCHEONG, r * 0.09)
+	canvas.draw_line(neck, Vector2(r * 0.22, chest + r * 0.16) + lean, GUNCHEONG, r * 0.09)
+	# 고름 — 가슴에서 늘어진 붉은 끈. 홍띠(ClothBody)와 색을 맞춘다.
+	canvas.draw_line(Vector2(r * 0.10, chest + r * 0.10) + lean,
+		Vector2(r * 0.06, waist + r * 0.22) + lean, JUSA, r * 0.07)
+
+	# --- 머리 ---
+	var head := Vector2(0.0, -r * 0.60 + lift) + lean
+	canvas.draw_circle(head, r * 0.34, skin)
 	# 눈 두 점. 없으면 발광체지 사람이 아니다.
-	_draw_eyes(canvas, Vector2(0.0, -r * 0.62 + lift) + lean, r * 0.17, r * 0.07,
+	_draw_eyes(canvas, head + Vector2(0.0, r * 0.04), r * 0.15, r * 0.065,
 		Color(0.11, 0.11, 0.14))
 	# 고깔 — 강신무의 관. 상체보다 덜 따라와야 관성이 있는 것처럼 보인다.
 	var hat_lean := lean * 0.55
 	canvas.draw_colored_polygon(PackedVector2Array([
-		Vector2(0.0, -r * 1.7 + lift) + hat_lean,
-		Vector2(r * 0.5, -r * 0.9 + lift) + hat_lean,
-		Vector2(-r * 0.5, -r * 0.9 + lift) + hat_lean
+		Vector2(0.0, -r * 1.58 + lift) + hat_lean,
+		Vector2(r * 0.44, -r * 0.84 + lift) + hat_lean,
+		Vector2(-r * 0.44, -r * 0.84 + lift) + hat_lean
 	]), Color(0.93, 0.94, 0.97))
 
-	# 앞팔 — 무구를 쥔 손. 여기가 모션의 주역이라 마지막에 그려 맨 위로 올린다.
-	var hand := shaman_hand(r, bob, facing, swing)
-	canvas.draw_line(shoulder_main, hand, Color(0.96, 0.91, 0.83), r * 0.23)
+	# --- 앞팔 --- 무구를 쥔 손. 모션의 주역이라 마지막에 그려 맨 위로 올린다.
+	var shoulder_main := Vector2(r * 0.30 * dir.x, -r * 0.20 + lift) + lean
+	var hand := shaman_hand(r, bob, facing, swing, pose)
+	# 팔꿈치를 살짝 꺾어 막대가 아니라 팔로 보이게 한다.
+	var elbow := shoulder_main.lerp(hand, 0.5) + (hand - shoulder_main).orthogonal().normalized() * (r * 0.12)
+	canvas.draw_line(shoulder_main, elbow, skin, r * 0.20)
+	canvas.draw_line(elbow, hand, skin, r * 0.18)
 	# 손. 무기가 어디서 나가는지 한 점으로 찍어 준다.
-	canvas.draw_circle(hand, r * 0.15, Color(0.96, 0.91, 0.83))
+	canvas.draw_circle(hand, r * 0.14, skin)
 	# 내지르는 순간에만 손끝에 잔광. 언제 터졌는지가 눈에 들어와야 한다(0-2 읽히는 설계).
 	if swing > 0.25:
 		var glow := GEUMBAK if taegi else HOBUN
-		canvas.draw_circle(hand, r * 0.32 * swing, Color(glow.r, glow.g, glow.b, 0.34 * swing))
+		canvas.draw_circle(hand, r * 0.30 * swing, Color(glow.r, glow.g, glow.b, 0.34 * swing))
 
 
 ## 부적 — 세로로 긴 종이. 진행 방향이 X 축이 되도록 그린다(호출부가 rotation 을 준다).
