@@ -22,6 +22,20 @@ const SWING_FORWARD: float = 1.0
 ## 타격 순간 무복을 미는 세기. 몸이 움직이면 천이 따라 휘는 것이 화려함의 본체다.
 const SWING_CLOTH_POWER: float = 1.5
 
+## 몸의 역동성. 그림 노드(Body)만 움직이므로 판정에는 영향이 없다.
+## 위에서 내려다보는 판이라 각도는 작게 — 크면 넘어진 것처럼 보인다.
+const BODY_TILT: float = 0.16
+## 휘두를 때 몸이 도는 각. 예비에서는 반대로 감긴다.
+const SWING_TILT: float = 0.34
+## 예비에서 눌리는 양(가로로 퍼지고 세로로 낮아진다).
+const SQUASH: float = 0.18
+## 타격에서 늘어나는 양. 눌렸다 늘어나는 이 대비가 만화적 타격감의 핵심이다.
+const STRETCH: float = 0.15
+## 타격 때 앞으로 나갔다 돌아오는 거리(px).
+const LUNGE: float = 3.6
+## 몸이 목표 각도를 좇는 속도. 즉시 돌리면 딱딱하다.
+const BODY_TURN: float = 18.0
+
 ## 정식 아트가 들어오면 여기에 물리고, 도형 실루엣은 자동으로 비켜난다.
 @export var texture: Texture2D
 
@@ -55,6 +69,7 @@ var _base_magnet_radius: float = 0.0
 @onready var _hurtbox: HurtboxComponent = %HurtboxComponent
 @onready var _magnet: Area2D = %PickupMagnet
 @onready var _cloth: ClothBody = get_node_or_null(^"%ClothBody")
+@onready var _body: Node2D = get_node_or_null(^"%Body")
 
 
 func _ready() -> void:
@@ -226,12 +241,47 @@ func _physics_process(delta: float) -> void:
 		# 휘두르는 동안에는 걷는 쪽으로 몸을 돌리지 않는다 — 벤 방향을 보고 있어야 한다.
 		# 즉시 돌리면 지전이 덜덜 떨리므로 부드럽게 좇는다.
 		_facing = rotate_toward(_facing, direction.angle(), FACE_TURN_RATE * delta)
-	# 무구를 쥔 손 — 지전이 여기 매달린다. 그리기와 같은 함수를 써야 종이 술이 손에서 논다.
-	# 무기 노드가 아니라 여기서 정하는 이유는 몸주마다 드는 무기가 달라도 매다는 위치는 "손"으로 같기 때문이다.
+	_update_body(delta)
+
+
+## 그림 노드만 기울이고 찌그러뜨린다. 무기는 루트에 있으므로 판정은 그대로다.
+func _update_body(delta: float) -> void:
+	if _body == null:
+		return
+	var reach := _swing_reach()
+	var dir := Vector2.from_angle(_facing)
+	var bob := sin(_bob_phase) * _bob_weight
+
+	# 이동 방향으로 기운다. 달리는 쪽으로 상체가 쏠려야 서 있는 판때기가 아니게 된다.
+	var move_tilt := clampf(velocity.x / maxf(1.0, _movement.speed), -1.0, 1.0) * BODY_TILT
+	# 휘두르면 그쪽으로 돈다. 예비(reach<0)에서는 반대로 감긴다.
+	var swing_tilt := reach * SWING_TILT * (1.0 if dir.x >= 0.0 else -1.0)
+	_body.rotation = lerp_angle(_body.rotation, move_tilt + swing_tilt,
+		1.0 - exp(-BODY_TURN * delta))
+
+	# 눌렸다 늘어난다. 예비에서 웅크리고 타격에서 뻗는 대비가 타격감을 만든다.
+	if reach < 0.0:
+		_body.scale = Vector2(1.0 + SQUASH * -reach, 1.0 - SQUASH * 0.8 * -reach)
+	else:
+		_body.scale = Vector2(1.0 - STRETCH * 0.7 * reach, 1.0 + STRETCH * reach)
+
+	# 타격 순간 앞으로 나갔다 돌아온다.
+	_body.position = dir * (LUNGE * maxf(reach, 0.0))
+
+	_body.bob = bob
+	_body.taegi = _taegi
+	_body.facing = _facing
+	_body.swing = reach
+	_body.pose = _pose
+	_body.radius = RADIUS
+	_body.texture = texture
+	_body.queue_redraw()
+
+	# 무구를 쥔 손 — 지전이 여기 매달린다. 몸이 돌고 찌그러지므로 **그 변환을 거쳐** 넘겨야
+	# 종이 술이 손에서 논다. 로컬 좌표를 그대로 주면 몸만 기울고 술은 제자리에 남는다.
 	if _cloth != null:
-		_cloth.set_grip(PlaceholderArt.shaman_hand(RADIUS,
-			sin(_bob_phase) * _bob_weight, _facing, _swing_reach(), _pose))
-	queue_redraw()
+		var hand := PlaceholderArt.shaman_hand(RADIUS, bob, _facing, reach, _pose)
+		_cloth.set_grip(_body.transform * hand)
 
 
 func _on_health_changed(current: float, maximum: float) -> void:
@@ -283,13 +333,3 @@ func _on_taegi_state_changed(active: bool) -> void:
 		# 신이 내리는 순간 자락이 위로 솟구친다.
 		if active:
 			_cloth.impulse(Vector2.UP, 2.2)
-	queue_redraw()
-
-
-func _draw() -> void:
-	if PlaceholderArt.draw_texture_centered(self, texture, RADIUS * 3.0):
-		return
-	# 무복은 ClothBody 가 물리로 그린다. 여기서는 그 위에 얹히는 몸만 그린다 —
-	# 천까지 여기서 그리면 도형과 물리가 겹쳐 두 벌을 입은 것처럼 보인다.
-	PlaceholderArt.draw_shaman_body(self, RADIUS, sin(_bob_phase) * _bob_weight, _taegi,
-		_facing, _swing_reach(), _pose)

@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3]
+[gd_scene load_steps=18 format=3]
 
 [ext_resource type="Script" path="res://scenes/actors/player/player.gd" id="1_player"]
 [ext_resource type="Script" path="res://scripts/components/movement_component.gd" id="2_move"]
@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" path="res://scenes/actors/projectiles/bujeok.tscn" id="9_bujeok_proj"]
 [ext_resource type="Script" path="res://scripts/components/orbit_blades.gd" id="10_orbit"]
 [ext_resource type="Resource" path="res://data/weapons/eonwoldo.tres" id="11_eonwoldo_data"]
+[ext_resource type="Script" path="res://scenes/actors/player/body_visual.gd" id="12_body"]
 [ext_resource type="Script" path="res://scripts/components/cloth_body.gd" id="99_cloth"]
 
 [sub_resource type="CircleShape2D" id="Shape_body"]
@@ -31,6 +32,10 @@ script = ExtResource("1_player")
 unique_name_in_owner = true
 script = ExtResource("99_cloth")
 
+
+[node name="Body" type="Node2D" parent="."]
+unique_name_in_owner = true
+script = ExtResource("12_body")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("Shape_body")
