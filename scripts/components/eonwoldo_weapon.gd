@@ -137,6 +137,10 @@ func _get_knockback() -> float:
 
 
 ## 한 바퀴 도는 큰 호. 작두의 부채꼴과 달리 **원 전체**가 판정이라 그대로 보여 준다.
+##
+## 창술로 읽히게 하는 것은 잔상이 아니라 **자루**다. 호만 그리면 충격파가 퍼지는 것처럼 보이고
+## 손에 장병기를 쥐고 돌린다는 사실이 사라진다. 그래서 매 프레임 원점에서 날까지 이어진
+## 자루를 같이 그린다 — 회전의 중심이 몸이라는 것이 이 선 하나로 읽힌다.
 func _draw() -> void:
 	if _sweep_left <= 0.0:
 		return
@@ -151,5 +155,15 @@ func _draw() -> void:
 		Color(color.r, color.g, color.b, t * 0.30), reach * 0.34)
 	# 날 끝 — 지금 어디를 지나는지.
 	draw_arc(Vector2.ZERO, reach, _sweep_from, _sweep_from + swept, 40, color, 3.0)
-	var tip := Vector2.from_angle(_sweep_from + swept) * reach
-	draw_circle(tip, 5.0, Color(1.0, 1.0, 1.0, t * 0.9))
+
+	var angle := _sweep_from + swept
+	var dir := Vector2.from_angle(angle)
+	var tip := dir * reach
+	# 자루. 뒤쪽으로도 조금 삐져나온다 — 자루 끝이 몸 반대편에 있어야 장병기로 보인다.
+	draw_line(-dir * (reach * 0.22), tip * 0.9, Color(0.42, 0.33, 0.26, t * 0.95), 5.0)
+	# 초승달 날 — 자루 끝에 옆으로 휘어 붙는다. 언월(偃月)이 이름의 근거다.
+	var side := dir.orthogonal()
+	draw_colored_polygon(PackedVector2Array([
+		tip * 0.88, tip + side * (reach * 0.20), tip + dir * (reach * 0.10),
+	]), Color(0.92, 0.94, 1.0, minf(1.0, t + 0.2)))
+	draw_circle(tip, 4.0, Color(1.0, 1.0, 1.0, t * 0.9))

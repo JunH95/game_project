@@ -36,6 +36,15 @@ const LUNGE: float = 3.6
 ## 몸이 목표 각도를 좇는 속도. 즉시 돌리면 딱딱하다.
 const BODY_TURN: float = 18.0
 
+## 무보(舞步) — 굿의 발놀림에서 이름을 가져온 짧은 회피(design.md 7-6).
+## 이동만이 유일한 조작인 게임에서 둘러싸였을 때 빠져나갈 수단이 아무것도 없으면
+## 억울한 죽음이 나온다. 무적을 주지 않는 이유는 그러면 회피가 아니라 무시가 되기 때문이다 —
+## 대신 **짧고 빠르게** 빠져나가되 피격은 그대로 받는다.
+const DASH_SPEED: float = 620.0
+const DASH_TIME: float = 0.14
+const DASH_COOLDOWN: float = 1.6
+const DASH_TILT: float = 0.62
+
 ## 정식 아트가 들어오면 여기에 물리고, 도형 실루엣은 자동으로 비켜난다.
 @export var texture: Texture2D
 
@@ -58,6 +67,10 @@ var _swing_total: float = 0.0
 var _pose: StringName = PlaceholderArt.POSE_SLASH
 ## 작두 연타의 몇 번째 타인지. 벨 때마다 궤적이 바뀐다.
 var _slash_step: int = 0
+## 무보(회피) 상태. 남은 시간이 0 보다 크면 그 방향으로 미끄러진다.
+var _dash_left: float = 0.0
+var _dash_cooldown: float = 0.0
+var _dash_dir: Vector2 = Vector2.RIGHT
 var _bob_phase: float = 0.0
 ## 0.0~1.0. 걸을수록 오르고 멈추면 내려간다. 흔들림의 크기를 여기에 곱한다.
 var _bob_weight: float = 0.0
@@ -232,6 +245,10 @@ func _on_magnet_area_entered(area: Area2D) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed(&"dash"):
+		if _try_dash():
+			get_viewport().set_input_as_handled()
+		return
 	# `[고증]` 신은 저절로 오지 않고 불러야 온다. 자동 발동이면 판단이 사라진다.
 	if not event.is_action_pressed(&"gangrim"):
 		return
@@ -240,9 +257,34 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 
+## 무보 — 짧게 미끄러져 포위를 빠져나간다. 쿨다운 중이면 false 를 돌려 헛발질을 알린다.
+func _try_dash() -> bool:
+	if _dash_cooldown > 0.0 or _dash_left > 0.0:
+		return false
+	var input := Input.get_vector("move_left", "move_right", "move_up", "move_down")
+	# 가만히 선 채로 누르면 보고 있는 쪽으로 나간다 — 아무 일도 안 일어나면 눌린 줄 모른다.
+	_dash_dir = input.normalized() if not input.is_zero_approx() else Vector2.from_angle(_facing)
+	_dash_left = DASH_TIME
+	_dash_cooldown = DASH_COOLDOWN
+	if _cloth != null:
+		# 자락이 뒤로 확 끌린다. 빠르게 움직였다는 것이 천으로 먼저 보인다.
+		_cloth.impulse(-_dash_dir, 2.4)
+	AudioManager.play(&"jakdu_swing")
+	return true
+
+
 func _physics_process(delta: float) -> void:
 	var direction := Input.get_vector("move_left", "move_right", "move_up", "move_down")
-	_movement.move(direction)
+	_dash_cooldown = maxf(0.0, _dash_cooldown - delta)
+	if _dash_left > 0.0:
+		_dash_left -= delta
+		# 끝으로 갈수록 잦아든다. 등속으로 끊으면 벽에 부딪힌 것처럼 멈춘다.
+		var ease_out := clampf(_dash_left / DASH_TIME, 0.0, 1.0)
+		velocity = _dash_dir * DASH_SPEED * (0.35 + 0.65 * ease_out)
+		move_and_slide()
+		_facing = _dash_dir.angle()
+	else:
+		_movement.move(direction)
 
 	# 걸음 흔들림. 플레이어는 하나뿐이라 매 프레임 다시 그려도 부담이 없다.
 	# 몸을 회전·반전시키지 않는 이유: 자식으로 달린 무기(작두 부채꼴·궤도)까지 같이 뒤집힌다.
@@ -278,11 +320,20 @@ func _update_body(delta: float) -> void:
 	_body.rotation = lerp_angle(_body.rotation, move_tilt + swing_tilt,
 		1.0 - exp(-BODY_TURN * delta))
 
+	# 무보 중에는 진행 방향으로 몸을 눕힌다. 속도는 숫자가 아니라 기울기로 읽힌다.
+	var dash_weight := clampf(_dash_left / DASH_TIME, 0.0, 1.0)
+	if dash_weight > 0.0:
+		_body.rotation = lerp_angle(_body.rotation,
+			DASH_TILT * signf(_dash_dir.x if absf(_dash_dir.x) > 0.01 else 1.0) * dash_weight,
+			1.0 - exp(-BODY_TURN * 1.6 * delta))
+
 	# 눌렸다 늘어난다. 예비에서 웅크리고 타격에서 뻗는 대비가 타격감을 만든다.
 	if reach < 0.0:
 		_body.scale = Vector2(1.0 + SQUASH * -reach, 1.0 - SQUASH * 0.8 * -reach)
 	else:
 		_body.scale = Vector2(1.0 - STRETCH * 0.7 * reach, 1.0 + STRETCH * reach)
+	# 달리는 방향으로 늘어나 잔상처럼 보인다.
+	_body.scale *= Vector2(1.0 - 0.18 * dash_weight, 1.0 + 0.14 * dash_weight)
 
 	# 타격 순간 앞으로 나갔다 돌아온다.
 	_body.position = dir * (LUNGE * maxf(reach, 0.0))
@@ -322,9 +373,10 @@ func _on_died() -> void:
 
 ## 작두는 벨 때마다 다른 궤적을 쓴다 — 베기 → 되돌려 베기 → 찌르기.
 ## 같은 동작만 반복하면 아무리 잘 그려도 기계처럼 보인다.
-func _on_jakdu_swung(direction: Vector2) -> void:
+## 연타 번호는 무기가 센다 — 팔의 포즈와 칼의 궤적이 같은 값을 봐야 어긋나지 않는다.
+func _on_jakdu_swung(direction: Vector2, step: int) -> void:
 	var chain := PlaceholderArt.SLASH_CHAIN
-	_slash_step = (_slash_step + 1) % chain.size()
+	_slash_step = clampi(step, 0, chain.size() - 1)
 	_on_weapon_swung(direction, chain[_slash_step])
 
 

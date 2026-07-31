@@ -207,13 +207,27 @@ static func _limb(canvas: CanvasItem, a: Vector2, b: Vector2, w_start: float, w_
 		var ahead: Vector2 = spine[mini(i + 1, spine.size() - 1)] - spine[maxi(i - 1, 0)]
 		var n := ahead.orthogonal().normalized() * w
 		left.append(spine[i] + n)
-		right.insert(0, spine[i] - n)
-	var poly := left
-	poly.append_array(right)
-	canvas.draw_colored_polygon(poly, color)
+		right.append(spine[i] - n)
+	# 좌우를 한 폴리곤으로 잇지 않는다. 팔이 접히면 양쪽 변이 교차해 나비넥타이 폴리곤이 되고,
+	# 그러면 매 프레임 "triangulation failed" 가 쏟아진다(전에 4.7MB 로그로 에디터를 죽인 그 버그다).
+	# 마디마다 삼각형 둘로 쪼개면 교차해도 각 조각은 여전히 성립한다.
+	for i in spine.size() - 1:
+		_fill_triangle(canvas, left[i], left[i + 1], right[i], color)
+		_fill_triangle(canvas, left[i + 1], right[i + 1], right[i], color)
 	# 끝을 둥글게 — 잘린 단면이 보이면 조립품처럼 읽힌다.
 	canvas.draw_circle(a, w_start * 0.5, color)
 	canvas.draw_circle(b, w_end * 0.5, color)
+
+
+## 넓이가 0 이거나 좌표가 유한하지 않은 삼각형은 건너뛴다. 렌더러에 넘기면 에러만 남고
+## 그려지지도 않는다 — 매 프레임 도는 코드라 로그가 곧 성능 문제가 된다.
+static func _fill_triangle(canvas: CanvasItem, a: Vector2, b: Vector2, c: Vector2,
+		color: Color) -> void:
+	if not (a.is_finite() and b.is_finite() and c.is_finite()):
+		return
+	if absf((b - a).cross(c - a)) < 0.01:
+		return
+	canvas.draw_colored_polygon(PackedVector2Array([a, b, c]), color)
 
 
 ## 탈 — 몸주가 정한다. 신이 내리면 얼굴이 바뀐다는 것을 그대로 쓴다.
