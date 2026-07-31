@@ -787,6 +787,25 @@
       </div>
 
       <div class="callout reveal">
+        <span class="lb">3D 캐릭터를 2D 화면에 합성 <span class="tag t-mi" style="margin-left:.4rem">프로토타입</span></span>
+        절차적 도형으로 캐릭터를 예쁘게 만드는 것은 <strong>천장에 닿았다</strong>. 3D 로 가는 길이 셋인데, <strong>가장 싼 것부터</strong> 시험한다.
+        <div class="tbl-wrap" style="margin:.6rem 0">
+          <table>
+            <thead><tr><th>방식</th><th>하는 일</th><th>게임플레이 코드</th><th>판정</th></tr></thead>
+            <tbody>
+              <tr><td><strong>A</strong> 게임 전체를 3D</td><td>씬·충돌·카메라·스폰·천 전부 재작성</td><td>거의 다 버림</td><td><strong>기각</strong> &mdash; 문제는 캐릭터 외형인데 대응이 게임 전체다</td></tr>
+              <tr><td><strong>B</strong> 3D 모델 &rarr; 스프라이트 시트</td><td>Blender 에서 굽고 PNG 로 렌더</td><td>안 바뀜</td><td><strong>유력</strong> &mdash; 8방향·애니메이션이 렌더 버튼이 된다</td></tr>
+              <tr><td><strong>C</strong> SubViewport 합성</td><td>캐릭터만 3D 실시간, 2D 화면에 얹음</td><td>거의 안 바뀜</td><td><strong>먼저 시험</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <strong>구조</strong>: 2D 도형 몸과 <strong>인터페이스가 같아서</strong> 플레이어 코드는 어느 쪽이 붙었는지 모른다 &mdash; <code>use_3d_visual</code> 하나로 갈아 끼우고, 실패하면 그 값 하나로 물러선다. 정식 모델이 들어오면 리그만 교체하고 조명·카메라·합성은 그대로 쓴다.<br>
+        <strong>세 번 고쳐서야 사람으로 읽혔다</strong>: 치마 밑변이 키의 1/4 이라 <strong>등불</strong>처럼 보였고 · 부감 52°로 위에서 보니 <strong>원뿔</strong>이었고 · 환경광이 밝아 흰옷이 <strong>한 덩어리</strong>로 뭉쳤고 · 팔이 <code>reach=0</code>에서도 머리 위라 <strong>가만히 서 있을 때가 가장 어색</strong>했다. 먹선은 두께를 유닛으로 정했다가 화면에서 0.4px 가 되어 있으나 마나였다.<br>
+        <strong>남은 것 &mdash; 절차적 천</strong>: 3D 모드에서는 verlet 자락을 <strong>꺼 둔다</strong>(3D 리그가 자기 치마를 들고 있어 겹치면 둘 다 망가진다). 무복이 찰랑거리는 건 지금 가장 잘 나온 연출이라, <strong>이걸 3D 로 어떻게 옮길지가 C 채택의 진짜 조건이다.</strong><br>
+        <strong>C 의 근본 한계</strong>: 뷰포트는 플레이어 전용이다. 적 수백 마리에 뷰포트를 하나씩 달 수 없으므로 적은 2D 로 남고, 그 순간 <strong>화면에 두 화풍이 섞인다</strong>. B 로 가면 사라지는 문제다.
+      </div>
+
+      <div class="callout reveal">
         <span class="lb">순서 &mdash; 게임플레이 우선</span>
         비주얼 완성도는 셀링이지만, <strong>루프가 재밌어지기 전에 폴리시부터 하면 안 된다.</strong> M1~M5는 도형 플레이스홀더(단, 위 팔레트를 겨냥)로 재미를 먼저 잡고, <strong>M6 &lsquo;아트·비주얼 완성 패스&rsquo;</strong>에서 아트 교체와 게임 필을 집중 투입한다. 게임플레이는 비주얼을 Resource에서 읽으므로 플레이스홀더가 로직에 새지 않는다.
       </div>

@@ -48,6 +48,10 @@ const DASH_TILT: float = 0.62
 ## 정식 아트가 들어오면 여기에 물리고, 도형 실루엣은 자동으로 비켜난다.
 @export var texture: Texture2D
 
+## 3D 캐릭터(SubViewport 합성) 프로토타입을 쓸지. 끄면 2D 도형 몸으로 되돌아간다 —
+## 둘을 나란히 남겨 둔 이유는 **바꿔 보고 판단하려는 것**이고, 실패하면 이 값 하나로 물러선다.
+@export var use_3d_visual: bool = true
+
 ## 신내림 수정자를 물어볼 GodSystem. main.tscn 에서 주입한다.
 @export var god_system_path: NodePath
 ## 합 성립을 물어볼 SynergySystem. 작두타기처럼 합이 여는 기능이 이걸 본다.
@@ -89,6 +93,7 @@ var _base_magnet_radius: float = 0.0
 
 
 func _ready() -> void:
+	_select_visual()
 	_hurtbox.health = _health
 	_health.health_changed.connect(_on_health_changed)
 	_health.died.connect(_on_died)
@@ -165,6 +170,29 @@ func _on_god_served(_god: GodData) -> void:
 	_apply_cloth()
 
 
+## 2D 도형 몸과 3D 리그 중 하나만 남긴다. 둘 다 `%Body` 와 같은 인터페이스라
+## 여기서 고르고 나면 아래 코드는 어느 쪽이 붙었는지 몰라도 된다.
+func _select_visual() -> void:
+	var body_2d := get_node_or_null(^"%Body") as Node2D
+	var body_3d := get_node_or_null(^"%Body3D") as Node2D
+	var chosen := body_3d if use_3d_visual and body_3d != null else body_2d
+	var dropped := body_2d if chosen == body_3d else body_3d
+	if chosen == null:
+		push_error("플레이어에 몸 그림 노드가 없다(%Body / %Body3D).")
+		return
+	_body = chosen
+	chosen.visible = true
+	chosen.process_mode = Node.PROCESS_MODE_INHERIT
+	if dropped != null:
+		dropped.visible = false
+		# 안 보이는 몸이 계속 손 위치를 계산하면 프레임만 먹는다.
+		dropped.process_mode = Node.PROCESS_MODE_DISABLED
+	# 3D 리그는 자기 치마를 들고 있다. 2D 천을 같이 두면 겹쳐서 둘 다 망가진다 —
+	# 절차적 천을 3D 로 옮기는 것은 프로토타입 다음 문제다.
+	if _cloth != null and chosen == body_3d:
+		_cloth.visible = false
+
+
 ## 탈은 몸주가 정한다 — 신이 내리면 얼굴이 바뀐다.
 ## 얼굴을 그리지 않아 사람 얼굴 비례 문제를 피하고, 동시에 몸주마다 실루엣이 갈린다.
 func _apply_mask() -> void:
@@ -184,6 +212,9 @@ func _apply_cloth() -> void:
 		return
 	var momju: GodData = _god_system.get_momju() if _god_system.has_method(&"get_momju") else null
 	if momju != null:
+		# 3D 리그가 붙어 있으면 무복 색이 천이 아니라 재질로 간다. 값이 데이터에서 오는 구조는 같다.
+		if _body != null and _body.has_method(&"apply_appearance"):
+			_body.call(&"apply_appearance", momju.robe_color, momju.sash_color)
 		_cloth.robe_color = momju.robe_color
 		_cloth.sash_color = momju.sash_color
 		_cloth.cloth_weight = momju.cloth_weight
