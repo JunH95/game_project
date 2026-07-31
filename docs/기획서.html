@@ -802,6 +802,14 @@
         <strong>구조</strong>: 2D 도형 몸과 <strong>인터페이스가 같아서</strong> 플레이어 코드는 어느 쪽이 붙었는지 모른다 &mdash; <code>use_3d_visual</code> 하나로 갈아 끼우고, 실패하면 그 값 하나로 물러선다. 정식 모델이 들어오면 리그만 교체하고 조명·카메라·합성은 그대로 쓴다.<br>
         <strong>세 번 고쳐서야 사람으로 읽혔다</strong>: 치마 밑변이 키의 1/4 이라 <strong>등불</strong>처럼 보였고 · 부감 52°로 위에서 보니 <strong>원뿔</strong>이었고 · 환경광이 밝아 흰옷이 <strong>한 덩어리</strong>로 뭉쳤고 · 팔이 <code>reach=0</code>에서도 머리 위라 <strong>가만히 서 있을 때가 가장 어색</strong>했다. 먹선은 두께를 유닛으로 정했다가 화면에서 0.4px 가 되어 있으나 마나였다.<br>
         <strong>남은 것 &mdash; 절차적 천</strong>: 3D 모드에서는 verlet 자락을 <strong>꺼 둔다</strong>(3D 리그가 자기 치마를 들고 있어 겹치면 둘 다 망가진다). 무복이 찰랑거리는 건 지금 가장 잘 나온 연출이라, <strong>이걸 3D 로 어떻게 옮길지가 C 채택의 진짜 조건이다.</strong><br>
+        <strong>모션이 딱딱한 이유는 관절에 값을 <em>대입</em>하기 때문이다</strong>: 리그를 세우고 나니 다음 불만은 외형이 아니라 움직임이었다. 원인은 포즈 공식이 아니라 적용 방식이었다 &mdash; 매 프레임 목표 각도를 그대로 넣으면 관절이 정확히 그 각도가 되고, <strong>정확한 것이 곧 기계적인 것</strong>이다. 규칙 넷을 세웠고, 정식 모델이 들어와도 그대로 간다:
+        <ul style="margin:.4rem 0 0;padding-left:1.1rem">
+          <li><strong>대입 금지 · 스프링 경유</strong> &mdash; 임계 감쇠보다 낮게 줘서 <strong>살짝 지나쳤다 돌아온다</strong>. 오버슛이 없으면 무게가 없다.</li>
+          <li><strong>사슬은 뒤로 갈수록 늦다</strong> &mdash; 허리 &rarr; 상체 &rarr; 머리 &rarr; 고깔, 치마도 마디마다. 2D 판의 &ldquo;손이 반 박자 늦게 좇는다&rdquo;의 확장이다.</li>
+          <li><strong>관절을 하나 더</strong> &mdash; 팔꿈치·무릎. 통짜 막대는 무엇을 해도 막대가 휘두르는 것으로 보인다. 팔꿈치는 예비에서 깊게 접고 타격에서 펴진다: <strong>접었다 펴는 것이 힘의 출처로 읽힌다.</strong></li>
+          <li><strong>가만히 있을 때도 멈추지 않는다</strong> &mdash; 숨과 무게 이동. 아주 작아야 하고, 걸으면 묻혀야 한다.</li>
+        </ul>
+        휘두름 곡선도 고쳤다(2D·3D 공통): 예비는 <strong>감속</strong>으로 들어가고 타격은 <strong>가속</strong>으로 나간다. 등속 램프는 태엽 감는 기계처럼 보였다.<br>
         <strong>C 의 근본 한계</strong>: 뷰포트는 플레이어 전용이다. 적 수백 마리에 뷰포트를 하나씩 달 수 없으므로 적은 2D 로 남고, 그 순간 <strong>화면에 두 화풍이 섞인다</strong>. B 로 가면 사라지는 문제다.
       </div>
 

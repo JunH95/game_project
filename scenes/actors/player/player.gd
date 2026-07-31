@@ -435,11 +435,15 @@ func _swing_reach() -> float:
 	if _swing_total <= 0.0:
 		return 0.0
 	if _swing_time < SWING_WINDUP:
-		return lerpf(0.0, SWING_BACK, _swing_time / SWING_WINDUP)
+		# 예비는 **감속하며** 들어간다. 등속으로 감으면 태엽 감는 기계처럼 보인다.
+		var wind := _swing_time / SWING_WINDUP
+		return lerpf(0.0, SWING_BACK, 1.0 - (1.0 - wind) * (1.0 - wind))
 	var struck := _swing_time - SWING_WINDUP
 	if struck < SWING_STRIKE:
 		# 내지르는 구간은 짧고 급해야 한다. 여기가 완만하면 타격이 아니라 뻗기가 된다.
-		return lerpf(SWING_BACK, SWING_FORWARD, struck / SWING_STRIKE)
+		# 가속(t²)으로 나가야 **뒤로 감았다가 터지는** 대비가 생긴다.
+		var hit := struck / SWING_STRIKE
+		return lerpf(SWING_BACK, SWING_FORWARD, hit * hit)
 	var back := (struck - SWING_STRIKE) / SWING_RECOVER
 	# 복귀는 천천히 — ease-out 이라야 힘을 쓰고 난 뒤처럼 보인다.
 	return lerpf(SWING_FORWARD, 0.0, back * back)
