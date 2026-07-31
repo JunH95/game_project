@@ -15,6 +15,8 @@ var _finished: bool = false
 
 func _ready() -> void:
 	RunManager.elapsed_sec = 0.0
+	# 적 스케일링이 "관문의 몇 할이 지났나"를 알아야 하므로 길이를 런 상태에 알린다.
+	RunManager.gate_duration_sec = duration_sec
 
 
 func _process(delta: float) -> void:

@@ -167,6 +167,42 @@ static func shaman_hand(r: float, bob: float, facing: float, swing: float,
 ## swing 이 음수면 뒤로 감는 예비 동작, 양수면 앞으로 내지르는 타격이다(0 이면 평상시).
 ## 몸통을 회전시키지 않는 이유: 자식으로 달린 무기(부채꼴·궤도)까지 같이 돌아간다.
 ## 그래서 회전 대신 **팔·상체를 facing 쪽으로 밀어** 방향을 낸다.
+## 두 점을 잇되 **가운데가 부풀어 휘는** 선의 점들. 한복은 직선이 거의 없다 —
+## 배래(소매 아랫선)·도련(저고리 밑단)·어깨가 전부 곡선이라, 직선으로 그리면 레고가 된다.
+## bulge 는 휘는 방향과 깊이(로컬 기준 수직 방향).
+static func _curve(a: Vector2, b: Vector2, bulge: float, steps: int = 8) -> PackedVector2Array:
+	var out := PackedVector2Array()
+	var normal := (b - a).orthogonal().normalized() * bulge
+	for i in steps + 1:
+		var t := float(i) / float(steps)
+		# 이차 베지어. 가운데에서 가장 많이 휜다.
+		var mid := a.lerp(b, t)
+		out.append(mid + normal * (4.0 * t * (1.0 - t)))
+	return out
+
+
+## 끝으로 갈수록 가늘어지는 사지. 굵기가 일정한 선은 팔이 아니라 막대로 보인다.
+static func _limb(canvas: CanvasItem, a: Vector2, b: Vector2, w_start: float, w_end: float,
+		color: Color, bulge: float = 0.0) -> void:
+	var spine := _curve(a, b, bulge, 6)
+	var left := PackedVector2Array()
+	var right := PackedVector2Array()
+	for i in spine.size():
+		var t := float(i) / float(spine.size() - 1)
+		var w := lerpf(w_start, w_end, t) * 0.5
+		# 다음 점을 향한 방향의 수직으로 두께를 준다.
+		var ahead: Vector2 = spine[mini(i + 1, spine.size() - 1)] - spine[maxi(i - 1, 0)]
+		var n := ahead.orthogonal().normalized() * w
+		left.append(spine[i] + n)
+		right.insert(0, spine[i] - n)
+	var poly := left
+	poly.append_array(right)
+	canvas.draw_colored_polygon(poly, color)
+	# 끝을 둥글게 — 잘린 단면이 보이면 조립품처럼 읽힌다.
+	canvas.draw_circle(a, w_start * 0.5, color)
+	canvas.draw_circle(b, w_end * 0.5, color)
+
+
 ## 탈 — 몸주가 정한다. 신이 내리면 얼굴이 바뀐다는 것을 그대로 쓴다.
 ## 형태만으로 셋이 구분돼야 하므로 윤곽선을 서로 다르게 잡았다(작은 크기에서 색은 뭉개진다).
 static func draw_mask(canvas: CanvasItem, center: Vector2, r: float, shape: StringName,
@@ -236,30 +272,37 @@ static func draw_shaman_body(canvas: CanvasItem, r: float, bob: float, taegi: bo
 	for leg in [1.0, -1.0]:
 		var hip := Vector2(r * 0.17 * leg, r * 0.34 + lift)
 		var foot := Vector2(r * 0.17 * leg + stride * leg + brace * leg, r * 1.02)
-		canvas.draw_line(hip, foot, skin, r * 0.16)
-		# 버선 — 코가 살짝 들린 흰 신. 발끝에 흰 점 하나로 암시한다.
-		canvas.draw_circle(foot, r * 0.13, HOBUN)
+		# 다리는 무릎에서 살짝 휜다. 곧은 막대면 조립품이다.
+		_limb(canvas, hip, foot, r * 0.18, r * 0.12, skin, leg * r * 0.05)
+		# 버선 — 코가 살짝 들린 흰 신.
+		canvas.draw_circle(foot, r * 0.14, HOBUN)
 
 	# --- 뒷팔 --- 몸 뒤에 깔려야 앞팔이 위로 읽힌다. 앞팔과 반대로 움직여 균형을 잡는다.
 	var shoulder_off := Vector2(-r * 0.30 * dir.x, -r * 0.20 + lift) + lean * 0.4
-	canvas.draw_line(shoulder_off, shoulder_off - dir * (r * (0.36 + maxf(swing, 0.0) * 0.28)),
-		skin, r * 0.17)
+	var back_hand := shoulder_off - dir * (r * (0.36 + maxf(swing, 0.0) * 0.28))
+	_limb(canvas, shoulder_off, back_hand, r * 0.22, r * 0.14, skin, r * 0.08)
 
 	# --- 치마 위로 드러나는 저고리 --- 한복은 저고리가 짧고 치마가 가슴 밑에서 퍼진다.
 	# 그 경계가 실루엣의 핵심이라 저고리를 짧은 사다리꼴로 둔다.
-	var chest := -r * 0.16 + lift
-	var waist := r * 0.10 + lift
-	canvas.draw_colored_polygon(PackedVector2Array([
-		Vector2(-r * 0.40, chest) + lean, Vector2(r * 0.40, chest) + lean,
-		Vector2(r * 0.34, waist) + lean, Vector2(-r * 0.34, waist) + lean
-	]), HOBUN)
-	# 깃·동정 — 목에서 V 로 여미는 선. 한복으로 읽히게 하는 가장 싼 한 획이다.
-	var neck := Vector2(0.0, -r * 0.30 + lift) + lean
-	canvas.draw_line(neck, Vector2(-r * 0.22, chest + r * 0.16) + lean, GUNCHEONG, r * 0.09)
-	canvas.draw_line(neck, Vector2(r * 0.22, chest + r * 0.16) + lean, GUNCHEONG, r * 0.09)
-	# 고름 — 가슴에서 늘어진 붉은 끈. 홍띠(ClothBody)와 색을 맞춘다.
-	canvas.draw_line(Vector2(r * 0.10, chest + r * 0.10) + lean,
-		Vector2(r * 0.06, waist + r * 0.22) + lean, JUSA, r * 0.07)
+	var chest := -r * 0.30 + lift
+	var waist := r * 0.12 + lift
+	# 저고리 — 어깨는 둥글게 내려오고 도련(밑단)은 아래로 볼록하다. 사다리꼴로 그리면 레고가 된다.
+	var jeogori := PackedVector2Array()
+	jeogori.append_array(_curve(Vector2(-r * 0.44, chest + r * 0.10) + lean,
+		Vector2(r * 0.44, chest + r * 0.10) + lean, -r * 0.16))   # 어깨선(위로 볼록)
+	jeogori.append_array(_curve(Vector2(r * 0.40, waist) + lean,
+		Vector2(-r * 0.40, waist) + lean, -r * 0.12))             # 도련(아래로 볼록)
+	canvas.draw_colored_polygon(jeogori, HOBUN)
+
+	# 깃·동정 — 목에서 V 로 여미는 곡선. 한복으로 읽히게 하는 가장 싼 두 획이다.
+	var neck := Vector2(0.0, -r * 0.34 + lift) + lean
+	for side in [-1.0, 1.0]:
+		canvas.draw_polyline(_curve(neck,
+			Vector2(side * r * 0.30, chest + r * 0.30) + lean, side * r * 0.06),
+			GUNCHEONG, r * 0.10)
+	# 고름 — 가슴에서 늘어진 붉은 끈. 끝이 바람에 휜다.
+	canvas.draw_polyline(_curve(Vector2(r * 0.12, chest + r * 0.26) + lean,
+		Vector2(r * 0.04, waist + r * 0.34) + lean, r * 0.10), JUSA, r * 0.08)
 
 	# --- 머리와 탈 ---
 	# `[고증]` 굿에서 신을 청할 때 그 신의 탈을 쓴다. 사람 얼굴을 그리지 않는 이유이기도 하다 —
@@ -279,9 +322,8 @@ static func draw_shaman_body(canvas: CanvasItem, r: float, bob: float, taegi: bo
 	var shoulder_main := Vector2(r * 0.30 * dir.x, -r * 0.20 + lift) + lean
 	var hand := shaman_hand(r, bob, facing, swing, pose)
 	# 팔꿈치를 살짝 꺾어 막대가 아니라 팔로 보이게 한다.
-	var elbow := shoulder_main.lerp(hand, 0.5) + (hand - shoulder_main).orthogonal().normalized() * (r * 0.12)
-	canvas.draw_line(shoulder_main, elbow, skin, r * 0.20)
-	canvas.draw_line(elbow, hand, skin, r * 0.18)
+	# 배래 — 소매 아랫선이 활처럼 휘는 것이 한복의 결정적 곡선이다. 팔을 그 곡선으로 그린다.
+	_limb(canvas, shoulder_main, hand, r * 0.26, r * 0.15, skin, r * 0.14)
 	# 손. 무기가 어디서 나가는지 한 점으로 찍어 준다.
 	canvas.draw_circle(hand, r * 0.14, skin)
 	# 내지르는 순간에만 손끝에 잔광. 언제 터졌는지가 눈에 들어와야 한다(0-2 읽히는 설계).

@@ -5,6 +5,9 @@ extends Node
 ## 여기서는 보유만 한다. 처치 수만 이 노드가 직접 센다(런 전역 통계라 소유자가 없음).
 
 var elapsed_sec: float = 0.0
+## 이번 관문의 길이(초). GateTimer 가 채운다. 적 난이도 스케일링이 진행도를 재는 기준이라
+## 여기 두어야 적이 타이머 노드를 직접 찾지 않는다.
+var gate_duration_sec: float = 300.0
 var level: int = 1
 var kills: int = 0
 var served_gods: Array = []
@@ -24,6 +27,7 @@ func _on_enemy_died(_enemy: Node2D, _world_position: Vector2) -> void:
 ## 런 시작 시 호출. autoload 라 씬을 다시 열어도 값이 남으므로 명시적으로 비운다.
 func reset_run() -> void:
 	elapsed_sec = 0.0
+	gate_duration_sec = 300.0
 	level = 1
 	kills = 0
 	served_gods.clear()

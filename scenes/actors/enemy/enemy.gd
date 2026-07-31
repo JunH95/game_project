@@ -64,12 +64,26 @@ func setup(new_data: EnemyData) -> void:
 
 
 ## data 의 스탯·외형을 노드에 반영한다. 최초 _ready 와 풀 재사용 양쪽에서 부른다.
+## 관문이 진행될수록 적이 단단해진다(design.md 4-1).
+## 잡몹 한 방 킬은 이 장르의 정답이라 그대로 두되, **성장을 멈추면 한 방이 깨지도록** 한다.
+## 그래야 damage 를 올리는 이유가 "두 방을 한 방으로"가 아니라 "한 방을 유지하려고"가 된다.
+const HP_SCALE_AT_END: float = 2.6
+const DAMAGE_SCALE_AT_END: float = 1.8
+
+
+## 0.0(시작) ~ 1.0(관문 끝). RunManager 가 런 상태를 쥐고 있으므로 거기서 읽는다.
+static func difficulty_progress() -> float:
+	var total := maxf(1.0, RunManager.gate_duration_sec)
+	return clampf(RunManager.elapsed_sec / total, 0.0, 1.0)
+
+
 func _apply_data() -> void:
 	if data == null:
 		return
+	var t := difficulty_progress()
 	_movement.speed = data.move_speed
-	_health.setup(data.max_hp)
-	_hitbox.damage = data.contact_damage
+	_health.setup(data.max_hp * (1.0 + (HP_SCALE_AT_END - 1.0) * t))
+	_hitbox.damage = data.contact_damage * (1.0 + (DAMAGE_SCALE_AT_END - 1.0) * t)
 	var circle := _body_shape.shape as CircleShape2D
 	if circle != null:
 		circle.radius = data.radius
