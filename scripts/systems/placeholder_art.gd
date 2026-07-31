@@ -362,6 +362,27 @@ static func draw_shaman_body(canvas: CanvasItem, r: float, bob: float, taegi: bo
 		canvas.draw_circle(hand, r * 0.30 * swing, Color(glow.r, glow.g, glow.b, 0.34 * swing))
 
 
+## 무보(대시) 잔상용 납작한 실루엣. 본체를 그대로 다시 그리지 않는 이유가 둘 있다.
+## 하나는 비용 — 잔상 여섯 장이면 사지·탈·고름까지 여섯 번 그린다.
+## 다른 하나가 더 중요하다: **잔상은 형태가 아니라 궤적을 보여 주는 것**이라 디테일이 살아 있으면
+## 오히려 지금 몸이 어디인지가 흐려진다. 윤곽 한 덩어리로 뭉쳐야 속도로 읽힌다.
+static func draw_shaman_ghost(canvas: CanvasItem, r: float, tint: Color) -> void:
+	# 치마 — 실제 치마는 ClothBody 가 그리지만, 잔상에서 빠지면 같은 인물로 안 보인다.
+	canvas.draw_colored_polygon(PackedVector2Array([
+		Vector2(-r * 0.40, r * 0.10), Vector2(r * 0.40, r * 0.10),
+		Vector2(r * 0.86, r * 1.05), Vector2(-r * 0.86, r * 1.05),
+	]), tint)
+	# 저고리 + 머리 + 고깔. 셋이 겹친 덩어리라 볼록 조각만으로 성립한다.
+	canvas.draw_colored_polygon(PackedVector2Array([
+		Vector2(-r * 0.44, -r * 0.20), Vector2(r * 0.44, -r * 0.20),
+		Vector2(r * 0.40, r * 0.14), Vector2(-r * 0.40, r * 0.14),
+	]), tint)
+	canvas.draw_circle(Vector2(0.0, -r * 0.60), r * 0.36, tint)
+	canvas.draw_colored_polygon(PackedVector2Array([
+		Vector2(0.0, -r * 1.58), Vector2(r * 0.44, -r * 0.84), Vector2(-r * 0.44, -r * 0.84),
+	]), tint)
+
+
 ## 부적 — 세로로 긴 종이. 진행 방향이 X 축이 되도록 그린다(호출부가 rotation 을 준다).
 static func draw_talisman(canvas: CanvasItem, s: float) -> void:
 	# 꼬리 잔상. 유도로 휘는 궤적이 눈에 남게 한다.

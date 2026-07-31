@@ -84,6 +84,7 @@ var _base_magnet_radius: float = 0.0
 @onready var _hurtbox: HurtboxComponent = %HurtboxComponent
 @onready var _magnet: Area2D = %PickupMagnet
 @onready var _cloth: ClothBody = get_node_or_null(^"%ClothBody")
+@onready var _dash_trail: Node2D = get_node_or_null(^"%DashTrail")
 @onready var _body: Node2D = get_node_or_null(^"%Body")
 
 
@@ -269,6 +270,8 @@ func _try_dash() -> bool:
 	if _cloth != null:
 		# 자락이 뒤로 확 끌린다. 빠르게 움직였다는 것이 천으로 먼저 보인다.
 		_cloth.impulse(-_dash_dir, 2.4)
+	if _dash_trail != null:
+		_dash_trail.call(&"burst", global_position, _dash_dir)
 	AudioManager.play(&"jakdu_swing")
 	return true
 
@@ -283,6 +286,9 @@ func _physics_process(delta: float) -> void:
 		velocity = _dash_dir * DASH_SPEED * (0.35 + 0.65 * ease_out)
 		move_and_slide()
 		_facing = _dash_dir.angle()
+		# 옮긴 **뒤에** 남긴다 — 이동 전 위치를 기록하면 첫 잔상이 몸에 겹쳐 궤적이 한 칸 짧아진다.
+		if _dash_trail != null and _body != null:
+			_dash_trail.call(&"record", global_position, _body, RADIUS)
 	else:
 		_movement.move(direction)
 
