@@ -145,7 +145,21 @@ func _announce_health() -> void:
 ## 신을 새로 모시면(몸주 확정 포함) 능력치와 열린 무기를 다시 계산한다.
 func _on_god_served(_god: GodData) -> void:
 	_apply_god_mods()
+	_apply_mask()
 	_apply_cloth()
+
+
+## 탈은 몸주가 정한다 — 신이 내리면 얼굴이 바뀐다.
+## 얼굴을 그리지 않아 사람 얼굴 비례 문제를 피하고, 동시에 몸주마다 실루엣이 갈린다.
+func _apply_mask() -> void:
+	if _body == null or _god_system == null:
+		return
+	var momju: GodData = _god_system.get_momju() if _god_system.has_method(&"get_momju") else null
+	if momju == null:
+		return
+	_body.mask_shape = momju.mask_shape
+	_body.mask_color = momju.mask_color
+	_body.mask_mark_color = momju.mask_mark_color
 
 
 ## 무복은 몸주가 정하고, 모실수록 자락이 자란다. 새 그림이 아니라 값이라 여기서 끝난다.

@@ -29,6 +29,15 @@ extends Resource
 ## 몸주로 골랐을 때만 붙는 특수 훅 키(작두타기 게이지처럼 수치로 표현 못 하는 것).
 @export var momju_passive: StringName
 
+@export_subgroup("탈 (몸주일 때 쓰는 가면)")
+## 탈의 형태 키. PlaceholderArt 가 해석한다 — jangsu(장수탈) / gaksi(각시탈) / yangban(양반탈).
+## `[고증]` 굿에서 신을 청할 때 그 신의 탈을 쓴다. 신이 내리면 얼굴이 바뀐다는 관념이
+## 그대로 캐릭터 차별화가 된다. 그리고 사람 얼굴을 그리지 않아도 되어 실루엣이 산다.
+@export var mask_shape: StringName = &"jangsu"
+@export var mask_color: Color = Color("F2EDE3")
+## 탈에 그려진 무늬·눈매의 색. 형태만으로 부족한 구분을 여기서 낸다.
+@export var mask_mark_color: Color = Color("B3352A")
+
 @export_subgroup("무복 (몸주일 때 입는 옷)")
 ## 무복 색. 몸주가 바뀌면 외형이 갈리는 첫 번째 축이다.
 @export var robe_color: Color = Color("F2EDE3")

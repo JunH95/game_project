@@ -18,11 +18,22 @@
 ```
 Korean shamanic scroll painting (musindo) style, reimagined for a modern video game.
 Flat mineral-pigment color blocks with bold ink outlines, minimal gradient shading.
-Strict frontal iconic composition, symmetrical, hieratic stillness.
 Palette limited to: cinnabar red #B3352A, ultramarine #25407A, gold leaf #D9A441,
 ink black #1B1B24, shell white #F2EDE3. Aged hanji paper texture in the pigment.
 Dark, numinous, slightly eerie but not gory. Clean silhouette readable at small size.
 Centered subject, plain transparent background, no scenery, no text, no signature.
+```
+
+`[개정]` **"정면 정지 도상(strict frontal, hieratic stillness)"을 뺐다.** 무신도 원본은 제단에
+거는 그림이라 정지가 맞지만, **게임 캐릭터는 움직여야 한다.** 굵은 먹선·제한 팔레트·평면
+색면은 그대로 두고 **자세만 역동적으로** 간다. 이러면 무신도의 질감을 유지하면서
+Nine Sols 계열의 액션 지향에 가까워진다 — 둘은 생각보다 가깝다(둘 다 동양 종교화 기반의
+굵은 윤곽선·제한 색·평면 색면이고, 갈리는 지점은 정지냐 동세냐뿐이다).
+
+피사체가 **인물일 때만** 아래 한 줄을 덧붙인다:
+
+```
+Dynamic action pose with clear line of action, weight shifted, garments trailing.
 ```
 
 ### 네거티브 프롬프트 (지원하는 도구에서만)
@@ -175,13 +186,31 @@ diamond silhouette with an inner glow. Isolated object, no background.
 
 ### 플레이어 (바리)
 
+`[중요]` **얼굴을 그리지 않는다 — 탈을 씌운다.** 사람 얼굴은 눈코입 비례가 조금만 어긋나도
+"못생겼다"로 읽히는데, 작은 크기에서 그 정확도를 내기가 가장 어렵다. 탈은 원래 과장된
+형태라 그 판정 자체가 없고, **형태만으로 몸주가 구분된다.**
+
+`[고증]` 굿에서 신을 청할 때 그 신의 탈을 쓴다. 회피책이 아니라 **소재가 원래 그렇다.**
+그리고 대가 시스템의 "인간성을 잃을수록 얼굴이 흐려진다"(design.md 3-7-3)가
+**탈이 얼굴에 들러붙는 것**으로 그림이 된다 — 수치가 아니라 보이는 대가가 된다.
+
 ```
 <스타일 앵커>
-A young shaman seen from a high top-down angle, standing upright. White ritual hanbok
-with a cinnabar waist sash and ultramarine collar, small brass bells at the crown.
-Compact readable silhouette, arms close to the body, no weapon in hand.
-Facing the viewer. Readable at 24 pixels.
+<액션 포즈 한 줄>
+A young shaman seen from a high top-down angle, wearing a Korean ritual mask (tal)
+that fully covers the face. White ritual hanbok: short jeogori ending under the chest,
+high-waisted full chima flaring from there, cinnabar sash, ultramarine collar band.
+Mid-swing, one arm extended, skirt and sash trailing behind the motion.
+Compact readable silhouette. Readable at 24 pixels.
 ```
+
+**몸주별 탈** — 형태로 먼저 갈리게 한다. 작은 크기에서 색은 뭉개진다.
+
+| 몸주 | 탈 | 프롬프트에 넣을 말 |
+|---|---|---|
+| 작도대신 | 장수탈 | `fierce angular warrior mask, upswept eye slits, bold brow stroke` |
+| 최영장군 | 양반탈 | `broad squared nobleman mask, large round eyes, haughty` |
+| 칠성신 | 각시탈 | `slender oval maiden mask, narrow closed eyes, red dot on the forehead` |
 
 ---
 

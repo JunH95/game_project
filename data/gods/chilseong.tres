@@ -21,6 +21,9 @@ stat_mods = {
 "max_hp_pct": 8.0
 }
 description = "북두칠성. 이 신을 모시면 부적이 날아든다. 모실수록 발수가 늘어 일곱에 이른다."
+mask_shape = &"gaksi"
+mask_color = Color(0.949, 0.929, 0.891, 1)
+mask_mark_color = Color(0.180, 0.298, 0.565, 1)
 robe_color = Color(0.180, 0.298, 0.565, 1)
 sash_color = Color(0.949, 0.929, 0.891, 1)
 cloth_weight = 0.7

@@ -14,6 +14,10 @@ var taegi: bool = false
 var facing: float = 0.0
 var swing: float = 0.0
 var pose: StringName = PlaceholderArt.POSE_SLASH
+## 탈 — 몸주가 정한다. 신이 내리면 얼굴이 바뀐다.
+var mask_shape: StringName = &"jangsu"
+var mask_color: Color = PlaceholderArt.HOBUN
+var mask_mark_color: Color = PlaceholderArt.JUSA
 var radius: float = 12.0
 ## 정식 아트가 들어오면 여기에 물리고, 도형 실루엣은 자동으로 비켜난다(design.md 9-3).
 var texture: Texture2D
@@ -22,4 +26,5 @@ var texture: Texture2D
 func _draw() -> void:
 	if PlaceholderArt.draw_texture_centered(self, texture, radius * 3.0):
 		return
-	PlaceholderArt.draw_shaman_body(self, radius, bob, taegi, facing, swing, pose)
+	PlaceholderArt.draw_shaman_body(self, radius, bob, taegi, facing, swing, pose,
+		mask_shape, mask_color, mask_mark_color)

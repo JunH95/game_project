@@ -167,9 +167,49 @@ static func shaman_hand(r: float, bob: float, facing: float, swing: float,
 ## swing 이 음수면 뒤로 감는 예비 동작, 양수면 앞으로 내지르는 타격이다(0 이면 평상시).
 ## 몸통을 회전시키지 않는 이유: 자식으로 달린 무기(부채꼴·궤도)까지 같이 돌아간다.
 ## 그래서 회전 대신 **팔·상체를 facing 쪽으로 밀어** 방향을 낸다.
-## pose 는 무엇을 들었는지다(POSE_SLASH/THROW/HOLD). 무기마다 손이 다르게 가야 구분된다.
+## 탈 — 몸주가 정한다. 신이 내리면 얼굴이 바뀐다는 것을 그대로 쓴다.
+## 형태만으로 셋이 구분돼야 하므로 윤곽선을 서로 다르게 잡았다(작은 크기에서 색은 뭉개진다).
+static func draw_mask(canvas: CanvasItem, center: Vector2, r: float, shape: StringName,
+		face: Color, mark: Color) -> void:
+	match shape:
+		&"gaksi":
+			# 각시탈 — 갸름한 계란형. 이마에 붉은 점, 눈은 가늘게 감긴 선.
+			canvas.draw_colored_polygon(PackedVector2Array([
+				center + Vector2(0.0, -r * 1.05), center + Vector2(r * 0.72, -r * 0.1),
+				center + Vector2(0.0, r * 1.0), center + Vector2(-r * 0.72, -r * 0.1)
+			]), face)
+			canvas.draw_circle(center + Vector2(0.0, -r * 0.55), r * 0.15, mark)
+			for side in [-1.0, 1.0]:
+				canvas.draw_line(center + Vector2(side * r * 0.14, -r * 0.02),
+					center + Vector2(side * r * 0.46, -r * 0.12), mark, r * 0.13)
+		&"yangban":
+			# 양반탈 — 넓적하고 위가 각진 형. 눈이 크고 둥글다.
+			canvas.draw_colored_polygon(PackedVector2Array([
+				center + Vector2(-r * 0.78, -r * 0.72), center + Vector2(r * 0.78, -r * 0.72),
+				center + Vector2(r * 0.62, r * 0.95), center + Vector2(-r * 0.62, r * 0.95)
+			]), face)
+			for side in [-1.0, 1.0]:
+				canvas.draw_circle(center + Vector2(side * r * 0.34, -r * 0.08), r * 0.2, mark)
+		_:
+			# 장수탈 — 사납게 각진 형. 눈꼬리가 위로 치솟고 이마에 굵은 획.
+			canvas.draw_colored_polygon(PackedVector2Array([
+				center + Vector2(0.0, -r * 1.1), center + Vector2(r * 0.8, -r * 0.35),
+				center + Vector2(r * 0.5, r * 0.95), center + Vector2(-r * 0.5, r * 0.95),
+				center + Vector2(-r * 0.8, -r * 0.35)
+			]), face)
+			canvas.draw_line(center + Vector2(-r * 0.5, -r * 0.6),
+				center + Vector2(r * 0.5, -r * 0.6), mark, r * 0.16)
+			for side in [-1.0, 1.0]:
+				canvas.draw_line(center + Vector2(side * r * 0.12, r * 0.05),
+					center + Vector2(side * r * 0.52, -r * 0.22), mark, r * 0.16)
+
+
+## pose 는 무엇을 들었는지다(POSE_SLASH/THROW/HOLD/SPIN). 무기마다 손이 다르게 가야 구분된다.
+## mask_* 는 몸주가 정하는 탈. 얼굴을 그리지 않고 탈을 씌워 실루엣으로 캐릭터를 가른다.
 static func draw_shaman_body(canvas: CanvasItem, r: float, bob: float, taegi: bool,
-		facing: float = 0.0, swing: float = 0.0, pose: StringName = POSE_SLASH) -> void:
+		facing: float = 0.0, swing: float = 0.0, pose: StringName = POSE_SLASH,
+		mask_shape: StringName = &"jangsu", mask_color: Color = HOBUN,
+		mask_mark_color: Color = JUSA) -> void:
 	if taegi:
 		# 강림 중에는 뒤에 금빛이 번지고 발밑에 작두날이 깔린다 — 무당이 작두에 오르는 도상.
 		canvas.draw_circle(Vector2.ZERO, r * 2.4, Color(GEUMBAK.r, GEUMBAK.g, GEUMBAK.b, 0.14))
@@ -221,12 +261,12 @@ static func draw_shaman_body(canvas: CanvasItem, r: float, bob: float, taegi: bo
 	canvas.draw_line(Vector2(r * 0.10, chest + r * 0.10) + lean,
 		Vector2(r * 0.06, waist + r * 0.22) + lean, JUSA, r * 0.07)
 
-	# --- 머리 ---
+	# --- 머리와 탈 ---
+	# `[고증]` 굿에서 신을 청할 때 그 신의 탈을 쓴다. 사람 얼굴을 그리지 않는 이유이기도 하다 —
+	# 눈코입 비례는 조금만 어긋나도 "못생겼다"로 읽히지만, 탈은 원래 과장된 형태라 그 판정이 없다.
 	var head := Vector2(0.0, -r * 0.60 + lift) + lean
 	canvas.draw_circle(head, r * 0.34, skin)
-	# 눈 두 점. 없으면 발광체지 사람이 아니다.
-	_draw_eyes(canvas, head + Vector2(0.0, r * 0.04), r * 0.15, r * 0.065,
-		Color(0.11, 0.11, 0.14))
+	draw_mask(canvas, head, r * 0.36, mask_shape, mask_color, mask_mark_color)
 	# 고깔 — 강신무의 관. 상체보다 덜 따라와야 관성이 있는 것처럼 보인다.
 	var hat_lean := lean * 0.55
 	canvas.draw_colored_polygon(PackedVector2Array([
