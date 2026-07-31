@@ -129,6 +129,10 @@ const POSE_SLASH: StringName = &"slash"    ## 작두 — 옆에서 앞으로 쓸
 const POSE_THROW: StringName = &"throw"    ## 부적 — 뒤로 당겼다 앞으로 튕겨 놓는다
 const POSE_HOLD: StringName = &"hold"      ## 궤도 무기 — 돌아가는 날을 따라 들고 있는다
 const POSE_SPIN: StringName = &"spin"      ## 언월도 — 몸을 돌려 사방을 쓸어 벤다
+## 작두 3연타. 같은 궤적만 반복하면 기계처럼 보이므로 벨 때마다 돌려 쓴다.
+const POSE_SLASH_BACK: StringName = &"slash_back"  ## 되돌려 베기(궤적 반전)
+const POSE_THRUST: StringName = &"thrust"          ## 찌르기(마무리)
+const SLASH_CHAIN: Array[StringName] = [POSE_SLASH, POSE_SLASH_BACK, POSE_THRUST]
 
 
 ## 무구를 쥔 손의 위치(몸 로컬). 지전이 여기 매달리므로 **그리기와 천이 같은 값을 봐야 한다** —
@@ -152,6 +156,15 @@ static func shaman_hand(r: float, bob: float, facing: float, swing: float,
 			# 사방 베기 — 손이 몸을 한 바퀴 돈다. 팔을 길게 뻗어 대형 무기의 무게를 낸다.
 			var turn := clampf((swing + 0.38) / 1.38, 0.0, 1.0) * TAU
 			return shoulder + Vector2.from_angle(facing + turn) * (r * (0.72 + maxf(swing, 0.0) * 0.5))
+		POSE_SLASH_BACK:
+			# 되돌려 베기 — 위 궤적을 뒤집는다. 한쪽으로만 계속 휘두르면 기계처럼 보인다.
+			var back_sweep := lerpf(-0.95, 0.62, clampf((swing + 0.38) / 1.38, 0.0, 1.0))
+			return shoulder + Vector2.from_angle(facing + back_sweep) \
+				* (r * (0.62 + maxf(swing, 0.0) * 0.55))
+		POSE_THRUST:
+			# 찌르기 — 각도는 거의 고정하고 팔만 길게 뻗는다. 세 번째 타의 마무리.
+			return shoulder + Vector2.from_angle(facing + swing * 0.12) \
+				* (r * (0.5 + maxf(swing, 0.0) * 1.15))
 		_:
 			# 베기 — 손이 호를 그린다. 예비에서 뒤(+각), 타격에서 앞(−각)으로 쓸고 지나간다.
 			# 거리보다 **각도**가 움직여야 "휘둘렀다"로 읽힌다.
@@ -245,7 +258,8 @@ static func draw_mask(canvas: CanvasItem, center: Vector2, r: float, shape: Stri
 static func draw_shaman_body(canvas: CanvasItem, r: float, bob: float, taegi: bool,
 		facing: float = 0.0, swing: float = 0.0, pose: StringName = POSE_SLASH,
 		mask_shape: StringName = &"jangsu", mask_color: Color = HOBUN,
-		mask_mark_color: Color = JUSA) -> void:
+		mask_mark_color: Color = JUSA,
+		hand_override: Variant = null) -> void:
 	if taegi:
 		# 강림 중에는 뒤에 금빛이 번지고 발밑에 작두날이 깔린다 — 무당이 작두에 오르는 도상.
 		canvas.draw_circle(Vector2.ZERO, r * 2.4, Color(GEUMBAK.r, GEUMBAK.g, GEUMBAK.b, 0.14))
@@ -320,7 +334,9 @@ static func draw_shaman_body(canvas: CanvasItem, r: float, bob: float, taegi: bo
 
 	# --- 앞팔 --- 무구를 쥔 손. 모션의 주역이라 마지막에 그려 맨 위로 올린다.
 	var shoulder_main := Vector2(r * 0.30 * dir.x, -r * 0.20 + lift) + lean
-	var hand := shaman_hand(r, bob, facing, swing, pose)
+	# 호출부가 지연된 손 위치를 주면 그걸 쓴다 — 목표를 반 박자 늦게 좇아야 팔이 부드럽다.
+	var hand: Vector2 = hand_override if hand_override is Vector2 \
+		else shaman_hand(r, bob, facing, swing, pose)
 	# 팔꿈치를 살짝 꺾어 막대가 아니라 팔로 보이게 한다.
 	# 배래 — 소매 아랫선이 활처럼 휘는 것이 한복의 결정적 곡선이다. 팔을 그 곡선으로 그린다.
 	_limb(canvas, shoulder_main, hand, r * 0.26, r * 0.15, skin, r * 0.14)

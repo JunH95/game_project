@@ -56,6 +56,8 @@ var _swing_time: float = 0.0
 var _swing_total: float = 0.0
 ## 지금 하고 있는 동작의 종류(베기/던지기/들기). 마지막으로 나간 무기가 정한다.
 var _pose: StringName = PlaceholderArt.POSE_SLASH
+## 작두 연타의 몇 번째 타인지. 벨 때마다 궤적이 바뀐다.
+var _slash_step: int = 0
 var _bob_phase: float = 0.0
 ## 0.0~1.0. 걸을수록 오르고 멈추면 내려간다. 흔들림의 크기를 여기에 곱한다.
 var _bob_weight: float = 0.0
@@ -107,7 +109,7 @@ func _ready() -> void:
 	if jakdu != null:
 		jakdu.synergy_system = _synergy_system
 		# 무기가 혼자 움직이면 미는 것처럼 보인다. 몸이 같이 나가야 때리는 것이 된다.
-		jakdu.swung.connect(_on_weapon_swung.bind(PlaceholderArt.POSE_SLASH))
+		jakdu.swung.connect(_on_jakdu_swung)
 	var bujeok := _weapons.get(&"bujeok") as BujeokWeapon
 	if bujeok != null:
 		bujeok.fired.connect(_on_weapon_swung.bind(PlaceholderArt.POSE_THROW))
@@ -292,12 +294,15 @@ func _update_body(delta: float) -> void:
 	_body.pose = _pose
 	_body.radius = RADIUS
 	_body.texture = texture
-	_body.queue_redraw()
+	# 다시 그리는 것은 Body 가 자기 _process 에서 한다(손 지연을 거기서 계산하므로).
 
 	# 무구를 쥔 손 — 지전이 여기 매달린다. 몸이 돌고 찌그러지므로 **그 변환을 거쳐** 넘겨야
 	# 종이 술이 손에서 논다. 로컬 좌표를 그대로 주면 몸만 기울고 술은 제자리에 남는다.
 	if _cloth != null:
-		var hand := PlaceholderArt.shaman_hand(RADIUS, bob, _facing, reach, _pose)
+		# Body 가 실제로 그린 손(지연 적용분)을 그대로 쓴다. 여기서 다시 계산하면
+		# 종이 술만 목표 위치로 튀어 손과 어긋난다.
+		var hand: Vector2 = _body.get_hand() if _body.has_method(&"get_hand") \
+			else PlaceholderArt.shaman_hand(RADIUS, bob, _facing, reach, _pose)
 		_cloth.set_grip(_body.transform * hand)
 
 
@@ -313,6 +318,14 @@ func _on_health_changed(current: float, maximum: float) -> void:
 ## (즉시 리로드하면 무엇 때문에 죽었는지 볼 새도 없이 판이 넘어간다).
 func _on_died() -> void:
 	EventBus.player_died.emit()
+
+
+## 작두는 벨 때마다 다른 궤적을 쓴다 — 베기 → 되돌려 베기 → 찌르기.
+## 같은 동작만 반복하면 아무리 잘 그려도 기계처럼 보인다.
+func _on_jakdu_swung(direction: Vector2) -> void:
+	var chain := PlaceholderArt.SLASH_CHAIN
+	_slash_step = (_slash_step + 1) % chain.size()
+	_on_weapon_swung(direction, chain[_slash_step])
 
 
 ## 무기가 나갔다. 몸도 같이 나가고, 그 바람에 무복이 휩쓸린다.

@@ -22,9 +22,32 @@ var radius: float = 12.0
 ## 정식 아트가 들어오면 여기에 물리고, 도형 실루엣은 자동으로 비켜난다(design.md 9-3).
 var texture: Texture2D
 
+## 손은 목표 위치를 **반 박자 늦게** 좇는다. 계산값을 그대로 그리면 팔이 딱딱 끊겨 움직인다 —
+## 사지가 부드러워 보이는 것은 관절이 많아서가 아니라 **따라오는 지연** 때문이다.
+const HAND_FOLLOW: float = 26.0
+
+var _hand: Vector2 = Vector2.ZERO
+var _hand_ready: bool = false
+
+
+func _process(delta: float) -> void:
+	var target := PlaceholderArt.shaman_hand(radius, bob, facing, swing, pose)
+	if not _hand_ready:
+		_hand = target
+		_hand_ready = true
+	else:
+		# 프레임률과 무관하게 같은 속도로 좇는다.
+		_hand = _hand.lerp(target, 1.0 - exp(-HAND_FOLLOW * delta))
+	queue_redraw()
+
+
+## 천(지전)이 매달릴 실제 손 위치. 그리는 값과 같아야 종이 술이 손에서 논다.
+func get_hand() -> Vector2:
+	return _hand
+
 
 func _draw() -> void:
 	if PlaceholderArt.draw_texture_centered(self, texture, radius * 3.0):
 		return
 	PlaceholderArt.draw_shaman_body(self, radius, bob, taegi, facing, swing, pose,
-		mask_shape, mask_color, mask_mark_color)
+		mask_shape, mask_color, mask_mark_color, _hand)
