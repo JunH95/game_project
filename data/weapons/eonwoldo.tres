@@ -6,11 +6,9 @@
 script = ExtResource("1_script")
 id = &"eonwoldo"
 display_name = "언월도"
-is_melee = false
-base_damage = 8.0
-cooldown = 0.0
-knockback = 60.0
-orbit_radius = 70.0
-orbit_speed = 2.0
-rehit_cooldown = 0.5
-count = 2
+is_melee = true
+base_damage = 22.0
+cooldown = 1.4
+knockback = 160.0
+attack_range = 115.0
+arc_degrees = 360.0

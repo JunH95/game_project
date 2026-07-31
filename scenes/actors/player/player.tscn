@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3]
+[gd_scene load_steps=19 format=3]
 
 [ext_resource type="Script" path="res://scenes/actors/player/player.gd" id="1_player"]
 [ext_resource type="Script" path="res://scripts/components/movement_component.gd" id="2_move"]
@@ -12,6 +12,7 @@
 [ext_resource type="Script" path="res://scripts/components/orbit_blades.gd" id="10_orbit"]
 [ext_resource type="Resource" path="res://data/weapons/eonwoldo.tres" id="11_eonwoldo_data"]
 [ext_resource type="Script" path="res://scenes/actors/player/body_visual.gd" id="12_body"]
+[ext_resource type="Script" path="res://scripts/components/eonwoldo_weapon.gd" id="13_eonwoldo"]
 [ext_resource type="Script" path="res://scripts/components/cloth_body.gd" id="99_cloth"]
 
 [sub_resource type="CircleShape2D" id="Shape_body"]
@@ -79,10 +80,8 @@ projectile_scene = ExtResource("9_bujeok_proj")
 
 [node name="EonwoldoWeapon" type="Node2D" parent="."]
 unique_name_in_owner = true
-script = ExtResource("10_orbit")
+script = ExtResource("13_eonwoldo")
 data = ExtResource("11_eonwoldo_data")
-damage_key = &"eonwoldo_damage_pct"
-count_mod_key = &"eonwoldo_count"
 
 [node name="JakduOrbit" type="Node2D" parent="."]
 unique_name_in_owner = true

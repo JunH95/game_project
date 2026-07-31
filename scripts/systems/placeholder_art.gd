@@ -127,7 +127,8 @@ static func draw_mudang(canvas: CanvasItem, r: float, bob: float, taegi: bool) -
 ## 무기별 손동작. 같은 "휘두름"이라도 무엇을 들었느냐로 손이 다르게 가야 무기가 구분된다.
 const POSE_SLASH: StringName = &"slash"    ## 작두 — 옆에서 앞으로 쓸어 벤다
 const POSE_THROW: StringName = &"throw"    ## 부적 — 뒤로 당겼다 앞으로 튕겨 놓는다
-const POSE_HOLD: StringName = &"hold"      ## 언월도 — 돌아가는 날을 따라 들고 있는다
+const POSE_HOLD: StringName = &"hold"      ## 궤도 무기 — 돌아가는 날을 따라 들고 있는다
+const POSE_SPIN: StringName = &"spin"      ## 언월도 — 몸을 돌려 사방을 쓸어 벤다
 
 
 ## 무구를 쥔 손의 위치(몸 로컬). 지전이 여기 매달리므로 **그리기와 천이 같은 값을 봐야 한다** —
@@ -147,6 +148,10 @@ static func shaman_hand(r: float, bob: float, facing: float, swing: float,
 		POSE_HOLD:
 			# 들고 있는 자세 — 몸에서 일정 거리로 내밀고, 휘두름에는 조금만 반응한다.
 			return shoulder + Vector2.from_angle(facing) * (r * (0.78 + swing * 0.22))
+		POSE_SPIN:
+			# 사방 베기 — 손이 몸을 한 바퀴 돈다. 팔을 길게 뻗어 대형 무기의 무게를 낸다.
+			var turn := clampf((swing + 0.38) / 1.38, 0.0, 1.0) * TAU
+			return shoulder + Vector2.from_angle(facing + turn) * (r * (0.72 + maxf(swing, 0.0) * 0.5))
 		_:
 			# 베기 — 손이 호를 그린다. 예비에서 뒤(+각), 타격에서 앞(−각)으로 쓸고 지나간다.
 			# 거리보다 **각도**가 움직여야 "휘둘렀다"로 읽힌다.

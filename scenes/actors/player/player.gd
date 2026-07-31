@@ -111,6 +111,9 @@ func _ready() -> void:
 	var bujeok := _weapons.get(&"bujeok") as BujeokWeapon
 	if bujeok != null:
 		bujeok.fired.connect(_on_weapon_swung.bind(PlaceholderArt.POSE_THROW))
+	var eonwoldo := _weapons.get(&"eonwoldo") as EonwoldoWeapon
+	if eonwoldo != null:
+		eonwoldo.swung.connect(_on_weapon_swung.bind(PlaceholderArt.POSE_SPIN))
 
 	# 합이 여는 궤도들. 무기가 아니라 합에 딸린 것이라 무기 맵과 따로 둔다.
 	_synergy_orbits = [get_node_or_null(^"%JakduOrbit"), get_node_or_null(^"%BujeokShield")]
