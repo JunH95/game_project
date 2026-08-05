@@ -5,6 +5,19 @@ extends CanvasLayer
 
 @export var god_system_path: NodePath
 
+## 대가 이름표(design.md 3-7-2). 여기 없는 키는 데이터 쪽 오타다.
+const PRICE_LABELS: Dictionary = {
+	&"lifespan": "수명",
+	&"flesh": "살",
+	&"soul": "넋",
+	&"humanity": "인간성",
+	&"memory": "기억",
+}
+
+## 값을 부르는 신은 붉은 테를 두른다(design.md 3-7-1). 색만 바꾸면 글자에 묻혀
+## 급하게 고를 때 안 보인다 — 테두리라야 카드 단위로 눈에 들어온다.
+const PRICE_BORDER: Color = Color(0.78, 0.24, 0.20)
+
 @onready var _panel: Control = %Panel
 @onready var _buttons: VBoxContainer = %Choices
 
@@ -44,7 +57,12 @@ func _show_next() -> void:
 		var button := Button.new()
 		var level: int = _god_system.get_level(god.id)
 		var prefix := "새로 모심" if level == 0 else "Lv %d -> %d" % [level, level + 1]
-		button.text = "%s  (%s)\n%s" % [god.display_name, prefix, god.description]
+		var head := "%s  (%s)" % [god.display_name, prefix]
+		# 대가는 **고르기 전에** 보여야 한다. 고르고 나서 알게 되면 그건 선택이 아니라 함정이다.
+		if god.price_kind != &"":
+			head += "   ▲ 대가 · %s" % PRICE_LABELS.get(god.price_kind, "알 수 없음")
+			_mark_priced(button)
+		button.text = "%s\n%s" % [head, god.description]
 		button.custom_minimum_size = Vector2(560, 76)
 		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		# 신 일러스트가 들어오면 GodData.icon 만 물리면 여기 뜬다. 없으면 글자만 나온다.
@@ -60,6 +78,19 @@ func _show_next() -> void:
 	# 일시정지 중에는 마우스보다 키보드/패드가 자연스러워 첫 항목에 포커스를 준다.
 	if _buttons.get_child_count() > 0:
 		(_buttons.get_child(0) as Button).grab_focus()
+
+
+## 붉은 테. 버튼의 네 가지 상태 전부에 씌우지 않으면 마우스를 올리는 순간 테가 사라진다.
+func _mark_priced(button: Button) -> void:
+	for state: String in ["normal", "hover", "pressed", "focus"]:
+		var style := StyleBoxFlat.new()
+		style.bg_color = Color(0.12, 0.07, 0.08, 0.92 if state == "normal" else 1.0)
+		style.set_border_width_all(2 if state == "normal" else 3)
+		style.border_color = PRICE_BORDER
+		style.set_corner_radius_all(4)
+		style.set_content_margin_all(10.0)
+		button.add_theme_stylebox_override(state, style)
+	button.add_theme_color_override("font_color", Color(0.95, 0.86, 0.84))
 
 
 func _on_choice_pressed(god: GodData) -> void:

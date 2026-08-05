@@ -22,6 +22,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/momju_select/momju_select.tscn" id="19_momju"]
 [ext_resource type="Script" uid="uid://cf0sw0pb8l8i3" path="res://scripts/systems/synergy_system.gd" id="20_synergy"]
 [ext_resource type="Script" uid="uid://mel1rueidvln" path="res://scripts/systems/fx_spawner.gd" id="21_fx"]
+[ext_resource type="Script" path="res://scripts/systems/price_system.gd" id="27_price"]
 [ext_resource type="PackedScene" path="res://scenes/actors/fx/damage_number.tscn" id="22_dmgnum"]
 [ext_resource type="PackedScene" path="res://scenes/actors/fx/death_burst.tscn" id="23_burst"]
 [ext_resource type="Resource" path="res://data/enemies/elite_saja.tres" id="24_saja"]
@@ -78,6 +79,13 @@ script = ExtResource("8_level")
 [node name="GateTimer" type="Node" parent="." unique_id=1776844507]
 unique_name_in_owner = true
 script = ExtResource("12_timer")
+
+[node name="PriceSystem" type="Node" parent="." unique_id=1099231044]
+unique_name_in_owner = true
+script = ExtResource("27_price")
+god_system_path = NodePath("../GodSystem")
+gate_timer_path = NodePath("../GateTimer")
+player_path = NodePath("../Player")
 
 [node name="Hud" parent="." unique_id=1722724224 instance=ExtResource("9_hud")]
 level_system_path = NodePath("../LevelSystem")

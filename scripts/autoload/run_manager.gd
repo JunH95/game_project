@@ -13,6 +13,9 @@ var kills: int = 0
 var served_gods: Array = []
 ## 이번 런의 몸주 id. 런 시작 화면에서 정해진다(design.md 3-1).
 var momju_id: StringName = &""
+## 인간성을 몇 번 내줬는지(design.md 3-7). **결말이 이걸 본다**(5-0) —
+## 다른 대가는 이 런 안에서 끝나지만 이것만 끝에서 청구된다. 그래서 런 상태로 들고 있다.
+var humanity_paid: int = 0
 
 
 func _ready() -> void:
@@ -32,3 +35,4 @@ func reset_run() -> void:
 	kills = 0
 	served_gods.clear()
 	momju_id = &""
+	humanity_paid = 0

@@ -18,6 +18,13 @@ signal momju_chosen(god: GodData)
 ## 신을 실제로 모신 순간. player_leveled_up 은 "고르기 전"에 오므로 능력치·합 판정은 이걸 봐야 한다.
 signal god_served(god: GodData)
 signal synergy_formed(synergy: SynergyData)
+## 대가를 치렀다(design.md 3-7). kind 는 lifespan/flesh/soul/humanity/memory.
+## detail 은 화면에 그대로 띄울 한 줄이다 — 무엇을 내줬는지 **보이고 남아야** 한다(3-7-3).
+signal price_paid(kind: StringName, god: GodData, detail: String)
+## 지금까지 치른 대가의 총량이 바뀌었다. HUD 가 구독한다.
+signal price_total_changed(total: int, humanity: int)
+## 이미 모신 신을 잊었다(대가: 기억). 도감이 "잊힌 신"으로 기록한다.
+signal god_forgotten(god_id: StringName, new_level: int)
 ## 작두타기처럼 잠시 켜졌다 꺼지는 상태. UI·연출이 구독한다.
 ## 적이 부하를 부른다(신장 계열). 스포너가 받아서 실제로 만든다 —
 ## 적이 직접 스폰하면 풀 관리가 두 곳으로 갈린다.

@@ -45,6 +45,9 @@ const DASH_TIME: float = 0.14
 const DASH_COOLDOWN: float = 1.6
 const DASH_TILT: float = 0.62
 
+## 인간성을 한 번 내줄 때마다 탈의 획이 바탕에 묻히는 정도(design.md 3-7-3).
+const HUMANITY_BLUR_STEP: float = 0.22
+
 ## 정식 아트가 들어오면 여기에 물리고, 도형 실루엣은 자동으로 비켜난다.
 @export var texture: Texture2D
 
@@ -153,6 +156,8 @@ func _ready() -> void:
 
 	# 작두타기가 발동하면 몸에 금빛이 실린다 — 지금이 그 순간임을 몸으로도 보여 준다.
 	EventBus.taegi_state_changed.connect(_on_taegi_state_changed)
+	# 대가는 god_served 보다 뒤에 청구되므로 얼굴은 이 신호로 다시 맞춘다.
+	EventBus.price_total_changed.connect(_on_price_total_changed)
 
 	# health_changed 는 피격 때만 오므로 시작 체력을 한 번 알린다.
 	# 지연시키는 이유: 플레이어가 HUD 보다 먼저 _ready 를 돌아, 즉시 쏘면 구독 전에 사라진다.
@@ -203,7 +208,10 @@ func _apply_mask() -> void:
 		return
 	_body.mask_shape = momju.mask_shape
 	_body.mask_color = momju.mask_color
-	_body.mask_mark_color = momju.mask_mark_color
+	# 인간성을 내줄수록 탈의 획이 바탕에 묻힌다 — **얼굴이 흐려진다**(design.md 3-7-3).
+	# 눈코입을 지우는 게 아니라 표정이 읽히지 않게 되는 쪽이라야 "사람에서 멀어졌다"가 된다.
+	var blur := clampf(float(RunManager.humanity_paid) * HUMANITY_BLUR_STEP, 0.0, 0.8)
+	_body.mask_mark_color = momju.mask_mark_color.lerp(momju.mask_color, blur)
 
 
 ## 무복은 몸주가 정하고, 모실수록 자락이 자란다. 새 그림이 아니라 값이라 여기서 끝난다.
@@ -447,6 +455,10 @@ func _swing_reach() -> float:
 	var back := (struck - SWING_STRIKE) / SWING_RECOVER
 	# 복귀는 천천히 — ease-out 이라야 힘을 쓰고 난 뒤처럼 보인다.
 	return lerpf(SWING_FORWARD, 0.0, back * back)
+
+
+func _on_price_total_changed(_total: int, _humanity: int) -> void:
+	_apply_mask()
 
 
 func _on_taegi_state_changed(active: bool) -> void:

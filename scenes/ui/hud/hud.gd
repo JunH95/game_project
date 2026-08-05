@@ -20,12 +20,26 @@ const ELEMENT_COLORS: Dictionary = {
 	&"earth": Color(0.83, 0.68, 0.38),
 }
 
+## 대가 표기. 순서를 고정해 둬야 낼 때마다 줄이 뒤섞이지 않는다.
+const PRICE_ORDER: Array[StringName] = [
+	&"lifespan", &"flesh", &"soul", &"memory", &"humanity"
+]
+const PRICE_NAMES: Dictionary = {
+	&"lifespan": "수명", &"flesh": "살", &"soul": "넋",
+	&"memory": "기억", &"humanity": "인간성",
+}
+const PRICE_COLOR: Color = Color(0.78, 0.24, 0.20)
+const HUMANITY_COLOR: Color = Color(0.72, 0.55, 0.85)
+## 타이머의 평상시 색. 수명을 내줄수록 여기서 붉은 쪽으로 간다.
+const TIME_COLOR: Color = Color(0.878, 0.784, 0.451)
+
 @onready var _time_label: Label = %TimeLabel
 @onready var _hp_bar: ProgressBar = %HpBar
 @onready var _xp_bar: ProgressBar = %XpBar
 @onready var _status_label: Label = %StatusLabel
 @onready var _gods_label: Label = %GodsLabel
 @onready var _synergy_label: Label = %SynergyLabel
+@onready var _price_label: Label = %PriceLabel
 
 var _level_system: Node
 var _gate_timer: Node
@@ -34,6 +48,9 @@ var _hp: float = 0.0
 var _max_hp: float = 0.0
 var _synergy_names: PackedStringArray = []
 var _jakdu: Node
+## 무엇을 내줬는지의 기록. 총량만 보여 주면 "몇 번 냈다"가 되고, 종류가 남아야
+## **어느 결말 쪽으로 가고 있는지**가 읽힌다(design.md 3-7-3).
+var _price_counts: Dictionary = {}
 
 
 func _ready() -> void:
@@ -44,7 +61,9 @@ func _ready() -> void:
 	# player_leveled_up 은 신을 고르기 "전"에 오므로 목록이 한 픽씩 밀린다. 실제로 모신 순간을 본다.
 	EventBus.god_served.connect(_on_god_served)
 	EventBus.synergy_formed.connect(_on_synergy_formed)
+	EventBus.price_paid.connect(_on_price_paid)
 	_synergy_label.hide()
+	_price_label.hide()
 
 
 func _resolve(path: NodePath, label: String) -> Node:
@@ -84,6 +103,28 @@ func _on_god_served(_god: GodData) -> void:
 func _on_synergy_formed(synergy: SynergyData) -> void:
 	_synergy_names.append(synergy.display_name)
 	_synergy_label.show()
+
+
+## 치른 대가는 사라지지 않고 쌓여 보인다. 이 게임의 첫 문장이 화면에 남는 자리다.
+func _on_price_paid(kind: StringName, _god: GodData, _detail: String) -> void:
+	_price_counts[kind] = int(_price_counts.get(kind, 0)) + 1
+	var parts: PackedStringArray = []
+	for key: StringName in PRICE_ORDER:
+		if not _price_counts.has(key):
+			continue
+		var count: int = _price_counts[key]
+		parts.append(PRICE_NAMES[key] if count == 1 else "%s×%d" % [PRICE_NAMES[key], count])
+	_price_label.text = "치른 대가 — " + " · ".join(parts)
+	# 인간성만 색이 다르다. 다른 넷은 이 런 안에서 끝나지만 이건 결말을 바꾼다(5-0).
+	_price_label.add_theme_color_override(&"font_color",
+		HUMANITY_COLOR if _price_counts.has(&"humanity") else PRICE_COLOR)
+	_price_label.show()
+	# 수명을 내주면 타이머가 붉어진다. 숫자만 줄면 "덜 남았네"지만, 색이 변하면
+	# **종착이 가까워졌다**가 된다 — 대가는 보이고 남아야 한다(3-7-3).
+	var spent: int = int(_price_counts.get(&"lifespan", 0))
+	if spent > 0:
+		_time_label.add_theme_color_override(&"font_color",
+			TIME_COLOR.lerp(PRICE_COLOR, minf(1.0, float(spent) * 0.34)))
 
 
 ## 작두타기 게이지. 언제 터지는지 보이지 않으면 기다릴 수가 없다.

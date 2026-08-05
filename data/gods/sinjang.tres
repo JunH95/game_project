@@ -10,7 +10,8 @@ tier = 1
 max_level = 5
 element = &"earth"
 stat_mods = {
-"damage_taken_pct": -6.0,
-"knockback_pct": 10.0
+"damage_taken_pct": -11.0,
+"knockback_pct": 18.0
 }
-description = "잡귀를 부리는 신. 땅의 기운이 몸을 지켜 맞는 피해가 줄어든다."
+price_kind = &"flesh"
+description = "잡귀를 부리는 신. 땅의 기운이 몸을 지킨다. 다만 이 신은 몸을 빌려 쓴다 — 맞고 나서 정신을 차리는 데 걸리는 시간이 짧아진다."

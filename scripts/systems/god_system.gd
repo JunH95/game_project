@@ -148,6 +148,31 @@ func roll_choices() -> Array[GodData]:
 	return pool.slice(0, mini(choice_count, pool.size()))
 
 
+## 이미 모신 신 하나를 1레벨 잊는다(대가: 기억, design.md 3-7-2).
+## 몸주는 잊지 않는다 — 런의 무기와 외형이 몸주에서 나오므로 잃으면 판이 무너진다.
+## 잊을 것이 없으면 false 를 돌려 호출자가 다른 대가로 갈아탈 수 있게 한다.
+func forget_one() -> bool:
+	var candidates: Array[StringName] = []
+	for god_id: StringName in _served:
+		if _momju != null and god_id == _momju.id:
+			continue
+		if int(_served[god_id]) > 0:
+			candidates.append(god_id)
+	if candidates.is_empty():
+		return false
+	candidates.shuffle()
+	var target: StringName = candidates[0]
+	var level := int(_served[target]) - 1
+	if level <= 0:
+		_served.erase(target)
+		level = 0
+	else:
+		_served[target] = level
+	RunManager.served_gods = _served.keys()
+	EventBus.god_forgotten.emit(target, level)
+	return true
+
+
 ## 선택한 신을 모신다(이미 모시는 신이면 레벨 +1).
 func serve(god: GodData) -> void:
 	if god == null:

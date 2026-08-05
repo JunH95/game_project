@@ -51,6 +51,18 @@ extends Resource
 ## 옆으로 벌어지려는 힘. 0 이면 치마가 다리처럼 붙는다.
 @export_range(0.0, 2.0) var cloth_spread: float = 1.0
 
+@export_group("대가 (design.md 3-7)")
+## 이 신을 모실 때 치르는 값. 빈 값이면 **순한 신**이다.
+## lifespan(수명) · flesh(살) · soul(넋) · humanity(인간성) · memory(기억)
+##
+## 전부에 대가를 붙이면 성장이 안 되고, 없으면 선택에 무게가 안 생긴다 — **셋 중 하나꼴**로 둔다.
+## `[설계 주의]` 값을 부르는 신은 같은 급 순한 신보다 확실히 세야 한다(3-7 초안 1.6~2.0배).
+## 안 그러면 "대가 있는 신은 거르는 것이 최적"이 되어 시스템이 죽는다.
+@export var price_kind: StringName
+
+## 대가의 크기 배율. 종류마다 단위가 달라 여기서는 배수만 준다(수명이면 20초 × 이 값).
+@export_range(0.25, 3.0) var price_scale: float = 1.0
+
 ## 시그니처 메커닉 훅 키. 없으면 빈 값 (손님신/바리공주 같은 특수 신만 사용)
 @export var special: StringName
 
