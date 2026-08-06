@@ -884,6 +884,26 @@
             <div class="stat"><div class="k">코어 신</div><div class="v">8</div></div>
             <div class="stat"><div class="k">기억 관문 넋</div><div class="v">8<span class="u">~12</span></div></div>
           </div>
+      <div class="callout reveal">
+        <span class="lb">테스트 &mdash; 처음부터 다시 플레이하지 않는다 <span class="tag t-go" style="margin-left:.4rem">구현 완료</span></span>
+        5분짜리 관문을 끝까지 돌아야 확인되는 것들이 있다: 후반 난이도, 합이 열린 뒤의 화면, 대가를 여러 번 치른 얼굴, 만렙 근처의 밸런스. <strong>매번 처음부터 플레이해서 보면 하루에 확인할 수 있는 가짓수가 열 손가락을 못 넘는다.</strong>
+        <div class="tbl-wrap" style="margin:.6rem 0">
+          <table>
+            <thead><tr><th>층</th><th>도구</th><th>무엇을 잡나</th></tr></thead>
+            <tbody>
+              <tr><td>1. 정적 검사</td><td><code>validate_project.py</code></td><td>씬 참조 · 리소스 프로퍼티 · 태그 순서</td></tr>
+              <tr><td>2. 자동 스모크</td><td><code>tests/smoke_*</code> (헤드리스)</td><td>&ldquo;눌렀는데 아무 일도 안 일어남&rdquo;류 회귀</td></tr>
+              <tr><td><strong>3. 상태 점프</strong></td><td><strong>DebugMenu (F1)</strong></td><td><strong>원하는 상태로 건너뛰어 눈으로 확인</strong></td></tr>
+              <tr><td>4. 화면 캡처</td><td><code>capture_shot</code></td><td>그림·UI 를 PNG 로 떨궈 비교</td></tr>
+              <tr><td>5. 통짜 플레이</td><td>사람</td><td>리듬·재미·피로도 &mdash; <strong>이건 대체 못 한다</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <strong>3층이 핵심이다.</strong> 1·2층은 &ldquo;깨졌나&rdquo;만 답하고 5층은 비싸다. 매일 쓰는 것은 3층이다. F1 로 배속(1~8x)·레벨·관문 시간·적 소환·무적·대가 5종·신 즉시 모심을 전부 건드린다. <strong>릴리즈 빌드에서는 스스로를 지운다</strong> &mdash; 치트가 출시본에 남는 사고는 대개 &ldquo;끄는 것을 잊어서&rdquo;가 아니라 <strong>끌 수 있게 안 만들어서</strong> 난다.<br>
+        <strong>만들자마자 나온 첫 수확</strong>: 히트스톱이 <code>time_scale</code> 을 하드코딩된 1.0 으로 되돌리고 있어서, 배속을 걸어 둔 채 <strong>적을 한 대만 때리면 배속이 풀렸다</strong>. 느린 연출(강림)을 넣을 때 똑같이 터졌을 버그다.<br>
+        <strong>아직 없는 것</strong>: 밸런스 시뮬(헤드리스로 런 수백 번 &rarr; 몸주·무기별 DPS·생존 분포) · 결정적 시드 · 입력 리플레이. 뱀서라이크의 밸런스는 결국 수치라 <strong>사람이 플레이해서 답할 문제가 아니다.</strong>
+      </div>
+
           <p class="muted" style="margin:1rem 0 0">+ 종착 보스 · 관문별 미니보스·보스·기믹·적 · <strong>대가 시스템</strong> · <strong>나루터 + 노잣돈</strong> · <strong>무구 8종</strong> · <strong>신단 트리</strong> · <strong>도감 5종</strong> · 타이틀+설정+세이브.</p>
           <p class="muted" style="margin:.6rem 0 0; font-size:.86rem">성장·수집·결말은 <strong>전부 출시에 넣는다</strong> &mdash; 빠지면 완결이 아니라 체험판이다.</p>
         </div>

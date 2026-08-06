@@ -22,10 +22,23 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
 
+## 평상시 시간 배속. 히트스톱은 여기에 **곱해지고 여기로 되돌아온다.**
+## 1.0 으로 하드코딩해 두면 배속을 걸어 둔 상태에서 한 대 때리는 순간 배속이 풀린다
+## (디버그 배속이 실제로 그렇게 죽었다). 느린 연출을 넣을 때도 같은 문제가 난다.
+var base_time_scale: float = 1.0
+
+
+## 평상시 배속을 바꾼다. 히트스톱 중이면 끝날 때 이 값으로 돌아간다.
+func set_base_time_scale(scale: float) -> void:
+	base_time_scale = maxf(0.01, scale)
+	if _hitstop_left <= 0.0:
+		Engine.time_scale = base_time_scale
+
+
 ## 잠깐 시간을 늦춰 타격을 "씹히게" 한다. duration 은 실시간 기준.
 func hitstop(duration: float) -> void:
 	_hitstop_left = maxf(_hitstop_left, minf(duration, MAX_HITSTOP))
-	Engine.time_scale = HITSTOP_SCALE
+	Engine.time_scale = base_time_scale * HITSTOP_SCALE
 
 
 func shake(strength: float, duration: float) -> void:
@@ -43,7 +56,7 @@ func _process(delta: float) -> void:
 	if _hitstop_left > 0.0:
 		_hitstop_left -= real_delta
 		if _hitstop_left <= 0.0:
-			Engine.time_scale = 1.0
+			Engine.time_scale = base_time_scale
 
 	_update_shake(real_delta)
 
@@ -82,4 +95,5 @@ func reset() -> void:
 	_shake_left = 0.0
 	_shake_strength = 0.0
 	_camera = null
+	base_time_scale = 1.0
 	Engine.time_scale = 1.0

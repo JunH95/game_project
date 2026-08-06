@@ -23,6 +23,7 @@
 [ext_resource type="Script" uid="uid://cf0sw0pb8l8i3" path="res://scripts/systems/synergy_system.gd" id="20_synergy"]
 [ext_resource type="Script" uid="uid://mel1rueidvln" path="res://scripts/systems/fx_spawner.gd" id="21_fx"]
 [ext_resource type="Script" path="res://scripts/systems/price_system.gd" id="27_price"]
+[ext_resource type="PackedScene" path="res://scenes/ui/debug/debug_menu.tscn" id="28_debug"]
 [ext_resource type="PackedScene" path="res://scenes/actors/fx/damage_number.tscn" id="22_dmgnum"]
 [ext_resource type="PackedScene" path="res://scenes/actors/fx/death_burst.tscn" id="23_burst"]
 [ext_resource type="Resource" path="res://data/enemies/elite_saja.tres" id="24_saja"]
@@ -99,5 +100,12 @@ god_system_path = NodePath("../GodSystem")
 god_system_path = NodePath("../GodSystem")
 
 [node name="PauseMenu" parent="." unique_id=321735288 instance=ExtResource("18_pause")]
+
+[node name="DebugMenu" parent="." instance=ExtResource("28_debug")]
+god_system_path = NodePath("../GodSystem")
+gate_timer_path = NodePath("../GateTimer")
+spawn_director_path = NodePath("../SpawnDirector")
+price_system_path = NodePath("../PriceSystem")
+synergy_system_path = NodePath("../SynergySystem")
 
 [node name="RunResult" parent="." unique_id=1394159035 instance=ExtResource("13_result")]
