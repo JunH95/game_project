@@ -40,7 +40,8 @@ func _ready() -> void:
 	GameFeel.reset()
 
 
-func _on_damage_dealt(world_position: Vector2, amount: float, is_crit: bool) -> void:
+func _on_damage_dealt(world_position: Vector2, amount: float, is_crit: bool,
+		_source: StringName) -> void:
 	if damage_number_scene != null:
 		var number := ObjectPool.acquire(damage_number_scene, self)
 		if number != null:

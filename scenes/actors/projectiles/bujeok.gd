@@ -97,7 +97,8 @@ func _on_area_entered(area: Area2D) -> void:
 	if hurtbox.health != null:
 		var result := DamageCalc.resolve(damage, god_system, &"bujeok_damage_pct", enemy)
 		hurtbox.health.take_damage(result["amount"])
-		EventBus.damage_dealt.emit(enemy.global_position, result["amount"], result["is_crit"])
+		EventBus.damage_dealt.emit(enemy.global_position, result["amount"], result["is_crit"],
+			&"bujeok")
 		if enemy.has_method(&"flash_hit"):
 			enemy.call(&"flash_hit", result["is_crit"])
 	if knockback > 0.0 and enemy.has_method(&"apply_knockback"):

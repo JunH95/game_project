@@ -93,7 +93,9 @@ func _on_blade_area_entered(area: Area2D) -> void:
 	if hurtbox.health != null:
 		var result := DamageCalc.resolve(_get_base_damage(), god_system, damage_key, enemy)
 		hurtbox.health.take_damage(result["amount"])
-		EventBus.damage_dealt.emit(enemy.global_position, result["amount"], result["is_crit"])
+		# 궤도는 합이 열어 준 것이라 자기 무기 id 가 없다. 물린 데이터의 id 로 출처를 낸다.
+		EventBus.damage_dealt.emit(enemy.global_position, result["amount"], result["is_crit"],
+			data.id if data != null else &"orbit")
 		if enemy.has_method(&"flash_hit"):
 			enemy.call(&"flash_hit", result["is_crit"])
 	var knockback: float = (data.knockback if data != null else 0.0) * _god_mult(&"knockback_pct")

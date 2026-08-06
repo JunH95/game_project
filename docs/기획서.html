@@ -901,7 +901,18 @@
         </div>
         <strong>3층이 핵심이다.</strong> 1·2층은 &ldquo;깨졌나&rdquo;만 답하고 5층은 비싸다. 매일 쓰는 것은 3층이다. F1 로 배속(1~8x)·레벨·관문 시간·적 소환·무적·대가 5종·신 즉시 모심을 전부 건드린다. <strong>릴리즈 빌드에서는 스스로를 지운다</strong> &mdash; 치트가 출시본에 남는 사고는 대개 &ldquo;끄는 것을 잊어서&rdquo;가 아니라 <strong>끌 수 있게 안 만들어서</strong> 난다.<br>
         <strong>만들자마자 나온 첫 수확</strong>: 히트스톱이 <code>time_scale</code> 을 하드코딩된 1.0 으로 되돌리고 있어서, 배속을 걸어 둔 채 <strong>적을 한 대만 때리면 배속이 풀렸다</strong>. 느린 연출(강림)을 넣을 때 똑같이 터졌을 버그다.<br>
-        <strong>아직 없는 것</strong>: 밸런스 시뮬(헤드리스로 런 수백 번 &rarr; 몸주·무기별 DPS·생존 분포) · 결정적 시드 · 입력 리플레이. 뱀서라이크의 밸런스는 결국 수치라 <strong>사람이 플레이해서 답할 문제가 아니다.</strong>
+        <strong>아직 없는 것</strong>: 입력 리플레이 · 텔레메트리(외부 테스터가 붙는 시점).
+      </div>
+
+      <div class="callout reveal">
+        <span class="lb">밸런스 시뮬 &mdash; 감이 아니라 표로 고친다 <span class="tag t-go" style="margin-left:.4rem">구현 완료</span></span>
+        뱀서라이크의 밸런스는 결국 수치다. 사람이 플레이해서 &ldquo;부적이 좀 센 것 같다&rdquo;를 답으로 쓰면 <strong>얼마나 센지 모른 채</strong> 고치게 된다 &mdash; 실제로 부적을 과하게 버프해 다른 무기의 1.5배가 된 적이 있고, 그건 플레이가 아니라 <strong>표를 봐야</strong> 잡히는 사고다.<br>
+        런을 헤드리스로 반복 실행해 <strong>생존 시간 · 클리어율 · 처치 · 도달 레벨 · 무기별 데미지 비중 · 치명률 · 받은 피해</strong>를 뽑고 JSON 으로 남긴다. 수정 전후를 그대로 비교하려는 것이다. 무기별 비중을 재려고 타격 이벤트에 <strong>출처(무기 id)</strong>를 붙였다 &mdash; 무엇이 얼마나 때렸는지를 밖에서 못 재면 밸런스를 감으로만 잡게 된다.<br>
+        <strong>봇은 게임 코드를 건드리지 않는다</strong>: 실제 입력 액션을 눌러 사람이 조작할 때와 같은 경로를 탄다. 그래서 조작·무기·판정에 시뮬 전용 분기가 하나도 없다.<br>
+        <strong>다만 봇은 사람이 아니다</strong> &mdash; 절대 수치가 아니라 <strong>조건 간 차이</strong>를 보는 도구다. &ldquo;몸주 A 가 B 보다 오래 버틴다&rdquo;는 믿을 수 있지만 &ldquo;3분 42초를 버틴다&rdquo;는 못 믿는다.<br>
+        <strong>만들면서 걸린 함정 셋</strong>(전부 &ldquo;조용히 틀린 값을 내는&rdquo; 종류라 기록해 둔다): 12배속을 걸었는데 <strong>1.0x</strong> 로 돌았다 &mdash; 이펙트 스포너가 시작할 때 시간 배속을 초기화하고 있었다(배속은 씬을 띄운 <em>뒤에</em> 건다). 그 전에는 히트스톱이 매 타격마다 되돌렸다(평상시 배속의 주인은 하나여야 한다). 그리고 봇의 회피 반경이 무기 사거리보다 커서 <strong>도망만 다니느라 180초 동안 Lv 1</strong> 이었다 &mdash; 사람은 적을 끌고 다니며 줍는다.<br>
+        <strong>첫 수확 &mdash; 부적으로 죽인 적은 젬을 안 떨궜다</strong>: 돌리자마자 로그가 같은 엔진 에러로 도배됐다. <strong>투사체의 물리 콜백 한복판에서 적이 죽었고, 그 자리에서 젬을 만들려다 엔진이 거부했다</strong> &mdash; 근접 무기는 멀쩡했고 <strong>부적 계열만</strong> 처치 보상을 잃고 있었다. 화면에서는 &ldquo;부적이 좀 약하네&rdquo;로만 보였을 버그다. 칠성신이 <strong>DPS 는 가장 높은데 도달 레벨은 최저</strong>라, 수치를 나란히 놓고 나서야 앞뒤가 안 맞는 게 보였다.<br>
+        <strong>그림 노드는 시뮬 중 끈다</strong>. 판정이 전부 다른 데 있으므로 결과는 안 바뀌는데 속도만 오른다 &mdash; <strong>그림/판정을 갈라 둔 값을 여기서 돌려받는 셈이다.</strong>
       </div>
 
           <p class="muted" style="margin:1rem 0 0">+ 종착 보스 · 관문별 미니보스·보스·기믹·적 · <strong>대가 시스템</strong> · <strong>나루터 + 노잣돈</strong> · <strong>무구 8종</strong> · <strong>신단 트리</strong> · <strong>도감 5종</strong> · 타이틀+설정+세이브.</p>

@@ -10,7 +10,9 @@ extends Node
 signal enemy_died(enemy: Node2D, world_position: Vector2)
 ## 타격이 들어간 순간. 소리·데미지 숫자·히트스톱이 전부 이걸 구독한다 —
 ## 무기마다 연출을 직접 호출하면 무기를 더할 때마다 빠뜨린다.
-signal damage_dealt(world_position: Vector2, amount: float, is_crit: bool)
+## source 는 때린 무기 id. 데미지 숫자·사운드는 안 보지만 **무엇이 얼마나 때렸는지**를
+## 밖에서 잴 수 없으면 밸런스를 사람 감으로만 잡게 된다(design.md 16-2).
+signal damage_dealt(world_position: Vector2, amount: float, is_crit: bool, source: StringName)
 signal xp_collected(amount: int)
 signal wonhon_collected(amount: int)
 signal player_leveled_up(new_level: int)

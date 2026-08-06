@@ -192,7 +192,8 @@ func _hit(enemy: Node2D, damage: float, knockback: float, offset: Vector2) -> vo
 		return
 	var result := DamageCalc.resolve(damage, god_system, &"jakdu_damage_pct", enemy)
 	health.take_damage(result["amount"])
-	EventBus.damage_dealt.emit(enemy.global_position, result["amount"], result["is_crit"])
+	EventBus.damage_dealt.emit(enemy.global_position, result["amount"], result["is_crit"],
+		&"jakdu")
 	if enemy.has_method(&"flash_hit"):
 		enemy.call(&"flash_hit", result["is_crit"])
 	if knockback > 0.0 and enemy.has_method(&"apply_knockback"):

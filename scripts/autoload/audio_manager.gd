@@ -86,7 +86,8 @@ func _ready() -> void:
 ## 이벤트로 알 수 있는 소리는 여기서 한 번에 묶는다 — 게임플레이 코드에 재생 호출을 흩뿌리면
 ## 어디서 무슨 소리가 나는지 추적이 안 된다. 무기 타격음처럼 이벤트가 없는 것만 호출부에 남긴다.
 func _connect_cues() -> void:
-	EventBus.damage_dealt.connect(func(_pos, _amount, is_crit): play(&"crit" if is_crit else &"hit"))
+	EventBus.damage_dealt.connect(
+		func(_pos, _amount, is_crit, _source): play(&"crit" if is_crit else &"hit"))
 	EventBus.enemy_died.connect(func(_e, _p): play(&"enemy_die"))
 	EventBus.xp_collected.connect(func(_amount): play(&"pickup"))
 	EventBus.player_leveled_up.connect(func(_level): play(&"level_up"))
