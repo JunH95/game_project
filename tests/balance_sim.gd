@@ -49,6 +49,11 @@ var _damage_by_source: Dictionary = {}
 var _crits: int = 0
 var _hits: int = 0
 var _damage_taken: float = 0.0
+## 이번 런에서 플레이어가 실제로 취한 자세 집합. 연타가 도는지 여기서 같이 본다 —
+## 무기가 emit 한 step 이 아니라 **몸이 잡은 자세**를 모아야
+## "무기는 세는데 몸은 그대로"인 상태를 잡는다.
+var _poses_seen: Dictionary = {}
+var _last_pose: StringName = &""
 var _last_hp: float = -1.0
 ## 선택 화면에서 못 빠져나온 프레임 수. 멈춘 채로 매달려 있으면 원인을 찍고 끊는다 —
 ## 헤드리스에서 조용히 걸려 있으면 타임아웃까지 아무것도 안 나온다.
@@ -131,6 +136,8 @@ func _start_next() -> void:
 	_hits = 0
 	_damage_taken = 0.0
 	_last_hp = -1.0
+	_poses_seen = {}
+	_last_pose = &""
 	_run_started_at = Time.get_ticks_msec()
 
 	var scene := load(MAIN_SCENE) as PackedScene
@@ -187,6 +194,7 @@ func _process(_delta: float) -> void:
 		_auto_choose()
 		return
 	_stuck_frames = 0
+	_track_pose()
 	_drive_bot()
 
 
@@ -254,6 +262,18 @@ func _drive_bot() -> void:
 	_press_move(move.normalized() if move.length() > 0.15 else Vector2.ZERO)
 	# 코앞까지 붙으면 무보로 뺀다. 쿨다운은 플레이어가 알아서 무시한다.
 	_press(&"dash", nearest_sq < PANIC_RADIUS * PANIC_RADIUS)
+
+
+## 지금 잡은 자세. 바뀐 순간에만 담아 같은 값이 부풀지 않게 한다.
+func _track_pose() -> void:
+	var player := get_tree().get_first_node_in_group(&"player")
+	if player == null:
+		return
+	var pose: StringName = player.get(&"_pose")
+	if pose == _last_pose:
+		return
+	_last_pose = pose
+	_poses_seen[pose] = true
 
 
 func _press_move(direction: Vector2) -> void:
@@ -365,6 +385,7 @@ func _finish_run() -> void:
 	_current["crit_rate"] = float(_crits) / maxf(1.0, float(_hits))
 	_current["damage_taken"] = _damage_taken
 	_current["gods"] = _describe_served()
+	_current["poses"] = _poses_seen.keys()
 	_current["humanity"] = RunManager.humanity_paid
 	_results.append(_current)
 
@@ -418,6 +439,8 @@ func _report_and_quit() -> void:
 			_mean(rows, "kills"), _mean(rows, "level"),
 			_mean(rows, "dps"), _mean(rows, "damage_taken")])
 
+	_report_chains()
+
 	print("\n--- 무기별 데미지 비중 ---")
 	var weapon_totals: Dictionary = {}
 	var grand := 0.0
@@ -446,6 +469,33 @@ func _describe_served() -> Array:
 	for god_id: StringName in served:
 		out.append("%s:%d" % [god_id, int(served[god_id])])
 	return out
+
+
+## 연타 점검. 무기마다 자세가 셋 다 나왔는지 본다 — 연타는 **조용히** 한 장으로 되돌아간다.
+## 시그널 인자를 하나 놓치거나 포즈를 `.bind()` 로 박아 두면 게임은 멀쩡히 돌면서 모션만 죽는다.
+## 실제로 언월도·부적이 그 상태였고, 화면만 봐서는 "원래 저런가 보다"로 넘어갔다.
+func _report_chains() -> void:
+	var chains := {
+		&"작두": PlaceholderArt.SLASH_CHAIN,
+		&"언월도": PlaceholderArt.SPIN_CHAIN,
+		&"부적": PlaceholderArt.THROW_CHAIN,
+	}
+	var seen: Dictionary = {}
+	for row: Dictionary in _results:
+		for pose: StringName in (row["poses"] as Array):
+			seen[pose] = true
+	print("")
+	print("--- 연타 점검(그 무기를 쓴 런이 있으면 자세 셋이 다 나와야 한다) ---")
+	for label: StringName in chains:
+		var chain: Array = chains[label]
+		var missing: PackedStringArray = []
+		for pose: StringName in chain:
+			if not seen.has(pose):
+				missing.append(String(pose))
+		if missing.is_empty():
+			print("  %s  %d/%d" % [label, chain.size(), chain.size()])
+		else:
+			push_error("  %s 연타가 안 돈다 — 못 본 자세: %s" % [label, ", ".join(missing)])
 
 
 func _mean(rows: Array, key: String) -> float:

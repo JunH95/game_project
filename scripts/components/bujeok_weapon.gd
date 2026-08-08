@@ -7,7 +7,8 @@ extends Node2D
 ## 사거리 제약이 사실상 없어 조준 대상만 있으면 쏜다. 발수(count)는 칠성신 계열이 늘린다.
 
 ## 쏜 순간을 알린다. 몸이 던지는 동작을 해야 무기가 혼자 날아가는 것처럼 보이지 않는다.
-signal fired(direction: Vector2)
+## step 은 법사 3연타의 몇 번째인지(0~2).
+signal fired(direction: Vector2, step: int)
 
 @export var data: WeaponData
 @export var projectile_scene: PackedScene
@@ -22,6 +23,15 @@ const MAX_COUNT: int = 7
 ## 발수가 2 이상일 때 부채꼴로 흩어 쏘는 총 각도.
 const SPREAD_DEGREES: float = 24.0
 
+## 법사 3연타 — 뿌리기 → 인(印) 맺기 → 장풍.
+## `[핵심]` 손이 매번 같은 데서 같은 데로 가면 세 번 다 던지기로 보인다. 그래서 **퍼짐**을 바꾼다:
+## 넓게 뿌렸다가(1타), 더 넓게 밀어냈다가(2타), 한 줄로 내지른다(3타).
+## 부적은 손에 남는 무기가 없어 자세만으로는 구분이 약하다 — **날아가는 모양이 곧 모션**이다.
+const STEP_COUNT: int = 3
+const STEP_SPREAD_MULT: Array[float] = [1.0, 3.0, 0.16]
+## 장풍은 빠르고, 밀어내는 인은 느리고 무겁다.
+const STEP_SPEED_MULT: Array[float] = [1.0, 0.85, 1.45]
+
 ## 신내림 수정자를 물어볼 GodSystem. 없으면 기본 수치로 동작한다.
 var god_system: Node
 
@@ -31,6 +41,8 @@ const CAST_VISUAL_TIME: float = 0.22
 var _cooldown_left: float = 0.0
 var _cast_left: float = 0.0
 var _cast_direction: Vector2 = Vector2.RIGHT
+## 법사 연타의 몇 번째 타인지.
+var _step: int = 0
 
 
 func _process(delta: float) -> void:
@@ -45,11 +57,12 @@ func _process(delta: float) -> void:
 	if target == null:
 		return
 	_cooldown_left = _get_cooldown()
+	_step = (_step + 1) % STEP_COUNT
 	var direction := (target.global_position - global_position).normalized()
 	_fire(direction)
 	_cast_direction = direction
 	_cast_left = CAST_VISUAL_TIME
-	fired.emit(direction)
+	fired.emit(direction, _step)
 	queue_redraw()
 
 
@@ -73,7 +86,8 @@ func _fire(direction: Vector2) -> void:
 		return
 	var count := _get_count()
 	# 여러 발은 부채꼴로 흩어 쏜다. 한 점에 겹쳐 쏘면 발수가 늘어난 게 보이지 않는다.
-	var spread := deg_to_rad(SPREAD_DEGREES)
+	# 퍼짐은 연타 단계가 정한다 — 이게 부적의 3연타가 눈에 보이는 유일한 곳이다.
+	var spread := deg_to_rad(SPREAD_DEGREES * _step_mult(STEP_SPREAD_MULT))
 	var base := direction.angle() - spread * 0.5
 	var step := spread / float(maxi(1, count - 1))
 
@@ -85,12 +99,16 @@ func _fire(direction: Vector2) -> void:
 		projectile.global_position = global_position
 		projectile.damage = _get_base_damage()
 		projectile.god_system = god_system
-		projectile.speed = data.projectile_speed if data != null else 320.0
+		projectile.speed = (data.projectile_speed if data != null else 320.0) 			* _step_mult(STEP_SPEED_MULT)
 		projectile.homing_turn_rate = data.homing_turn_rate if data != null else 4.0
 		projectile.pierce = data.pierce if data != null else 1
 		projectile.lifetime = data.lifetime if data != null else 2.5
 		projectile.knockback = (data.knockback if data != null else 0.0) * _god_mult(&"knockback_pct")
 		projectile.launch(Vector2.from_angle(angle))
+
+
+func _step_mult(table: Array[float]) -> float:
+	return table[clampi(_step, 0, table.size() - 1)]
 
 
 func _god_mult(key: StringName) -> float:
@@ -125,6 +143,17 @@ func _draw() -> void:
 		return
 	var t := _cast_left / CAST_VISUAL_TIME
 	var origin := _cast_direction * 18.0
+	match _step:
+		1:
+			_draw_seal(t, origin)
+		2:
+			_draw_palm(t, origin)
+		_:
+			_draw_scatter(t, origin)
+
+
+## 뿌리기 — 고리 하나에 획 넷. 술법을 여는 기본 인장이다.
+func _draw_scatter(t: float, origin: Vector2) -> void:
 	# 고리는 퍼지면서 옅어진다. 제자리에 머무는 원은 표식이지 발동이 아니다.
 	var ring := 10.0 + (1.0 - t) * 26.0
 	var ink := PlaceholderArt.JUSA
@@ -141,3 +170,44 @@ func _draw() -> void:
 	# 발사 방향으로 한 줄기. 어디로 날아갔는지가 한 프레임 안에 읽혀야 한다.
 	draw_line(origin, origin + _cast_direction * (34.0 * (1.0 - t) + 8.0),
 		Color(1.0, 0.95, 0.82, t * 0.7), 2.5)
+
+
+## 인(印) 맺기 — 뻗어 나가지 않고 **옆으로 밀어낸다.** 부챗살이 넓게 열리는 그림이라
+## 같은 던지기와 한눈에 갈린다. 발사 줄기를 안 그리는 것이 이 타의 요점이다.
+func _draw_seal(t: float, origin: Vector2) -> void:
+	var ink := PlaceholderArt.GUNCHEONG
+	var span := deg_to_rad(SPREAD_DEGREES * STEP_SPREAD_MULT[1] * 0.5)
+	var base := _cast_direction.angle()
+	var reach := 20.0 + (1.0 - t) * 44.0
+	# 넓게 열리는 부챗살. 살이 바깥으로 밀려 나가면서 옅어진다.
+	for i in 5:
+		var angle := base + lerpf(-span, span, float(i) / 4.0)
+		var dir := Vector2.from_angle(angle)
+		draw_line(origin + dir * (reach * 0.35), origin + dir * reach,
+			Color(ink.r, ink.g, ink.b, t * 0.7), 2.5)
+	# 손 앞에 맺힌 인 — 겹친 사각. 원이 아니라 각이라 앞 타와 형태가 갈린다.
+	var side := _cast_direction.orthogonal()
+	var s := 9.0 * (0.6 + t * 0.6)
+	draw_polyline(PackedVector2Array([
+		origin + side * s, origin + _cast_direction * s,
+		origin - side * s, origin - _cast_direction * s, origin + side * s,
+	]), Color(ink.r, ink.g, ink.b, t * 0.9), 2.0)
+
+
+## 장풍 — 한 줄로 내지른다. 고리를 아예 안 그린다.
+## 앞의 둘이 퍼지는 그림이었으므로 **모이는 그림**이라야 마무리로 읽힌다.
+func _draw_palm(t: float, origin: Vector2) -> void:
+	var ink := Color(1.0, 0.92, 0.72)
+	var length := 26.0 + (1.0 - t) * 62.0
+	var side := _cast_direction.orthogonal()
+	var tip := origin + _cast_direction * length
+	# 가늘고 긴 마름모. 끝으로 갈수록 모인다.
+	draw_colored_polygon(PackedVector2Array([
+		origin, origin + _cast_direction * (length * 0.4) + side * (7.0 * t),
+		tip, origin + _cast_direction * (length * 0.4) - side * (7.0 * t),
+	]), Color(ink.r, ink.g, ink.b, t * 0.55))
+	draw_line(origin, tip, Color(ink.r, ink.g, ink.b, t * 0.95), 3.0)
+	# 손 앞에서 안으로 모이는 획 둘. 밀어낸 것이 아니라 **쏘아 보낸** 것으로 읽힌다.
+	for sign: float in [-1.0, 1.0]:
+		draw_line(origin + side * (sign * 14.0) - _cast_direction * 6.0,
+			origin + _cast_direction * 6.0, Color(ink.r, ink.g, ink.b, t * 0.6), 2.0)

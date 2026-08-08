@@ -134,10 +134,10 @@ func _ready() -> void:
 		jakdu.swung.connect(_on_jakdu_swung)
 	var bujeok := _weapons.get(&"bujeok") as BujeokWeapon
 	if bujeok != null:
-		bujeok.fired.connect(_on_weapon_swung.bind(PlaceholderArt.POSE_THROW))
+		bujeok.fired.connect(_on_chain_swung.bind(PlaceholderArt.THROW_CHAIN))
 	var eonwoldo := _weapons.get(&"eonwoldo") as EonwoldoWeapon
 	if eonwoldo != null:
-		eonwoldo.swung.connect(_on_weapon_swung.bind(PlaceholderArt.POSE_SPIN))
+		eonwoldo.swung.connect(_on_chain_swung.bind(PlaceholderArt.SPIN_CHAIN))
 
 	# 합이 여는 궤도들. 무기가 아니라 합에 딸린 것이라 무기 맵과 따로 둔다.
 	_synergy_orbits = [get_node_or_null(^"%JakduOrbit"), get_node_or_null(^"%BujeokShield")]
@@ -420,7 +420,13 @@ func _on_died() -> void:
 ## 같은 동작만 반복하면 아무리 잘 그려도 기계처럼 보인다.
 ## 연타 번호는 무기가 센다 — 팔의 포즈와 칼의 궤적이 같은 값을 봐야 어긋나지 않는다.
 func _on_jakdu_swung(direction: Vector2, step: int) -> void:
-	var chain := PlaceholderArt.SLASH_CHAIN
+	_on_chain_swung(direction, step, PlaceholderArt.SLASH_CHAIN)
+
+
+## 연타 무기의 공통 처리. 무기가 자기 단계를 세어 넘겨주고, 몸은 그 단계의 자세를 잡는다.
+## 단계 관리를 무기 쪽에 둔 이유: 쿨다운·강림 같은 조건으로 단계를 건너뛰는 판단이
+## 무기 안에 있고, 몸이 따로 세면 둘이 어긋난다.
+func _on_chain_swung(direction: Vector2, step: int, chain: Array[StringName]) -> void:
 	_slash_step = clampi(step, 0, chain.size() - 1)
 	_on_weapon_swung(direction, chain[_slash_step])
 

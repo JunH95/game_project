@@ -808,7 +808,25 @@
         <strong>사운드</strong>: CC0 배포처가 차단된 환경이라 <strong>직접 합성</strong>했다(효과음 12종 + 앰비언트 루프). 무속 타악(징·장구·방울)의 성질을 흉내낸 플레이스홀더이고, <code>AudioManager</code>가 <strong>키만</strong> 알기 때문에 진짜 에셋으로 갈아 끼울 때 코드는 바뀌지 않는다.
       </div>
 
-      <div class="callout reveal">
+            <div class="callout reveal">
+        <span class="lb">무기마다 3연타 <span class="tag t-go" style="margin-left:.4rem">구현 완료</span></span>
+        같은 동작만 반복하면 아무리 잘 그려도 기계처럼 보인다. 무기 셋이 각자 다른 무술을 한다.
+        <div class="tbl-wrap" style="margin:.6rem 0">
+          <table>
+            <thead><tr><th>무기</th><th>컨셉</th><th>1타</th><th>2타</th><th>3타</th></tr></thead>
+            <tbody>
+              <tr><td><strong>작두</strong></td><td>사무라이</td><td>베기</td><td><strong>되돌려 베기</strong></td><td>찌르기</td></tr>
+              <tr><td><strong>언월도</strong></td><td>창술</td><td>횡소 360&deg;</td><td><strong>역횡소</strong>(회전 반전)</td><td>자돌 &mdash; 좁고 길게</td></tr>
+              <tr><td><strong>부적</strong></td><td>법사</td><td>뿌리기</td><td>인(印) &mdash; 넓게 밀어냄</td><td>장풍 &mdash; 한 줄로</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <strong>규칙: 1타와 2타는 방향이 반대여야 한다.</strong> 같은 방향으로 세 번 휘두르면 각도를 아무리 바꿔도 &ldquo;같은 동작 세 번&rdquo;으로 보인다.<br>
+        <strong>부적은 자세가 아니라 탄이 모양을 낸다</strong>: 손에 남는 무기가 없어 팔 각도만으로는 구분이 약하다. 그래서 퍼짐을 바꾼다(24&deg; &rarr; 72&deg; &rarr; 4&deg;).<br>
+        <strong>연타는 조용히 죽는다</strong>: 시그널 인자를 하나 놓치거나 포즈를 박아 두면 게임은 멀쩡히 돌면서 <strong>모션만 한 장으로 되돌아간다</strong> &mdash; 실제로 언월도·부적이 오래 그 상태였고, 화면을 봐도 &ldquo;원래 저런가 보다&rdquo;로 넘어갔다. 그래서 밸런스 시뮬이 <strong>몸이 실제로 잡은 자세</strong>를 모아 무기마다 셋이 다 나왔는지 같이 검사한다.
+      </div>
+
+<div class="callout reveal">
         <span class="lb">3D 캐릭터를 2D 화면에 합성 <span class="tag t-mi" style="margin-left:.4rem">프로토타입</span></span>
         절차적 도형으로 캐릭터를 예쁘게 만드는 것은 <strong>천장에 닿았다</strong>. 3D 로 가는 길이 셋인데, <strong>가장 싼 것부터</strong> 시험한다.
         <div class="tbl-wrap" style="margin:.6rem 0">

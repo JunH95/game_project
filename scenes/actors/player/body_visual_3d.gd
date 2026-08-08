@@ -611,8 +611,20 @@ func _arm_pose(reach: float) -> Vector3:
 			# 던지기 — 당겼다 튕긴다. 팔이 몸 앞을 가로지르지 않는다.
 			return Vector3(0.55 - reach * 1.7, -0.25 * reach, 0.25)
 		PlaceholderArt.POSE_SPIN:
-			# 창술 — 자루째 크게 돈다. 팔을 옆으로 벌려야 장병기가 몸에 안 걸린다.
+			# 횡소 — 자루째 크게 돈다. 팔을 옆으로 벌려야 장병기가 몸에 안 걸린다.
 			return Vector3(-0.15 - reach * 0.4, reach * 2.2, 0.85)
+		PlaceholderArt.POSE_SPIN_BACK:
+			# 역횡소 — 반대로 돈다. Y 회전 부호만 뒤집으면 되는데, 그 하나가 2타를 만든다.
+			return Vector3(-0.15 - reach * 0.4, -reach * 2.2, 0.85)
+		PlaceholderArt.POSE_POLE_THRUST:
+			# 자돌 — 돌지 않고 앞으로 깊게. 팔을 몸 앞으로 모아야 창을 내미는 그림이 된다.
+			return Vector3(0.25 - reach * 2.15, 0.0, 0.35)
+		PlaceholderArt.POSE_SEAL:
+			# 인 맺기 — 예비에서 가슴 앞으로 모았다가 옆으로 민다. 앞뒤가 아니라 **좌우**다.
+			return Vector3(0.45 + reach * 0.15, -0.35 - reach * 1.15, 0.55 - reach * 0.35)
+		PlaceholderArt.POSE_PALM:
+			# 장풍 — 손바닥을 앞으로 내지른다. 던지기보다 짧게 당겼다 더 멀리 뻗는다.
+			return Vector3(0.3 - reach * 1.95, 0.0, 0.2)
 		_:
 			# 기본 베기 — 뒤로 감았다가 앞을 가로질러 쓴다.
 			return Vector3(0.2 - reach * 1.6, -reach * 0.85, 0.16)
@@ -621,8 +633,12 @@ func _arm_pose(reach: float) -> Vector3:
 ## 팔꿈치. **예비에서 깊게 접고 타격에서 펴진다** — 이 접었다 펴는 것이 힘의 출처로 읽힌다.
 ## 찌르기만 예외로 거의 편 채로 나간다(찌르기는 뻗는 동작이라 접으면 의미가 없다).
 func _elbow_pose(reach: float) -> Vector3:
-	if pose == PlaceholderArt.POSE_THRUST:
+	# 찌르는 계열은 전부 거의 편 채로 나간다 — 접으면 뻗는 동작이 아니게 된다.
+	if pose == PlaceholderArt.POSE_THRUST or pose == PlaceholderArt.POSE_POLE_THRUST 			or pose == PlaceholderArt.POSE_PALM:
 		return Vector3(-0.30 + reach * 0.24, 0.0, 0.0)
+	if pose == PlaceholderArt.POSE_SEAL:
+		# 인은 예비에서 **깊게 접었다가** 밀어내며 편다. 접힘의 낙차가 곧 밀어내는 힘이다.
+		return Vector3(-1.35 + maxf(reach, 0.0) * 0.95, 0.0, 0.0)
 	var bend := -0.45 - maxf(-reach, 0.0) * 0.95 + maxf(reach, 0.0) * 0.40
 	return Vector3(bend, 0.0, 0.0)
 
@@ -630,8 +646,13 @@ func _elbow_pose(reach: float) -> Vector3:
 ## pose 에 맞는 무기만 손에 남긴다. 베기 3종은 전부 작두다.
 func _show_weapon() -> void:
 	var wanted: StringName = pose
-	if pose == PlaceholderArt.POSE_SLASH_BACK or pose == PlaceholderArt.POSE_THRUST:
+	# 연타는 같은 무기를 계속 들고 있다. 손에 뜨는 물건이 타마다 바뀌면 무기가 바뀐 걸로 보인다.
+	if PlaceholderArt.SLASH_CHAIN.has(pose):
 		wanted = PlaceholderArt.POSE_SLASH
+	elif PlaceholderArt.SPIN_CHAIN.has(pose):
+		wanted = PlaceholderArt.POSE_SPIN
+	elif PlaceholderArt.THROW_CHAIN.has(pose):
+		wanted = PlaceholderArt.POSE_THROW
 	for key: StringName in _weapons:
 		var node: Node3D = _weapons[key]
 		node.visible = key == wanted

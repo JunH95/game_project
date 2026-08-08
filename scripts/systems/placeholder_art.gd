@@ -134,6 +134,16 @@ const POSE_SLASH_BACK: StringName = &"slash_back"  ## 되돌려 베기(궤적 �
 const POSE_THRUST: StringName = &"thrust"          ## 찌르기(마무리)
 const SLASH_CHAIN: Array[StringName] = [POSE_SLASH, POSE_SLASH_BACK, POSE_THRUST]
 
+## 언월도 — 창술 3연타. 횡소 → 역횡소(반대로 돈다) → 자돌.
+const POSE_SPIN_BACK: StringName = &"spin_back"    ## 역횡소(회전 반전)
+const POSE_POLE_THRUST: StringName = &"pole_thrust"  ## 자돌 — 자루째 앞으로 뻗는다
+const SPIN_CHAIN: Array[StringName] = [POSE_SPIN, POSE_SPIN_BACK, POSE_POLE_THRUST]
+
+## 부적 — 법사 3연타. 뿌리기 → 인 맺기 → 장풍.
+const POSE_SEAL: StringName = &"seal"    ## 인(印) — 손을 모았다 옆으로 밀어낸다
+const POSE_PALM: StringName = &"palm"    ## 장풍 — 손바닥을 앞으로 내지른다
+const THROW_CHAIN: Array[StringName] = [POSE_THROW, POSE_SEAL, POSE_PALM]
+
 
 ## 무구를 쥔 손의 위치(몸 로컬). 지전이 여기 매달리므로 **그리기와 천이 같은 값을 봐야 한다** —
 ## 각자 계산하면 손과 종이 술이 따로 논다. draw_shaman_body 와 인자가 같다.
@@ -156,6 +166,22 @@ static func shaman_hand(r: float, bob: float, facing: float, swing: float,
 			# 사방 베기 — 손이 몸을 한 바퀴 돈다. 팔을 길게 뻗어 대형 무기의 무게를 낸다.
 			var turn := clampf((swing + 0.38) / 1.38, 0.0, 1.0) * TAU
 			return shoulder + Vector2.from_angle(facing + turn) * (r * (0.72 + maxf(swing, 0.0) * 0.5))
+		POSE_SPIN_BACK:
+			# 역횡소 — 손이 반대로 한 바퀴 돈다. 회전 방향이 뒤집히는 것이 2타의 전부다.
+			var back_turn := clampf((swing + 0.38) / 1.38, 0.0, 1.0) * -TAU
+			return shoulder + Vector2.from_angle(facing + back_turn) 				* (r * (0.72 + maxf(swing, 0.0) * 0.5))
+		POSE_POLE_THRUST:
+			# 자돌 — 돌지 않고 자루째 앞으로 뻗는다. 대형 무기라 작두 찌르기보다 더 나간다.
+			return shoulder + Vector2.from_angle(facing + swing * 0.08) 				* (r * (0.45 + maxf(swing, 0.0) * 1.45))
+		POSE_SEAL:
+			# 인 맺기 — 손을 몸 앞으로 **모았다가 옆으로** 민다. 앞뒤가 아니라 좌우로 움직여야
+			# 던지기와 갈린다. 예비에서 가슴 앞까지 당겨 온다.
+			var open := clampf((swing + 0.38) / 1.38, 0.0, 1.0)
+			var lateral := lerpf(-0.15, 1.05, open)
+			return shoulder + Vector2.from_angle(facing + lateral) 				* (r * (0.35 + maxf(swing, 0.0) * 0.55))
+		POSE_PALM:
+			# 장풍 — 손바닥을 앞으로 내지른다. 던지기보다 짧게 당겼다 더 멀리 뻗는다.
+			return shoulder + Vector2.from_angle(facing) * (r * (0.42 + swing * 1.35))
 		POSE_SLASH_BACK:
 			# 되돌려 베기 — 위 궤적을 뒤집는다. 한쪽으로만 계속 휘두르면 기계처럼 보인다.
 			var back_sweep := lerpf(-0.95, 0.62, clampf((swing + 0.38) / 1.38, 0.0, 1.0))
