@@ -426,7 +426,7 @@
       <h3 class="reveal">5.1 신내림 (god system) &mdash; 차별점의 실체</h3>
       <div class="grid g2 reveal">
         <div class="card"><div class="n">1위 · 런의 정체성</div><h4>몸주 <span class="tag t-go">고증 구조</span></h4><p class="muted" style="margin:0">시작 무기·패시브를 결정하고 스탯 스케일링의 원천. 런 시작(캐릭터 선택)으로 정해진다. <strong>해금 캐릭터 = 몸주별.</strong></p></div>
-        <div class="card"><div class="n">다수 · 런의 빌드</div><h4>모시는 신 <span class="tag t-gak">수치=각색</span></h4><p class="muted" style="margin:0">레벨업 <strong>3택1</strong>로 늘려가는 서브 옵션. (a) 새 신 or (b) 보유 신 +1레벨(스택). <strong>최대 6신.</strong></p></div>
+        <div class="card"><div class="n">다수 · 런의 빌드</div><h4>모시는 신 <span class="tag t-gak">수치=각색</span></h4><p class="muted" style="margin:0">레벨업 <strong>3택1</strong>로 늘려가는 서브 옵션. (a) 새 신 or (b) 보유 신 +1레벨(스택). <strong>최대 4신</strong>(몸주 포함).</p></div>
       </div>
       <div class="callout gold reveal">
         <span class="lb">동시에 모시는 규모</span>
@@ -454,6 +454,26 @@
         <strong>수명이 이중으로 아픈 이유</strong>: 관문 길이는 적 난이도 진행도의 분모이기도 하다. 줄이면 남은 시간이 줄 뿐 아니라 <strong>남은 시간이 더 험해진다</strong>.<br>
         <strong>보이고 남는다</strong>: 3택1 카드에 붉은 테 + 대가 이름 &mdash; 고르고 나서 알게 되면 그건 선택이 아니라 함정이다. 인간성을 내주면 <strong>탈의 획이 바탕에 묻혀 얼굴이 흐려지고</strong>, 수명을 내주면 <strong>타이머가 붉어진다</strong>(숫자만 줄면 &ldquo;덜 남았네&rdquo;지만 색이 변하면 &ldquo;종착이 가까워졌다&rdquo;가 된다). HUD 에는 <strong>종류별로</strong> 남긴다 &mdash; 총량만 보이면 &ldquo;몇 번 냈다&rdquo;가 되고, 종류가 남아야 어느 결말 쪽으로 가는지가 읽힌다.<br>
         지금 값을 부르는 신은 <strong>신장(살)</strong>과 <strong>월광보살(인간성)</strong> 둘이고, 그만큼 확실히 세게 잡았다. 나머지 셋은 <strong>코드가 다 있고 데이터만 안 붙었다</strong> &mdash; 로스터가 늘면 <code>.tres</code> 한 줄이다.
+      </div>
+
+      <div class="callout gold reveal">
+        <span class="lb">신위(神位) &mdash; 모신 신은 <em>곁에 선다</em> <span class="tag t-gak" style="margin-left:.4rem">설계 확정</span></span>
+        <strong>몸주는 몸 안에 실리고, 나머지 모신 신은 곁을 돈다.</strong> 눈에 보이는 신격으로 존재하고 각자 싸운다.<br>
+        <strong>왜</strong>: &ldquo;신내림 = 신이 몸에 실리는 것&rdquo;이 이 게임의 핵심 규칙인데, 여태 그게 <strong>숫자로만</strong> 존재했다. 신을 여섯 모셔도 화면에는 아무것도 안 늘었다. 곁에 세우면 <strong>모셨다는 사실이 그림이 된다.</strong> 무신도가 원래 그렇다 &mdash; 주신을 가운데 두고 권속신들이 둘러 배치된다.
+        <div class="tbl-wrap" style="margin:.6rem 0">
+          <table>
+            <thead><tr><th>자리</th><th>무엇</th><th>몇</th></tr></thead>
+            <tbody>
+              <tr><td>몸 안</td><td><strong>몸주</strong> &mdash; 무기를 준다. 따로 안 보인다(플레이어가 곧 몸주다)</td><td>1</td></tr>
+              <tr><td>곁</td><td><strong>신위</strong> &mdash; 모신 신이 둘러 돈다. 각자 공격한다</td><td>최대 3</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <strong>모실 수 있는 신 상한 = 4</strong>(몸주 포함, 기존 6에서 축소). 여섯을 다 모으면 3택1이 &ldquo;무엇을 포기할까&rdquo;가 아니라 &ldquo;무엇을 먼저 집을까&rdquo;가 되어 <strong>선택이 아니라 순서</strong>가 된다. 상한에 닿은 뒤의 레벨업은 이미 모신 신의 레벨만 올리므로 <strong>남은 레벨업이 전부 진화에 쓰인다.</strong><br>
+        <strong>무기는 몸주가 준 하나뿐</strong>: 신은 무기를 더 주지 않는다. 예전엔 칠성신만 부적을 줘서 <strong>부적이 전체 데미지의 52%</strong>를 먹는 비대칭이 있었다.<br>
+        <strong>레벨은 수가 아니라 행동을 바꾼다</strong>: 수를 늘리면 화면만 지저분해지고 숫자만 올리면 레벨업이 사건이 아니게 된다. 예 &mdash; <strong>신장</strong>: 잡귀가 문다 &rarr; 붙잡는다 &rarr; 부정이 남는다 &rarr; <strong>끌고 온다</strong> &rarr; 죽은 넋이 잡귀가 된다. 4단계의 &ldquo;끌고 온다&rdquo;에서 <strong>광역 무기와의 연계</strong>가 생긴다.<br>
+        <strong>합은 모든 쌍이 다르다</strong>: 6신 &rarr; <strong>쌍 15개</strong>(기존 &ldquo;몸주에 묶어 조합 폭발을 막는다&rdquo;를 뒤집었다 &mdash; 두 신격이 눈에 보이게 나란히 서 있는데 아무 일도 안 일어나면 그게 더 이상하다). 한 런에 동시 성립은 최대 6쌍.<br>
+        <strong>스코프 경고</strong>: 신 하나를 더하면 <strong>행동 5개 + 합 N개</strong>가 따라오고 <strong>제곱으로 는다</strong>. 그래서 방향을 <strong>&ldquo;적은 신, 깊은 신&rdquo;</strong>으로 정한다 &mdash; 로스터 6 + 상한 4면 매 런이 절반만 보므로 리플레이는 그 자체로 생긴다.
       </div>
 
       <h4 class="reveal">몸주 ↔ 무기 1:1 대응</h4>
