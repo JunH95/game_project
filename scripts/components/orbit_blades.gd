@@ -93,9 +93,8 @@ func _on_blade_area_entered(area: Area2D) -> void:
 	if hurtbox.health != null:
 		var result := DamageCalc.resolve(_get_base_damage(), god_system, damage_key, enemy)
 		hurtbox.health.take_damage(result["amount"])
-		# 궤도는 합이 열어 준 것이라 자기 무기 id 가 없다. 물린 데이터의 id 로 출처를 낸다.
 		EventBus.damage_dealt.emit(enemy.global_position, result["amount"], result["is_crit"],
-			data.id if data != null else &"orbit")
+			_damage_source())
 		if enemy.has_method(&"flash_hit"):
 			enemy.call(&"flash_hit", result["is_crit"])
 	var knockback: float = (data.knockback if data != null else 0.0) * _god_mult(&"knockback_pct")
@@ -114,6 +113,16 @@ func _expire_cooldowns() -> void:
 
 func _now() -> float:
 	return float(Time.get_ticks_msec()) / 1000.0
+
+
+## 계측용 출처 이름. **물린 데이터의 id 를 그대로 쓰면 안 된다** — 궤도 작두는 작두의
+## WeaponData 를 물고 있어서, 밸런스 표에서 합의 데미지가 작두 무기의 데미지로 합산된다.
+## 실제로 그것 때문에 "최영장군 판에서도 작두가 딜을 넣는다"는 잘못된 표가 나왔다.
+## 합 id 를 쓰면 어느 합이 얼마나 때렸는지까지 따로 읽힌다.
+func _damage_source() -> StringName:
+	if required_synergy != &"":
+		return required_synergy
+	return data.id if data != null else &"orbit"
 
 
 func _god_mult(key: StringName) -> float:
