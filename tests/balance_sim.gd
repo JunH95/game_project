@@ -172,6 +172,12 @@ func _strip_visuals() -> void:
 func _process(_delta: float) -> void:
 	if _finished or _main == null:
 		return
+	# 런 종료를 **먼저** 본다. 결과 화면도 트리를 멈추므로, 일시정지 분기를 앞에 두면
+	# 죽은 뒤에 영영 선택 화면을 찾다가 매달린다. 예전에는 몸주 버튼을 무조건 눌러 대는
+	# 버그가 우연히 일시정지를 풀어 줘서 이 문제가 가려져 있었다.
+	if _is_run_over() or _real_elapsed() > REAL_TIME_LIMIT:
+		_finish_run()
+		return
 	# 몸주·신 선택 화면은 트리를 멈춘다. 봇이 대신 고른다.
 	if get_tree().paused:
 		_stuck_frames += 1
@@ -181,9 +187,6 @@ func _process(_delta: float) -> void:
 		_auto_choose()
 		return
 	_stuck_frames = 0
-	if _is_run_over() or _real_elapsed() > REAL_TIME_LIMIT:
-		_finish_run()
-		return
 	_drive_bot()
 
 
@@ -196,8 +199,10 @@ func _report_stuck() -> void:
 			lines.append("%s: 없음" % dialog_name)
 			continue
 		var choices := dialog.find_child("Choices", true, false)
-		lines.append("%s: 버튼 %s" % [dialog_name,
-			str(choices.get_child_count()) if choices != null else "Choices 없음"])
+		# 가시성까지 찍는다. "버튼은 있는데 안 눌린다"의 원인은 대개 창이 안 떠 있는 것이라,
+		# 버튼 수만 찍으면 같은 자리에서 두 번 헤맨다.
+		lines.append("%s: 열림=%s 버튼=%s" % [dialog_name, str(_is_panel_open(dialog)),
+			str(choices.get_child_count()) if choices != null else "없음"])
 	push_error("밸런스 시뮬: 선택 화면에서 멈췄다 — " + " / ".join(lines))
 	_report_and_quit()
 
@@ -274,13 +279,22 @@ func _release_all() -> void:
 
 # --- 선택 화면 자동 처리 ---
 
+## `[중요]` **떠 있는 창만 누른다.** 몸주 선택은 고르고 나면 패널만 숨고 노드와 버튼은 그대로
+## 남는다 — 가시성을 안 보고 누르면 이후 모든 레벨업에서 **몸주 버튼을 다시 눌러**
+## `set_momju` 가 반복 호출된다. 그러면 신내림 카드는 한 번도 안 눌리고 몸주만 계속 쌓여,
+## 시뮬이 "몸주 단일 스택"을 재면서 겉으로는 멀쩡한 표를 뱉는다(실제로 그랬다).
 func _auto_choose() -> void:
 	var momju := _main.find_child("MomjuSelect", true, false)
-	if momju != null and _press_momju(momju):
+	if momju != null and _is_panel_open(momju) and _press_momju(momju):
 		return
 	var select := _main.find_child("GodSelect", true, false)
-	if select != null:
+	if select != null and _is_panel_open(select):
 		_press_random_choice(select)
+
+
+func _is_panel_open(dialog: Node) -> bool:
+	var panel := dialog.find_child("Panel", true, false) as Control
+	return panel != null and panel.visible
 
 
 ## 지정한 몸주를 고른다. 버튼 순서는 `get_momju_candidates()` 순서와 같다.
@@ -350,7 +364,7 @@ func _finish_run() -> void:
 	_current["damage_by_source"] = _damage_by_source.duplicate()
 	_current["crit_rate"] = float(_crits) / maxf(1.0, float(_hits))
 	_current["damage_taken"] = _damage_taken
-	_current["gods"] = RunManager.served_gods.duplicate()
+	_current["gods"] = _describe_served()
 	_current["humanity"] = RunManager.humanity_paid
 	_results.append(_current)
 
@@ -419,6 +433,19 @@ func _report_and_quit() -> void:
 	if not _out_path.is_empty():
 		_save_json()
 	get_tree().quit(0)
+
+
+## 무엇을 몇 레벨로 모셨는지. id 만 남기면 "신 3종"까지만 알 수 있어
+## 어떤 빌드가 이겼는지 되짚을 수 없다.
+func _describe_served() -> Array:
+	var out: Array = []
+	var god_system := _main.get_node_or_null(^"%GodSystem") if _main != null else null
+	if god_system == null:
+		return out
+	var served: Dictionary = god_system.get_served()
+	for god_id: StringName in served:
+		out.append("%s:%d" % [god_id, int(served[god_id])])
+	return out
 
 
 func _mean(rows: Array, key: String) -> float:

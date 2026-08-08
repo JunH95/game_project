@@ -174,9 +174,17 @@ func forget_one() -> bool:
 
 
 ## 선택한 신을 모신다(이미 모시는 신이면 레벨 +1).
+##
+## 만렙은 여기서도 막는다. `roll_choices()` 가 이미 걸러 주지만 그건 **3택1 경로만**이고,
+## `set_momju`·디버그 메뉴·시뮬처럼 직접 부르는 길이 여럿이다. `get_mod()` 이 레벨을 그대로
+## 곱하므로 한 번 새면 능력치가 조용히 몇 배가 된다 — 실제로 시뮬이 몸주를 Lv13(만렙 5)까지
+## 쌓아 놓고 멀쩡해 보이는 밸런스 표를 뱉은 적이 있다.
 func serve(god: GodData) -> void:
 	if god == null:
 		return
-	_served[god.id] = get_level(god.id) + 1
+	var level := get_level(god.id)
+	if god.max_level > 0 and level >= god.max_level:
+		return
+	_served[god.id] = level + 1
 	RunManager.served_gods = _served.keys()
 	EventBus.god_served.emit(god)
